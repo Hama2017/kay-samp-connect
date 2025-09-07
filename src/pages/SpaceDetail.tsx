@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye } from "lucide-react";
+import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,10 +71,18 @@ const mockSpacePosts = [
   }
 ];
 
+const sortFilters = [
+  { id: "recent", label: "Plus récents", icon: Clock },
+  { id: "viral", label: "Plus viraux", icon: TrendingUp },
+  { id: "popular", label: "Plus populaires", icon: Flame },
+  { id: "discussed", label: "Plus discutés", icon: MessageCircle },
+];
+
 export default function SpaceDetail() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("recent");
 
   const space = mockSpaceDetails[spaceId as keyof typeof mockSpaceDetails];
 
@@ -89,6 +97,23 @@ export default function SpaceDetail() {
       </div>
     );
   }
+
+  const sortedPosts = useMemo(() => {
+    const posts = [...mockSpacePosts];
+    
+    switch (selectedFilter) {
+      case "recent":
+        return posts.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+      case "viral":
+        return posts.sort((a, b) => (b.votesUp + b.viewsCount) - (a.votesUp + a.viewsCount));
+      case "popular":
+        return posts.sort((a, b) => b.votesUp - a.votesUp);
+      case "discussed":
+        return posts.sort((a, b) => b.commentsCount - a.commentsCount);
+      default:
+        return posts;
+    }
+  }, [selectedFilter]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -197,9 +222,30 @@ export default function SpaceDetail() {
 
       {/* Posts section */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">Publications récentes</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Publications</h3>
+        </div>
         
-        {mockSpacePosts.map((post) => (
+        {/* Sort filters */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {sortFilters.map((filter) => {
+            const Icon = filter.icon;
+            return (
+              <Button
+                key={filter.id}
+                variant={selectedFilter === filter.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedFilter(filter.id)}
+                className="whitespace-nowrap gap-2"
+              >
+                <Icon className="h-3 w-3" />
+                {filter.label}
+              </Button>
+            );
+          })}
+        </div>
+        
+        {sortedPosts.map((post) => (
           <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
