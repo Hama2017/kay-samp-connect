@@ -7,6 +7,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import Home from "./pages/Home";
 import Discover from "./pages/Discover";
 import CreateSpace from "./pages/CreateSpace";
+import CreatePost from "./pages/CreatePost";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -24,7 +25,9 @@ const App = () => (
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Home />} />
             <Route path="discover" element={<Discover />} />
-            <Route path="create" element={<CreateSpace />} />
+            <Route path="create-space" element={<CreateSpace />} />
+            <Route path="create-post" element={<CreatePost />} />
+            <Route path="space/:spaceId/create-post" element={<CreatePost />} />
             <Route path="trending" element={<Trending />} />
             <Route path="profile" element={<Profile />} />
             <Route path="space/:spaceId" element={<SpaceDetail />} />

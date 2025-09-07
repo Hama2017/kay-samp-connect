@@ -186,20 +186,26 @@ export default function SpaceDetail() {
             </div>
           </div>
           
-          <Button
-            variant={isSubscribed ? "outline" : "default"}
-            className="w-full"
-            onClick={() => setIsSubscribed(!isSubscribed)}
-          >
-            {isSubscribed ? (
-              "Abonné"
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                S'abonner
-              </>
-            )}
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant={isSubscribed ? "outline" : "default"}
+              className="flex-1"
+              onClick={() => setIsSubscribed(!isSubscribed)}
+            >
+              {isSubscribed ? "Abonné" : "S'abonner"}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(`/space/${spaceId}/create-post`, { 
+                state: { spaceName: space.name } 
+              })}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Créer un post
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
