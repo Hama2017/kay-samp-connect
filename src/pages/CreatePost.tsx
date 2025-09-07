@@ -1,21 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Upload, Image, Video, Type, MapPin } from "lucide-react";
+import { ArrowLeft, Upload, Image, Video, MapPin, Smile, Hash, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 
 const categories = ["Sport", "Culture", "Cuisine", "Technologie", "Religion"];
-
-const contentTypes = [
-  { id: "text", label: "Texte", icon: Type },
-  { id: "image", label: "Image", icon: Image },
-  { id: "video", label: "Vidéo", icon: Video },
-];
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -28,25 +21,30 @@ export default function CreatePost() {
   const spaceName = location.state?.spaceName || "";
 
   const [formData, setFormData] = useState({
-    title: "",
     content: "",
     category: "",
-    contentType: "text",
     location: "",
     tags: "",
+    selectedFiles: [] as File[],
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileUpload = (files: FileList | null) => {
+    if (files) {
+      setFormData(prev => ({ ...prev, selectedFiles: Array.from(files) }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.content.trim()) {
+    if (!formData.content.trim()) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "Veuillez écrire quelque chose",
         variant: "destructive",
       });
       return;
@@ -75,161 +73,165 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Créer un post
-          </h1>
-          {isInSpace && (
-            <p className="text-sm text-muted-foreground">
-              Publication dans l'espace: {spaceName}
-            </p>
-          )}
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-semibold">
+              {isInSpace ? `Poster dans ${spaceName}` : "Créer un post"}
+            </h1>
+          </div>
+          <Button 
+            onClick={handleSubmit}
+            className="px-6"
+            disabled={!formData.content.trim()}
+          >
+            Publier
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Type className="h-5 w-5" />
-            Nouveau post
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Type de contenu */}
-            <div className="space-y-2">
-              <Label htmlFor="contentType">Type de contenu</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {contentTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <Button
-                      key={type.id}
-                      type="button"
-                      variant={formData.contentType === type.id ? "default" : "outline"}
-                      onClick={() => handleInputChange("contentType", type.id)}
-                      className="flex flex-col gap-2 h-auto py-4"
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-sm">{type.label}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Titre */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Titre *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Donnez un titre à votre post..."
-                required
+      {/* Main Content */}
+      <div className="max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {/* User Avatar and Input */}
+          <div className="flex gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src="/placeholder-avatar.jpg" />
+              <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <Textarea
+                value={formData.content}
+                onChange={(e) => handleInputChange("content", e.target.value)}
+                placeholder="Quoi de neuf ?"
+                className="min-h-[120px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-0"
               />
-            </div>
+              
+              {/* Category Selection (only if not in space) */}
+              {!isInSpace && (
+                <div className="mt-4">
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choisir une catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-            {/* Contenu */}
-            <div className="space-y-2">
-              <Label htmlFor="content">Contenu *</Label>
-              {formData.contentType === "text" ? (
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => handleInputChange("content", e.target.value)}
-                  placeholder="Partagez votre contenu..."
-                  className="min-h-[120px]"
-                  required
-                />
-              ) : (
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                  <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {formData.contentType === "image" ? "Téléchargez une image" : "Téléchargez une vidéo"}
-                  </p>
-                  <Button type="button" variant="outline" size="sm">
-                    Choisir un fichier
-                  </Button>
+              {/* File Upload Area */}
+              {formData.selectedFiles.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {formData.selectedFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                        {file.type.startsWith('image/') ? (
+                          <Image className="h-8 w-8 text-muted-foreground" />
+                        ) : (
+                          <Video className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {file.name}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Catégorie (seulement si pas dans un espace) */}
-            {!isInSpace && (
-              <div className="space-y-2">
-                <Label htmlFor="category">Catégorie *</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez une catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Localisation */}
-            <div className="space-y-2">
-              <Label htmlFor="location" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Localisation (optionnel)
-              </Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleInputChange("location", e.target.value)}
-                placeholder="Ajoutez une localisation..."
+          {/* Bottom Toolbar */}
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                id="file-upload"
+                multiple
+                accept="image/*,video/*"
+                onChange={(e) => handleFileUpload(e.target.files)}
+                className="hidden"
               />
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (optionnel)</Label>
-              <Input
-                id="tags"
-                value={formData.tags}
-                onChange={(e) => handleInputChange("tags", e.target.value)}
-                placeholder="Ajoutez des tags séparés par des virgules..."
-              />
-            </div>
-
-            {/* Boutons d'action */}
-            <div className="flex gap-3 pt-4">
+              <label htmlFor="file-upload">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-primary hover:bg-primary/10"
+                  asChild
+                >
+                  <span>
+                    <Image className="h-5 w-5" />
+                  </span>
+                </Button>
+              </label>
+              
               <Button
                 type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                className="flex-1"
+                variant="ghost"
+                size="icon"
+                className="text-primary hover:bg-primary/10"
               >
-                Annuler
+                <Video className="h-5 w-5" />
               </Button>
+              
               <Button
-                type="submit"
-                className="flex-1"
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-primary hover:bg-primary/10"
+                onClick={() => {
+                  const currentLocation = navigator.geolocation ? "Localisation actuelle" : "";
+                  handleInputChange("location", currentLocation);
+                }}
               >
-                Publier
+                <MapPin className="h-5 w-5" />
+              </Button>
+              
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-primary hover:bg-primary/10"
+              >
+                <Smile className="h-5 w-5" />
+              </Button>
+              
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-primary hover:bg-primary/10"
+              >
+                <Hash className="h-5 w-5" />
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+
+            {formData.content.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Globe className="h-4 w-4" />
+                <span>Tout le monde peut répondre</span>
+              </div>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
