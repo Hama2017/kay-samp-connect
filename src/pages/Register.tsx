@@ -11,8 +11,8 @@ export default function Register() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    password: "",
-    confirmPassword: ""
+    phone: "",
+    password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   
@@ -27,65 +27,89 @@ export default function Register() {
     }));
   };
 
+  const validateUsername = (username: string) => {
+    if (!username.trim()) {
+      return "Le nom d'utilisateur est requis";
+    }
+    if (username.length < 3) {
+      return "Le nom d'utilisateur doit contenir au moins 3 caractères";
+    }
+    if (username.length > 20) {
+      return "Le nom d'utilisateur ne peut pas dépasser 20 caractères";
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return "Le nom d'utilisateur ne peut contenir que des lettres, chiffres et underscores";
+    }
+    return null;
+  };
+
+  const validateEmail = (email: string) => {
+    if (!email.trim()) {
+      return "L'adresse email est requise";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "L'adresse email n'est pas valide";
+    }
+    return null;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) {
+      return "Le mot de passe est requis";
+    }
+    if (password.length < 8) {
+      return "Le mot de passe doit contenir au moins 8 caractères";
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return "Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre";
+    }
+    return null;
+  };
+
+  const validatePhone = (phone: string) => {
+    if (phone && !/^\+?[1-9]\d{1,14}$/.test(phone.replace(/\s/g, ''))) {
+      return "Le numéro de téléphone n'est pas valide";
+    }
+    return null;
+  };
+
   const validateForm = () => {
-    if (!formData.username.trim()) {
+    const usernameError = validateUsername(formData.username);
+    if (usernameError) {
       toast({
         title: "Erreur",
-        description: "Le nom d'utilisateur est requis",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    if (formData.username.length < 3) {
-      toast({
-        title: "Erreur", 
-        description: "Le nom d'utilisateur doit contenir au moins 3 caractères",
+        description: usernameError,
         variant: "destructive",
       });
       return false;
     }
 
-    if (!formData.email.trim()) {
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
       toast({
         title: "Erreur",
-        description: "L'adresse email est requise",
+        description: emailError,
         variant: "destructive",
       });
       return false;
     }
 
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
       toast({
         title: "Erreur",
-        description: "L'adresse email n'est pas valide",
+        description: passwordError,
         variant: "destructive",
       });
       return false;
     }
 
-    if (!formData.password) {
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) {
       toast({
         title: "Erreur",
-        description: "Le mot de passe est requis",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.password.length < 6) {
-      toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
+        description: phoneError,
         variant: "destructive",
       });
       return false;
@@ -99,7 +123,7 @@ export default function Register() {
     
     if (!validateForm()) return;
 
-    const { error } = await signUp(formData.email, formData.password, formData.username);
+    const { error } = await signUp(formData.email, formData.password, formData.username, formData.phone);
     
     if (!error) {
       toast({
@@ -108,9 +132,20 @@ export default function Register() {
       });
       navigate("/login");
     } else {
+      let errorMessage = error;
+      
+      // Gestion des erreurs spécifiques
+      if (error.includes("User already registered")) {
+        errorMessage = "Un compte existe déjà avec cet email";
+      } else if (error.includes("Invalid email")) {
+        errorMessage = "L'adresse email n'est pas valide";
+      } else if (error.includes("Password")) {
+        errorMessage = "Le mot de passe ne respecte pas les critères requis";
+      }
+      
       toast({
         title: "Erreur d'inscription",
-        description: error,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -160,9 +195,22 @@ export default function Register() {
                 placeholder="email@exemple.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
+                required
               />
             </div>
 
+            <div className="space-y-2">
+              <label htmlFor="phone" className="text-sm font-medium text-foreground">
+                Numéro de téléphone <span className="text-muted-foreground">(optionnel)</span>
+              </label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+221 77 123 45 67"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+              />
+            </div>
             
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-foreground">
@@ -176,6 +224,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   className="pr-12"
+                  required
                 />
                 <Button
                   type="button"
@@ -191,19 +240,9 @@ export default function Register() {
                   )}
                 </Button>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
-                Confirmer le mot de passe
-              </label>
-              <Input
-                id="confirmPassword"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              />
+              <p className="text-xs text-muted-foreground">
+                Au moins 8 caractères avec majuscule, minuscule et chiffre
+              </p>
             </div>
 
             <Button 
