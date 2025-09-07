@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +23,7 @@ interface AppHeaderProps {
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const unreadNotifications = 3; // Mock count
+  const { unreadCount } = useNotifications();
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -73,9 +74,9 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             className="relative hover:bg-primary/5"
           >
             <Bell className="h-5 w-5" />
-            {unreadNotifications > 0 && (
+            {unreadCount > 0 && (
               <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
-                {unreadNotifications}
+                {unreadCount}
               </Badge>
             )}
           </Button>

@@ -1,205 +1,331 @@
-import { useState } from "react";
-import { Bell, MessageCircle, UserPlus, Heart, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
+import { useNotifications, Notification } from "@/hooks/useNotifications";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
+import { 
+  ArrowLeft, 
+  Heart, 
+  MessageCircle, 
+  UserPlus, 
+  AtSign, 
+  FileText, 
+  Settings, 
+  MoreVertical,
+  Check,
+  Trash2,
+  Bell
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
-// Mock notifications data
-const mockNotifications = [
-  {
-    id: "1",
-    type: "new_post",
-    user: {
-      username: "AmadouD",
-      profilePicture: "",
-      isVerified: true,
-    },
-    space: "Lions du Sénégal 🦁",
-    content: "a publié un nouveau post dans",
-    message: "Match important demain contre le Nigeria !",
-    time: "il y a 2min",
-    isRead: false,
-  },
-  {
-    id: "2", 
-    type: "comment",
-    user: {
-      username: "AminaK",
-      profilePicture: "",
-      isVerified: false,
-    },
-    content: "a commenté votre post:",
-    message: "Excellente analyse ! J'espère qu'on va gagner",
-    time: "il y a 15min",
-    isRead: false,
-  },
-  {
-    id: "3",
-    type: "follow",
-    user: {
-      username: "MoussaK",
-      profilePicture: "",
-      isVerified: false,
-    },
-    content: "s'est abonné à votre compte",
-    time: "il y a 1h",
-    isRead: true,
-  },
-  {
-    id: "4",
-    type: "like",
-    user: {
-      username: "FatimaS",
-      profilePicture: "",
-      isVerified: true,
-    },
-    content: "a aimé votre post:",
-    message: "Recette de thiébou dieune traditionnelle",
-    time: "il y a 2h",
-    isRead: true,
-  },
-];
-
-const getNotificationIcon = (type: string) => {
+const getNotificationIcon = (type: Notification['type']) => {
   switch (type) {
-    case "new_post":
-      return <TrendingUp className="h-4 w-4 text-primary" />;
-    case "comment":
-      return <MessageCircle className="h-4 w-4 text-blue-500" />;
-    case "follow":
-      return <UserPlus className="h-4 w-4 text-green-500" />;
-    case "like":
+    case 'like':
       return <Heart className="h-4 w-4 text-red-500" />;
+    case 'comment':
+      return <MessageCircle className="h-4 w-4 text-blue-500" />;
+    case 'follow':
+      return <UserPlus className="h-4 w-4 text-green-500" />;
+    case 'mention':
+      return <AtSign className="h-4 w-4 text-purple-500" />;
+    case 'post':
+      return <FileText className="h-4 w-4 text-primary" />;
+    case 'system':
+      return <Settings className="h-4 w-4 text-muted-foreground" />;
     default:
-      return <Bell className="h-4 w-4 text-muted-foreground" />;
+      return <Bell className="h-4 w-4" />;
   }
 };
 
-export default function Notifications() {
-  const [filter, setFilter] = useState("all");
-  
-  const unreadCount = mockNotifications.filter(n => !n.isRead).length;
-  
-  const filteredNotifications = mockNotifications.filter(notification => {
-    if (filter === "unread") return !notification.isRead;
-    return true;
-  });
+interface NotificationItemProps {
+  notification: Notification;
+  onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
+  onClick?: () => void;
+}
+
+function NotificationItem({ notification, onMarkAsRead, onDelete, onClick }: NotificationItemProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (!notification.isRead) {
+      onMarkAsRead(notification.id);
+    }
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+    }
+    if (onClick) {
+      onClick();
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      {/* Header */}
-      <div className="text-center mb-6 animate-fade-in-up">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="relative">
-            <Bell className="h-6 w-6 text-primary" />
-            {unreadCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
-                {unreadCount}
-              </Badge>
-            )}
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Notifications
-          </h1>
-        </div>
-        <p className="text-muted-foreground">
-          Reste informé de toute l'activité
-        </p>
+    <div 
+      className={`flex items-start gap-3 p-4 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 relative ${
+        !notification.isRead ? 'bg-primary/5 border-primary/20' : 'bg-background'
+      }`}
+      onClick={handleClick}
+    >
+      {/* Unread indicator */}
+      {!notification.isRead && (
+        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary rounded-full" />
+      )}
+
+      {/* Icon */}
+      <div className="flex-shrink-0 mt-1 ml-4">
+        {getNotificationIcon(notification.type)}
       </div>
 
-      <Tabs value={filter} onValueChange={setFilter} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="all">
-            Toutes ({mockNotifications.length})
-          </TabsTrigger>
-          <TabsTrigger value="unread">
-            Non lues ({unreadCount})
-          </TabsTrigger>
-        </TabsList>
+      {/* Avatar (if user notification) */}
+      {notification.userAvatar && (
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={notification.userAvatar} alt={notification.userName} />
+          <AvatarFallback>
+            {notification.userName?.substring(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      )}
 
-        <TabsContent value={filter} className="space-y-3">
-          {filteredNotifications.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">
-                {filter === "unread" ? "Aucune nouvelle notification" : "Aucune notification"}
-              </h3>
-              <p className="text-muted-foreground">
-                {filter === "unread" 
-                  ? "Toutes vos notifications sont à jour !" 
-                  : "Vous recevrez des notifications ici quand il y aura de l'activité"
-                }
-              </p>
-            </div>
-          ) : (
-            filteredNotifications.map((notification) => (
-              <Card 
-                key={notification.id} 
-                className={`transition-all duration-300 hover:shadow-md cursor-pointer ${
-                  !notification.isRead ? "bg-primary/5 border-primary/20" : ""
-                }`}
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <p className={`text-sm ${!notification.isRead ? 'font-semibold' : 'font-medium'}`}>
+              {notification.title}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              {notification.message}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: fr })}
+            </p>
+          </div>
+
+          {/* Actions */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!notification.isRead && (
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMarkAsRead(notification.id);
+                  }}
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Marquer comme lu
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(notification.id);
+                }}
+                className="text-destructive"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 relative">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={notification.user.profilePicture} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold text-sm">
-                          {notification.user.username.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1">
-                        {getNotificationIcon(notification.type)}
-                      </div>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Notifications() {
+  const navigate = useNavigate();
+  const { 
+    notifications, 
+    isLoading, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification,
+    fetchNotifications 
+  } = useNotifications();
+
+  const unreadNotifications = notifications.filter(n => !n.isRead);
+  const readNotifications = notifications.filter(n => n.isRead);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <LoadingSpinner size="lg" text="Chargement des notifications..." />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-background border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-bold">Notifications</h1>
+                {unreadCount > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {unreadCount} notification{unreadCount > 1 ? 's' : ''} non lue{unreadCount > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {unreadCount > 0 && (
+              <Button variant="outline" size="sm" onClick={markAllAsRead}>
+                <Check className="h-4 w-4 mr-2" />
+                Tout marquer comme lu
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {notifications.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="Aucune notification"
+            description="Vous n'avez pas encore de notifications. Elles apparaîtront ici quand vous en recevrez."
+            actionLabel="Actualiser"
+            onAction={fetchNotifications}
+          />
+        ) : (
+          <Tabs defaultValue="all" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all" className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Toutes ({notifications.length})
+              </TabsTrigger>
+              <TabsTrigger value="unread" className="flex items-center gap-2">
+                Non lues ({unreadCount})
+                {unreadCount > 0 && (
+                  <Badge variant="destructive" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="read" className="flex items-center gap-2">
+                Lues ({readNotifications.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="all">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Toutes les notifications</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[600px]">
+                    <div className="space-y-1">
+                      {notifications.map((notification, index) => (
+                        <div key={notification.id}>
+                          <NotificationItem
+                            notification={notification}
+                            onMarkAsRead={markAsRead}
+                            onDelete={deleteNotification}
+                          />
+                          {index < notifications.length - 1 && <Separator />}
+                        </div>
+                      ))}
                     </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm">@{notification.user.username}</span>
-                        {notification.user.isVerified && (
-                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                            ✓
-                          </Badge>
-                        )}
-                        {!notification.isRead && (
-                          <Badge className="h-2 w-2 rounded-full p-0 bg-primary"></Badge>
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {notification.content}
-                        {notification.space && (
-                          <span className="text-primary font-medium"> {notification.space}</span>
-                        )}
-                      </p>
-                      
-                      {notification.message && (
-                        <p className="text-sm text-foreground bg-muted/50 p-2 rounded-md mb-2">
-                          "{notification.message}"
-                        </p>
-                      )}
-                      
-                      <span className="text-xs text-muted-foreground">
-                        {notification.time}
-                      </span>
-                    </div>
-                  </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
-      
-      {unreadCount > 0 && (
-        <div className="mt-6 text-center">
-          <Button variant="outline" size="sm">
-            Marquer tout comme lu
-          </Button>
-        </div>
-      )}
+            </TabsContent>
+
+            <TabsContent value="unread">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notifications non lues</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {unreadNotifications.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <Check className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                      <p className="text-muted-foreground">Toutes vos notifications sont lues !</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[600px]">
+                      <div className="space-y-1">
+                        {unreadNotifications.map((notification, index) => (
+                          <div key={notification.id}>
+                            <NotificationItem
+                              notification={notification}
+                              onMarkAsRead={markAsRead}
+                              onDelete={deleteNotification}
+                            />
+                            {index < unreadNotifications.length - 1 && <Separator />}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="read">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notifications lues</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {readNotifications.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">Aucune notification lue</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[600px]">
+                      <div className="space-y-1">
+                        {readNotifications.map((notification, index) => (
+                          <div key={notification.id}>
+                            <NotificationItem
+                              notification={notification}
+                              onMarkAsRead={markAsRead}
+                              onDelete={deleteNotification}
+                            />
+                            {index < readNotifications.length - 1 && <Separator />}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
     </div>
   );
 }
