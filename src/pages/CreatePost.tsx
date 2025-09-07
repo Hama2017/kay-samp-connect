@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { X, Image, Video } from "lucide-react";
+import { X, Image, Video, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,15 +20,38 @@ export default function CreatePost() {
     content: "",
     selectedFiles: [] as File[],
   });
+  
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const formatHashtags = (text: string) => {
+    return text.replace(/#(\w+)/g, '<span class="text-primary font-semibold">#$1</span>');
+  };
+
   const handleFileUpload = (files: FileList | null) => {
     if (files) {
-      setFormData(prev => ({ ...prev, selectedFiles: Array.from(files) }));
+      const filesArray = Array.from(files);
+      setFormData(prev => ({ ...prev, selectedFiles: filesArray }));
+      
+      // Create preview URLs
+      const urls = filesArray.map(file => URL.createObjectURL(file));
+      setPreviewUrls(urls);
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedFiles: prev.selectedFiles.filter((_, i) => i !== index)
+    }));
+    setPreviewUrls(prev => {
+      URL.revokeObjectURL(prev[index]); // Clean up memory
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -95,24 +118,61 @@ export default function CreatePost() {
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <Textarea
-                value={formData.content}
-                onChange={(e) => handleInputChange("content", e.target.value)}
-                placeholder="Quoi de neuf ?"
-                className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-0 bg-transparent"
-              />
+              <div className="relative">
+                <Textarea
+                  ref={textareaRef}
+                  value={formData.content}
+                  onChange={(e) => handleInputChange("content", e.target.value)}
+                  placeholder="Quoi de neuf ?"
+                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-0 bg-transparent"
+                />
+                {/* Hashtag overlay for visual feedback */}
+                <div 
+                  className="absolute inset-0 pointer-events-none text-lg p-0 min-h-[150px] whitespace-pre-wrap break-words opacity-0"
+                  dangerouslySetInnerHTML={{
+                    __html: formatHashtags(formData.content).replace(/\n/g, '<br>')
+                  }}
+                />
+              </div>
               
-              {/* File Upload Area */}
+              {/* File Upload Area with Preview */}
               {formData.selectedFiles.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="mt-4 grid grid-cols-2 gap-3">
                   {formData.selectedFiles.map((file, index) => (
-                    <div key={index} className="relative">
-                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                    <div key={index} className="relative group">
+                      <div className="aspect-square bg-muted rounded-xl overflow-hidden relative">
                         {file.type.startsWith('image/') ? (
-                          <Image className="h-8 w-8 text-muted-foreground" />
+                          <img 
+                            src={previewUrls[index]} 
+                            alt={file.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : file.type.startsWith('video/') ? (
+                          <div className="relative w-full h-full">
+                            <video 
+                              src={previewUrls[index]} 
+                              className="w-full h-full object-cover"
+                              muted
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <Play className="h-8 w-8 text-white" />
+                            </div>
+                          </div>
                         ) : (
-                          <Video className="h-8 w-8 text-muted-foreground" />
+                          <div className="flex items-center justify-center h-full">
+                            <Video className="h-8 w-8 text-muted-foreground" />
+                          </div>
                         )}
+                        
+                        {/* Remove button */}
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeFile(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {file.name}
@@ -137,13 +197,13 @@ export default function CreatePost() {
             <label htmlFor="file-upload">
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary"
+                variant="ghost"
+                size="lg"
+                className="gap-3 hover:bg-primary/10 hover:text-primary border-2 border-dashed border-primary/30 hover:border-primary/60 px-6 py-3"
                 asChild
               >
                 <span>
-                  <Image className="h-4 w-4" />
+                  <Image className="h-5 w-5" />
                   Photo
                 </span>
               </Button>
@@ -152,13 +212,13 @@ export default function CreatePost() {
             <label htmlFor="file-upload">
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary"
+                variant="ghost"
+                size="lg"
+                className="gap-3 hover:bg-primary/10 hover:text-primary border-2 border-dashed border-primary/30 hover:border-primary/60 px-6 py-3"
                 asChild
               >
                 <span>
-                  <Video className="h-4 w-4" />
+                  <Video className="h-5 w-5" />
                   Vidéo
                 </span>
               </Button>

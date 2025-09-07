@@ -26,12 +26,13 @@ const App = () => (
             <Route index element={<Home />} />
             <Route path="discover" element={<Discover />} />
             <Route path="create-space" element={<CreateSpace />} />
-            <Route path="create-post" element={<CreatePost />} />
-            <Route path="space/:spaceId/create-post" element={<CreatePost />} />
             <Route path="trending" element={<Trending />} />
             <Route path="profile" element={<Profile />} />
             <Route path="space/:spaceId" element={<SpaceDetail />} />
           </Route>
+          {/* Routes without layout for full screen pages */}
+          <Route path="create-post" element={<CreatePost />} />
+          <Route path="space/:spaceId/create-post" element={<CreatePost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
