@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { PostCommentsModal } from "@/components/PostCommentsModal";
 
 // Mock data for posts
 const mockPosts = [
@@ -53,6 +54,18 @@ const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Relig
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [selectedPost, setSelectedPost] = useState<typeof mockPosts[0] | null>(null);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+  const handlePostClick = (post: typeof mockPosts[0]) => {
+    setSelectedPost(post);
+    setIsCommentsOpen(true);
+  };
+
+  const handleCloseComments = () => {
+    setIsCommentsOpen(false);
+    setSelectedPost(null);
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -84,7 +97,11 @@ export default function Home() {
       {/* Posts feed */}
       <div className="space-y-4">
         {mockPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+          <Card 
+            key={post.id} 
+            className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+            onClick={() => handlePostClick(post)}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -159,6 +176,13 @@ export default function Home() {
           </Card>
         ))}
       </div>
+
+      {/* Comments Modal */}
+      <PostCommentsModal 
+        post={selectedPost}
+        isOpen={isCommentsOpen}
+        onClose={handleCloseComments}
+      />
     </div>
   );
 }
