@@ -11,6 +11,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: ""
   });
@@ -99,7 +100,7 @@ export default function Register() {
     
     if (!validateForm()) return;
 
-    const { error } = await signUp(formData.email, formData.password, formData.username);
+    const { error } = await signUp(formData.email, formData.password, formData.username, formData.phone);
     
     if (!error) {
       toast({
@@ -163,6 +164,18 @@ export default function Register() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label htmlFor="phone" className="text-sm font-medium text-foreground">
+                Numéro de téléphone (optionnel)
+              </label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+221 77 123 45 67"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+              />
+            </div>
             
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-foreground">
