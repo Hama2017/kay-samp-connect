@@ -15,7 +15,8 @@ export default function Register() {
   
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
+    countryCode: "+221",
+    phoneNumber: "",
     password: "",
     confirmPassword: ""
   });
@@ -24,7 +25,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.username || !formData.phoneNumber || !formData.password || !formData.confirmPassword) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs",
@@ -51,7 +52,8 @@ export default function Register() {
       return;
     }
 
-    const success = await register(formData.username, formData.email, formData.password);
+    const fullPhoneNumber = formData.countryCode + formData.phoneNumber;
+    const success = await register(formData.username, fullPhoneNumber, formData.password);
     
     if (success) {
       toast({
@@ -62,7 +64,7 @@ export default function Register() {
     } else {
       toast({
         title: "Erreur d'inscription",
-        description: "Un compte avec cet email ou nom d'utilisateur existe déjà",
+        description: "Un compte avec ce numéro ou nom d'utilisateur existe déjà",
         variant: "destructive"
       });
     }
@@ -102,15 +104,35 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="votre@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                disabled={isLoading}
-              />
+              <Label htmlFor="phone">Numéro de téléphone</Label>
+              <div className="flex space-x-2">
+                <select 
+                  className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={formData.countryCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
+                  disabled={isLoading}
+                >
+                  <option value="+221">🇸🇳 +221</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+41">🇨🇭 +41</option>
+                  <option value="+32">🇧🇪 +32</option>
+                  <option value="+31">🇳🇱 +31</option>
+                </select>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="77 123 45 67"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value.replace(/[^0-9]/g, '') }))}
+                  disabled={isLoading}
+                  className="flex-1"
+                />
+              </div>
             </div>
             
             <div className="space-y-2">

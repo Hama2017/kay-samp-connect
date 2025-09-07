@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface User {
   id: string;
   username: string;
-  email: string;
+  phone: string;
   profilePicture?: string;
   isVerified: boolean;
   bio?: string;
@@ -14,8 +14,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<boolean>;
+  login: (phone: string, password: string) => Promise<boolean>;
+  register: (username: string, phone: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
   updateProfile: (data: Partial<User>) => void;
@@ -28,7 +28,7 @@ const mockUsers: User[] = [
   {
     id: "1",
     username: "AmadouD",
-    email: "amadou@kaaysamp.sn",
+    phone: "+221771234567",
     isVerified: false,
     followersCount: 156,
     followingCount: 89,
@@ -38,7 +38,7 @@ const mockUsers: User[] = [
   {
     id: "2", 
     username: "FatimaK",
-    email: "fatima@kaaysamp.sn",
+    phone: "+221781234567",
     isVerified: true,
     followersCount: 342,
     followingCount: 127,
@@ -48,7 +48,7 @@ const mockUsers: User[] = [
   {
     id: "3",
     username: "OmarB", 
-    email: "omar@kaaysamp.sn",
+    phone: "+221791234567",
     isVerified: false,
     followersCount: 98,
     followingCount: 67,
@@ -70,14 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (phone: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Find user by email
-    const foundUser = mockUsers.find(u => u.email === email);
+    // Find user by phone
+    const foundUser = mockUsers.find(u => u.phone === phone);
     
     if (foundUser && password.length >= 6) { // Simple password validation
       setUser(foundUser);
@@ -90,20 +90,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+  const register = async (username: string, phone: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Check if user already exists
-    const existingUser = mockUsers.find(u => u.email === email || u.username === username);
+    const existingUser = mockUsers.find(u => u.phone === phone || u.username === username);
     
     if (!existingUser && password.length >= 6) {
       const newUser: User = {
         id: String(mockUsers.length + 1),
         username,
-        email,
+        phone,
         isVerified: false,
         followersCount: 0,
         followingCount: 0,

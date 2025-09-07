@@ -20,7 +20,7 @@ export default function Settings() {
   
   const [profileData, setProfileData] = useState({
     username: user?.username || "",
-    email: user?.email || "",
+    phone: user?.phone || "",
     bio: user?.bio || ""
   });
 
@@ -140,8 +140,8 @@ export default function Settings() {
                     <Input
                       id="email"
                       type="email"
-                      value={profileData.email}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
                     />
                   </div>
 

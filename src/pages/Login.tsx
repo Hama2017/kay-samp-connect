@@ -15,7 +15,7 @@ export default function Login() {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    email: "",
+    phone: "",
     password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
+    if (!formData.phone || !formData.password) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs",
@@ -34,7 +34,7 @@ export default function Login() {
       return;
     }
 
-    const success = await login(formData.email, formData.password);
+    const success = await login(formData.phone, formData.password);
     
     if (success) {
       toast({
@@ -45,7 +45,7 @@ export default function Login() {
     } else {
       toast({
         title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect",
+        description: "Numéro de téléphone ou mot de passe incorrect",
         variant: "destructive"
       });
     }
@@ -73,13 +73,13 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="phone">Numéro de téléphone</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="votre@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                id="phone"
+                type="tel"
+                placeholder="+221771234567"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                 disabled={isLoading}
               />
             </div>
@@ -146,9 +146,9 @@ export default function Login() {
               Comptes de démonstration :
             </p>
             <div className="text-xs space-y-1">
-              <p><strong>amadou@kaaysamp.sn</strong> (mot de passe: 123456)</p>
-              <p><strong>fatima@kaaysamp.sn</strong> (mot de passe: 123456)</p>
-              <p><strong>omar@kaaysamp.sn</strong> (mot de passe: 123456)</p>
+              <p><strong>+221771234567</strong> (mot de passe: 123456)</p>
+              <p><strong>+221781234567</strong> (mot de passe: 123456)</p>
+              <p><strong>+221791234567</strong> (mot de passe: 123456)</p>
             </div>
           </div>
         </CardContent>
