@@ -119,16 +119,6 @@ export default function CreatePost() {
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="relative">
-                <div 
-                  className="absolute inset-0 pointer-events-none text-lg p-3 min-h-[150px] whitespace-pre-wrap break-words overflow-hidden border border-transparent"
-                  style={{ 
-                    color: "transparent",
-                    lineHeight: "1.5"
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html: formatHashtags(formData.content + " ").replace(/\n/g, '<br/>')
-                  }}
-                />
                 <Textarea
                   ref={textareaRef}
                   value={formData.content}
@@ -139,6 +129,13 @@ export default function CreatePost() {
                     lineHeight: "1.5"
                   }}
                 />
+                {/* Visual indicator for hashtags */}
+                {formData.content.includes('#') && (
+                  <div className="text-xs text-muted-foreground mt-2 px-3">
+                    Les hashtags apparaîtront en{" "}
+                    <span className="text-primary font-semibold">vert</span> dans votre post
+                  </div>
+                )}
               </div>
               
               {/* File Upload Area with Preview */}

@@ -279,9 +279,12 @@ export default function Home() {
             </CardHeader>
             
             <CardContent className="pt-0">
-              <p className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap">
-                {getDisplayContent(post)}
-              </p>
+              <div 
+                className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{
+                  __html: getDisplayContent(post).replace(/#(\w+)/g, '<span style="color: hsl(var(--primary)); font-weight: 600;">#$1</span>')
+                }}
+              />
               
               {/* Bouton lire la suite */}
               {shouldShowReadMore(post.content) && (
