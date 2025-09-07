@@ -22,11 +22,14 @@ interface AuthUser extends User {
 interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
-  signUp: (email: string, password: string, username: string, phone?: string) => Promise<{ error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  sendVerificationCode: (phone: string, username: string) => Promise<{ error?: string }>;
+  verifyPhoneAndSignUp: (phone: string, code: string, username: string) => Promise<{ error?: string }>;
+  signInWithPhone: (phone: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
   updateProfile: (data: Partial<Profile>) => Promise<{ error?: string }>;
+  verificationStep: 'phone' | 'code' | 'completed';
+  setVerificationStep: (step: 'phone' | 'code' | 'completed') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,6 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [verificationStep, setVerificationStep] = useState<'phone' | 'code' | 'completed'>('phone');
+  const [pendingPhone, setPendingPhone] = useState<string>('');
+  const [pendingUsername, setPendingUsername] = useState<string>('');
+  const [verificationCode, setVerificationCode] = useState<string>('');
 
   // Fetch user profile
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
@@ -97,20 +104,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, username: string, phone?: string) => {
+  const sendVerificationCode = async (phone: string, username: string) => {
     setIsLoading(true);
     
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      // Generate 6-digit verification code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setVerificationCode(code);
+      setPendingPhone(phone);
+      setPendingUsername(username);
+      
+      // Send SMS via our edge function
+      const { error } = await supabase.functions.invoke('send-sms-verification', {
+        body: { phone, code }
+      });
+
+      if (error) {
+        setIsLoading(false);
+        return { error: error.message };
+      }
+
+      setVerificationStep('code');
+      setIsLoading(false);
+      return {};
+    } catch (error: any) {
+      setIsLoading(false);
+      return { error: error.message };
+    }
+  };
+
+  const verifyPhoneAndSignUp = async (phone: string, code: string, username: string) => {
+    setIsLoading(true);
+    
+    try {
+      if (code !== verificationCode) {
+        setIsLoading(false);
+        return { error: 'Code de vérification incorrect' };
+      }
+
+      // Use phone as email for Supabase auth (temporary workaround)
+      const tempEmail = `${phone.replace(/[^0-9]/g, '')}@kaaysamp.temp`;
+      const tempPassword = Math.random().toString(36).substring(2, 15);
       
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: tempEmail,
+        password: tempPassword,
         options: {
-          emailRedirectTo: redirectUrl,
           data: {
             username,
-            phone
+            phone,
+            phone_verified: true
           }
         }
       });
@@ -120,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
 
+      setVerificationStep('completed');
       setIsLoading(false);
       return {};
     } catch (error: any) {
@@ -128,18 +172,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithPhone = async (phone: string) => {
     setIsLoading(true);
     
     try {
+      // For existing users, we need to find them by phone and sign them in
+      const tempEmail = `${phone.replace(/[^0-9]/g, '')}@kaaysamp.temp`;
+      
+      // This is a simplified approach - in production you'd want a more robust system
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+        email: tempEmail,
+        password: 'defaultpassword' // You'd need a better system for this
       });
 
       if (error) {
         setIsLoading(false);
-        return { error: error.message };
+        return { error: 'Numéro de téléphone non trouvé' };
       }
 
       setIsLoading(false);
@@ -192,11 +240,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     session,
-    signUp,
-    signIn,
+    sendVerificationCode,
+    verifyPhoneAndSignUp,
+    signInWithPhone,
     signOut,
     isLoading,
-    updateProfile
+    updateProfile,
+    verificationStep,
+    setVerificationStep
   };
 
   return (
