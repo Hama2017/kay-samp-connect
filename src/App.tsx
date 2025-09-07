@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
+import { PWAPrompt } from "@/components/PWAPrompt";
 import Home from "./pages/Home";
 import Discover from "./pages/Discover";
 import CreateSpace from "./pages/CreateSpace";
@@ -68,6 +69,7 @@ const App = () => (
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PWAPrompt />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
