@@ -10,6 +10,7 @@ import CreateSpace from "./pages/CreateSpace";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import SpaceDetail from "./pages/SpaceDetail";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="create" element={<CreateSpace />} />
             <Route path="trending" element={<Trending />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="space/:spaceId" element={<SpaceDetail />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

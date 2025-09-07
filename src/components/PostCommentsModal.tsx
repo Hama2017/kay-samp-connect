@@ -256,25 +256,22 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 flex gap-3 items-end">
               <Textarea
                 placeholder="Ajouter un commentaire..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[60px] resize-none"
+                className="min-h-[60px] resize-none flex-1"
               />
               
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleSubmitComment}
-                  disabled={!newComment.trim()}
-                  size="sm"
-                  className="gap-2"
-                >
-                  <Send className="h-4 w-4" />
-                  Publier
-                </Button>
-              </div>
+              <Button 
+                onClick={handleSubmitComment}
+                disabled={!newComment.trim()}
+                size="icon"
+                className="rounded-full h-10 w-10 flex-shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>

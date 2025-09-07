@@ -1,4 +1,5 @@
 import { X, Users, Hash } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,8 @@ const subscribedSpaces = [
 ];
 
 export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
+  const navigate = useNavigate();
+  
   if (!open) return null;
 
   return (
@@ -50,6 +53,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
               <div
                 key={space.id}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 cursor-pointer transition-colors group"
+                onClick={() => navigate(`/space/${space.id}`)}
               >
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
@@ -63,8 +67,8 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                       {space.name}
                     </h3>
                     {space.isVerified && (
-                      <Badge variant="secondary" className="text-xs">
-                        ✓
+                      <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                        ✓ Certifié
                       </Badge>
                     )}
                   </div>

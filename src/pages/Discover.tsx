@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Users, Hash, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ const mockSpaces = [
 const categories = ["Tous", "Sport", "Culture & Musique", "Cuisine", "Technologie", "Religion"];
 
 export default function Discover() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
 
@@ -103,7 +105,11 @@ export default function Discover() {
       {/* Spaces list */}
       <div className="space-y-4">
         {filteredSpaces.map((space) => (
-          <Card key={space.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+          <Card 
+            key={space.id} 
+            className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+            onClick={() => navigate(`/space/${space.id}`)}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -118,7 +124,7 @@ export default function Discover() {
                       </h3>
                       {space.isVerified && (
                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
+                          ✓ Certifié
                         </Badge>
                       )}
                     </div>
