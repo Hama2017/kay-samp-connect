@@ -11,7 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye } from "lucide-react";
+import { ModerationTools } from "@/components/moderation/ModerationTools";
+import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, logout } = useAuth();
@@ -80,10 +81,11 @@ export default function Settings() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
+            <TabsTrigger value="moderation">Modération</TabsTrigger>
             <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
 
@@ -301,6 +303,24 @@ export default function Settings() {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Moderation Tab */}
+          <TabsContent value="moderation">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Outils de modération
+                </CardTitle>
+                <CardDescription>
+                  Gérez les signalements et maintenez la qualité de la communauté
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ModerationTools />
               </CardContent>
             </Card>
           </TabsContent>
