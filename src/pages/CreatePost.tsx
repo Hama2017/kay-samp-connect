@@ -29,7 +29,7 @@ export default function CreatePost() {
   };
 
   const formatHashtags = (text: string) => {
-    return text.replace(/#(\w+)/g, '<span class="text-primary font-semibold">#$1</span>');
+    return text.replace(/#(\w+)/g, '<span style="color: hsl(var(--primary)); font-weight: 600;">#$1</span>');
   };
 
   const handleFileUpload = (files: FileList | null) => {
@@ -119,18 +119,24 @@ export default function CreatePost() {
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="relative">
+                <div 
+                  className="absolute inset-0 pointer-events-none text-lg p-3 min-h-[150px] whitespace-pre-wrap break-words overflow-hidden border border-transparent"
+                  style={{ 
+                    color: "transparent",
+                    lineHeight: "1.5"
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: formatHashtags(formData.content + " ").replace(/\n/g, '<br/>')
+                  }}
+                />
                 <Textarea
                   ref={textareaRef}
                   value={formData.content}
                   onChange={(e) => handleInputChange("content", e.target.value)}
                   placeholder="Quoi de neuf ?"
-                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-0 bg-transparent"
-                />
-                {/* Hashtag overlay for visual feedback */}
-                <div 
-                  className="absolute inset-0 pointer-events-none text-lg p-0 min-h-[150px] whitespace-pre-wrap break-words opacity-0"
-                  dangerouslySetInnerHTML={{
-                    __html: formatHashtags(formData.content).replace(/\n/g, '<br>')
+                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-3 bg-transparent relative z-10"
+                  style={{
+                    lineHeight: "1.5"
                   }}
                 />
               </div>
