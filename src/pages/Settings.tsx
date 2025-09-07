@@ -12,12 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "next-themes";
+import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   
   const [profileData, setProfileData] = useState({
     username: user?.username || "",
@@ -83,9 +86,9 @@ export default function Settings() {
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="appearance">Thème</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
-            <TabsTrigger value="moderation">Modération</TabsTrigger>
             <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
 
@@ -161,6 +164,99 @@ export default function Settings() {
                   <Button onClick={handleProfileUpdate} className="w-fit">
                     Sauvegarder les modifications
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Appearance Tab */}
+          <TabsContent value="appearance">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Apparence et thème
+                </CardTitle>
+                <CardDescription>
+                  Personnalisez l'apparence de KaaySamp selon vos préférences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Sélecteur de thème</Label>
+                      <div className="text-sm text-muted-foreground">
+                        Basculez rapidement entre les thèmes
+                      </div>
+                    </div>
+                    <ThemeToggle />
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <Label className="text-base">Aperçu des thèmes</Label>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div 
+                        className="cursor-pointer rounded-md border-2 p-2 hover:border-primary transition-colors"
+                        style={{ borderColor: theme === 'light' ? 'hsl(var(--primary))' : 'hsl(var(--border))' }}
+                        onClick={() => setTheme('light')}
+                      >
+                        <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
+                          <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
+                            <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
+                            <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                            <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                          </div>
+                        </div>
+                        <span className="block w-full p-2 text-center text-sm font-medium">
+                          Clair {theme === 'light' && '✓'}
+                        </span>
+                      </div>
+
+                      <div 
+                        className="cursor-pointer rounded-md border-2 p-2 hover:border-primary transition-colors"
+                        style={{ borderColor: theme === 'dark' ? 'hsl(var(--primary))' : 'hsl(var(--border))' }}
+                        onClick={() => setTheme('dark')}
+                      >
+                        <div className="space-y-2 rounded-sm bg-slate-950 p-2">
+                          <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                            <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-slate-400" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                          </div>
+                        </div>
+                        <span className="block w-full p-2 text-center text-sm font-medium text-white">
+                          Sombre {theme === 'dark' && '✓'}
+                        </span>
+                      </div>
+
+                      <div 
+                        className="cursor-pointer rounded-md border-2 p-2 hover:border-primary transition-colors"
+                        style={{ borderColor: theme === 'system' ? 'hsl(var(--primary))' : 'hsl(var(--border))' }}
+                        onClick={() => setTheme('system')}
+                      >
+                        <div className="space-y-2 rounded-sm bg-gradient-to-r from-slate-50 to-slate-950 p-2">
+                          <div className="space-y-2 rounded-md bg-white/50 p-2 shadow-sm">
+                            <div className="h-2 w-[80px] rounded-lg bg-slate-300" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-300" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-white/50 p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-slate-300" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-300" />
+                          </div>
+                        </div>
+                        <span className="block w-full p-2 text-center text-sm font-medium">
+                          Système {theme === 'system' && '✓'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,34 +403,27 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          {/* Moderation Tab */}
-          <TabsContent value="moderation">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Outils de modération
-                </CardTitle>
-                <CardDescription>
-                  Gérez les signalements et maintenez la qualité de la communauté
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ModerationTools />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Account Tab */}
           <TabsContent value="account">
             <Card>
               <CardHeader>
                 <CardTitle>Gestion du compte</CardTitle>
                 <CardDescription>
-                  Actions sur votre compte
+                  Actions sur votre compte et outils de modération
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Moderation Tools for Moderators */}
+                {user.isVerified && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Shield className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold">Outils de modération</h3>
+                    </div>
+                    <ModerationTools />
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <div className="p-4 border border-destructive/20 rounded-lg">
                     <h4 className="font-medium text-destructive mb-2">Zone de danger</h4>
