@@ -22,6 +22,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
+import Bookmarks from "./pages/Bookmarks";
 
 // Composant pour tracker les pages
 function PageTracker() {
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="space/:spaceId" element={<SpaceDetail />} />
               <Route path="settings" element={<Settings />} />
               <Route path="search" element={<Search />} />
+              <Route path="bookmarks" element={<Bookmarks />} />
             </Route>
             
             {/* Protected routes without layout for full screen pages */}

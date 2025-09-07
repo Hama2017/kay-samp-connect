@@ -14,8 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { BookmarksList } from "@/components/bookmarks/BookmarksList";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, BarChart3 } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, BarChart3, Bookmark } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, logout } = useAuth();
@@ -87,11 +88,11 @@ export default function Settings() {
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="bookmarks">Favoris</TabsTrigger>
             <TabsTrigger value="appearance">Thème</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
@@ -167,6 +168,24 @@ export default function Settings() {
                     Sauvegarder les modifications
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bookmarks Tab */}
+          <TabsContent value="bookmarks" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bookmark className="h-5 w-5" />
+                  Mes favoris
+                </CardTitle>
+                <CardDescription>
+                  Gérez vos posts, espaces et utilisateurs sauvegardés
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BookmarksList />
               </CardContent>
             </Card>
           </TabsContent>
@@ -401,24 +420,6 @@ export default function Settings() {
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Analytics et statistiques
-                </CardTitle>
-                <CardDescription>
-                  Découvrez comment votre contenu performe et optimisez votre engagement
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AnalyticsDashboard />
               </CardContent>
             </Card>
           </TabsContent>
