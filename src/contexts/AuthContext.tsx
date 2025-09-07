@@ -22,15 +22,11 @@ interface AuthUser extends User {
 interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
-  sendOTP: (phone: string, isSignUp?: boolean, username?: string) => Promise<{ error?: string }>;
-  verifyOTP: (phone: string, code: string, isSignUp?: boolean, username?: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, username: string, phone?: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
   updateProfile: (data: Partial<Profile>) => Promise<{ error?: string }>;
-  otpStep: 'phone' | 'code' | 'completed';
-  setOtpStep: (step: 'phone' | 'code' | 'completed') => void;
-  pendingPhone: string;
-  setPendingPhone: (phone: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,10 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [otpStep, setOtpStep] = useState<'phone' | 'code' | 'completed'>('phone');
-  const [pendingPhone, setPendingPhone] = useState<string>('');
-  const [pendingUsername, setPendingUsername] = useState<string>('');
-  const [verificationCode, setVerificationCode] = useState<string>('');
 
   // Fetch user profile
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
@@ -105,21 +97,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sendOTP = async (phone: string, isSignUp = false, username?: string) => {
+  const signUp = async (email: string, password: string, username: string, phone?: string) => {
     setIsLoading(true);
     
     try {
-      // Generate 6-digit OTP code
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setVerificationCode(code);
-      setPendingPhone(phone);
-      if (username) {
-        setPendingUsername(username);
-      }
+      const redirectUrl = `${window.location.origin}/`;
       
-      // Send SMS via our edge function
-      const { error } = await supabase.functions.invoke('send-sms-verification', {
-        body: { phone, code }
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            username,
+            phone
+          }
+        }
       });
 
       if (error) {
@@ -127,7 +120,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
 
-      setOtpStep('code');
       setIsLoading(false);
       return {};
     } catch (error: any) {
@@ -136,56 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const verifyOTP = async (phone: string, code: string, isSignUp = false, username?: string) => {
+  const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     
     try {
-      if (code !== verificationCode) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
         setIsLoading(false);
-        return { error: 'Code OTP incorrect' };
+        return { error: error.message };
       }
 
-      if (isSignUp) {
-        // Create new account
-        const tempEmail = `${phone.replace(/[^0-9]/g, '')}@kaaysamp.temp`;
-        const tempPassword = `pwd_${phone.replace(/[^0-9]/g, '')}_${Date.now()}`;
-        
-        const { error } = await supabase.auth.signUp({
-          email: tempEmail,
-          password: tempPassword,
-          options: {
-            data: {
-              username: username || `user_${phone.slice(-4)}`,
-              phone,
-              phone_verified: true
-            }
-          }
-        });
-
-        if (error) {
-          setIsLoading(false);
-          return { error: error.message };
-        }
-      } else {
-        // Sign in existing user
-        const tempEmail = `${phone.replace(/[^0-9]/g, '')}@kaaysamp.temp`;
-        
-        // First, try to get the user's stored password from their profile or use a pattern
-        const tempPassword = `pwd_${phone.replace(/[^0-9]/g, '')}_*`;
-        
-        // This is a simplified approach - you'd need a better system in production
-        const { error } = await supabase.auth.signInWithPassword({
-          email: tempEmail,
-          password: tempPassword
-        });
-
-        if (error) {
-          setIsLoading(false);
-          return { error: 'Utilisateur non trouvé. Créez d\'abord un compte.' };
-        }
-      }
-
-      setOtpStep('completed');
       setIsLoading(false);
       return {};
     } catch (error: any) {
@@ -236,15 +192,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     session,
-    sendOTP,
-    verifyOTP,
+    signUp,
+    signIn,
     signOut,
     isLoading,
-    updateProfile,
-    otpStep,
-    setOtpStep,
-    pendingPhone,
-    setPendingPhone
+    updateProfile
   };
 
   return (

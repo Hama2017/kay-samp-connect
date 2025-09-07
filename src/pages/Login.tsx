@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,66 +8,30 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    phone: "",
-    otpCode: ""
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
-  const { sendOTP, verifyOTP, isLoading, otpStep, setOtpStep, pendingPhone } = useAuth();
+  const { signIn, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || "/";
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.phone) {
+    if (!email || !password) {
       toast({
         title: "Erreur",
-        description: "Veuillez saisir votre numéro de téléphone",
+        description: "Veuillez remplir tous les champs",
         variant: "destructive",
       });
       return;
     }
 
-    const { error } = await sendOTP(formData.phone, false);
-    
-    if (!error) {
-      toast({
-        title: "Code OTP envoyé !",
-        description: "Vérifiez votre téléphone pour recevoir le code OTP",
-      });
-    } else {
-      toast({
-        title: "Erreur d'envoi",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.otpCode || formData.otpCode.length !== 6) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir le code OTP à 6 chiffres",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { error } = await verifyOTP(formData.phone, formData.otpCode, false);
+    const { error } = await signIn(email, password);
     
     if (!error) {
       toast({
@@ -82,11 +46,6 @@ export default function Login() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleBackToPhone = () => {
-    setOtpStep('phone');
-    setFormData(prev => ({ ...prev, otpCode: '' }));
   };
 
   return (
@@ -109,83 +68,65 @@ export default function Login() {
         </CardHeader>
         
         <CardContent>
-          {otpStep === 'phone' && (
-            <form onSubmit={handlePhoneSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium text-foreground">
-                  Numéro de téléphone
-                </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
+                Adresse email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="email@exemple.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pr-4"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
+                Mot de passe
+              </label>
+              <div className="relative">
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+221 77 123 45 67"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-12"
                 />
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Envoi du code...
-                  </>
-                ) : (
-                  "Envoyer le code OTP"
-                )}
-              </Button>
-            </form>
-          )}
-
-          {otpStep === 'code' && (
-            <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="otpCode" className="text-sm font-medium text-foreground">
-                  Code OTP
-                </label>
-                <Input
-                  id="otpCode"
-                  type="text"
-                  placeholder="123456"
-                  maxLength={6}
-                  value={formData.otpCode}
-                  onChange={(e) => handleInputChange('otpCode', e.target.value)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Un code OTP à 6 chiffres a été envoyé au {pendingPhone || formData.phone}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={handleBackToPhone}
-                  disabled={isLoading}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  Retour
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="flex-1" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Vérification...
-                    </>
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    "Se connecter"
+                    <Eye className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-            </form>
-          )}
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                "Se connecter"
+              )}
+            </Button>
+          </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
@@ -200,10 +141,10 @@ export default function Login() {
           </div>
 
           <div className="bg-muted/50 border rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-2">Authentification par téléphone :</h3>
+            <h3 className="font-medium text-sm mb-2">Test avec votre compte :</h3>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p>Créez d'abord votre compte avec votre numéro de téléphone</p>
-              <p>Puis connectez-vous avec le même numéro</p>
+              <p>Créez votre compte en cliquant sur "Créer un compte"</p>
+              <p>Ou connectez-vous avec votre email/mot de passe</p>
             </div>
           </div>
         </CardContent>
