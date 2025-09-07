@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MessageCircle, ChevronUp, ChevronDown, Eye } from "lucide-react";
+import { useState, useMemo } from "react";
+import { MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,8 +113,16 @@ const mockPosts = [
 
 const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
 
+const sortFilters = [
+  { id: "recent", label: "Plus récents", icon: Clock },
+  { id: "viral", label: "Plus viraux", icon: TrendingUp },
+  { id: "popular", label: "Plus populaires", icon: Flame },
+  { id: "discussed", label: "Plus discutés", icon: MessageCircle },
+];
+
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedPost, setSelectedPost] = useState<typeof mockPosts[0] | null>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
@@ -150,6 +158,25 @@ export default function Home() {
     return post.content.substring(0, 200) + "...";
   };
 
+  const filteredAndSortedPosts = useMemo(() => {
+    let posts = selectedCategory === "Tous" 
+      ? mockPosts 
+      : mockPosts.filter(post => post.category === selectedCategory);
+    
+    switch (selectedFilter) {
+      case "recent":
+        return posts.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+      case "viral":
+        return posts.sort((a, b) => (b.votesUp + b.viewsCount) - (a.votesUp + a.viewsCount));
+      case "popular":
+        return posts.sort((a, b) => b.votesUp - a.votesUp);
+      case "discussed":
+        return posts.sort((a, b) => b.commentsCount - a.commentsCount);
+      default:
+        return posts;
+    }
+  }, [selectedCategory, selectedFilter]);
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       {/* Welcome section */}
@@ -163,7 +190,7 @@ export default function Home() {
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
         {categories.map((category) => (
           <Button
             key={category}
@@ -177,9 +204,28 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Sort filters */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+        {sortFilters.map((filter) => {
+          const Icon = filter.icon;
+          return (
+            <Button
+              key={filter.id}
+              variant={selectedFilter === filter.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedFilter(filter.id)}
+              className="whitespace-nowrap gap-2"
+            >
+              <Icon className="h-3 w-3" />
+              {filter.label}
+            </Button>
+          );
+        })}
+      </div>
+
       {/* Posts feed */}
       <div className="space-y-4">
-        {mockPosts.map((post) => (
+        {filteredAndSortedPosts.map((post) => (
           <Card 
             key={post.id} 
             className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
