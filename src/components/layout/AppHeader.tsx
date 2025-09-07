@@ -54,8 +54,10 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher des espaces..."
+              placeholder="Rechercher..."
               className="w-64 pl-9 border-primary/20 focus:border-primary/40"
+              onFocus={() => navigate('/search')}
+              readOnly
             />
           </div>
           

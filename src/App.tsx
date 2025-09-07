@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="notifications" element={<Notifications />} />
               <Route path="space/:spaceId" element={<SpaceDetail />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="search" element={<Search />} />
             </Route>
             
             {/* Protected routes without layout for full screen pages */}
