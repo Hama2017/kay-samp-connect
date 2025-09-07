@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for posts
 const mockPosts = [
@@ -121,6 +122,7 @@ const sortFilters = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedPost, setSelectedPost] = useState<typeof mockPosts[0] | null>(null);
@@ -234,7 +236,13 @@ export default function Home() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
+                  <Avatar 
+                    className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/user/${post.author.username}`);
+                    }}
+                  >
                     <AvatarImage src={post.author.profilePicture} />
                     <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
                       {post.author.username.substring(0, 2).toUpperCase()}
@@ -243,7 +251,15 @@ export default function Home() {
                   
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">@{post.author.username}</span>
+                      <span 
+                        className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/user/${post.author.username}`);
+                        }}
+                      >
+                        @{post.author.username}
+                      </span>
                       {post.author.isVerified && (
                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
                           ✓
