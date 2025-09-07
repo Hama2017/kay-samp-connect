@@ -319,8 +319,8 @@ export default function Search() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1 min-w-0">
                                 <Avatar className="h-12 w-12 ring-2 ring-primary/10">
-                                  <AvatarImage src={user.profilePicture} />
-                                  <AvatarFallback className="bg-gradient-primary text-white">
+                                <AvatarImage src="" />
+                                <AvatarFallback className="bg-gradient-primary text-white">
                                     {user.username[0]?.toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
@@ -441,7 +441,7 @@ export default function Search() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               <Avatar className="h-12 w-12">
-                                <AvatarImage src={user.profilePicture} />
+                                <AvatarImage src="" />
                                 <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div>

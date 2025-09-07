@@ -22,7 +22,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   
   return (
@@ -86,18 +86,18 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user?.profilePicture} />
+                  <AvatarImage src={user?.profile?.profile_picture_url} />
                   <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                    {user?.username?.substring(0, 2).toUpperCase() || "U"}
+                    {user?.profile?.username?.substring(0, 2).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium leading-none">@{user?.username}</p>
+                <p className="text-sm font-medium leading-none">@{user?.profile?.username}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.phone}
+                  {user?.email}
                 </p>
               </div>
               <DropdownMenuSeparator />
@@ -109,7 +109,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 Paramètres
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive">
+              <DropdownMenuItem onClick={signOut} className="text-destructive">
                 Se déconnecter
               </DropdownMenuItem>
             </DropdownMenuContent>

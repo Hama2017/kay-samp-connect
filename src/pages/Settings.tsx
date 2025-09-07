@@ -19,15 +19,15 @@ import { useTheme } from "next-themes";
 import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, BarChart3, Bookmark } from "lucide-react";
 
 export default function Settings() {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   
   const [profileData, setProfileData] = useState({
-    username: user?.username || "",
-    phone: user?.phone || "",
-    bio: user?.bio || ""
+    username: user?.profile?.username || "",
+    phone: user?.profile?.phone || "",
+    bio: user?.profile?.bio || ""
   });
 
   const [notifications, setNotifications] = useState({
@@ -52,7 +52,7 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    logout();
+    signOut();
     toast({
       title: "Déconnexion",
       description: "À bientôt sur KaaySamp !"
@@ -77,7 +77,7 @@ export default function Settings() {
             </Button>
             <div>
               <h1 className="text-xl font-bold">Paramètres</h1>
-              <p className="text-sm text-muted-foreground">@{user.username}</p>
+              <p className="text-sm text-muted-foreground">@{user?.profile?.username || "Utilisateur"}</p>
             </div>
           </div>
         </div>
@@ -111,15 +111,15 @@ export default function Settings() {
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src={user.profilePicture} />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                      {user.username.substring(0, 2).toUpperCase()}
+                  <AvatarImage src={user?.profile?.profile_picture_url} />
+                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+                    {user?.profile?.username?.substring(0, 2).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">@{user.username}</h3>
-                      {user.isVerified && (
+                      <h3 className="font-semibold">@{user?.profile?.username || "Utilisateur"}</h3>
+                      {user?.profile?.is_verified && (
                         <Badge variant="secondary" className="bg-primary/10 text-primary">
                           ✓ Certifié
                         </Badge>
@@ -435,7 +435,7 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Moderation Tools for Moderators */}
-                {user.isVerified && (
+                {user?.profile?.is_verified && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
                       <Shield className="h-5 w-5 text-primary" />
@@ -465,11 +465,11 @@ export default function Settings() {
                 {/* Account Stats */}
                 <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
                   <div className="text-center">
-                    <p className="text-2xl font-bold">{user.followersCount}</p>
+                    <p className="text-2xl font-bold">{user?.profile?.followers_count || 0}</p>
                     <p className="text-sm text-muted-foreground">Abonnés</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold">{user.followingCount}</p>
+                    <p className="text-2xl font-bold">{user?.profile?.following_count || 0}</p>
                     <p className="text-sm text-muted-foreground">Abonnements</p>
                   </div>
                   <div className="text-center">

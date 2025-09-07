@@ -88,9 +88,9 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <div className="flex items-end gap-4 -mt-12">
               <Avatar className="h-24 w-24 border-4 border-background">
-                <AvatarImage src={userData.profilePicture} />
+                <AvatarImage src={userData.profile?.profile_picture_url} />
                 <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                  {userData.username.substring(0, 2).toUpperCase()}
+                  {userData.profile?.username?.substring(0, 2).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               
@@ -110,23 +110,23 @@ export default function Profile() {
             {/* User Info */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-2xl font-bold">@{userData.username}</h1>
-                {userData.isVerified && (
+                <h1 className="text-2xl font-bold">@{userData.profile?.username || "Utilisateur"}</h1>
+                {userData.profile?.is_verified && (
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
                     ✓ Certifié
                   </Badge>
                 )}
               </div>
               
-              {userData.bio && (
-                <p className="text-muted-foreground mb-3">{userData.bio}</p>
+              {userData.profile?.bio && (
+                <p className="text-muted-foreground mb-3">{userData.profile.bio}</p>
               )}
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span className="text-xs text-muted-foreground">
-                    Rejoint le {new Date(userData.joinDate).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                    Rejoint le {new Date(userData.profile?.created_at || new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                   </span>
                 </div>
               </div>
@@ -135,11 +135,11 @@ export default function Profile() {
             {/* Stats */}
             <div className="flex gap-6">
               <div className="text-center">
-                <p className="text-xl font-bold">{userData.followersCount}</p>
+                <p className="text-xl font-bold">{userData.profile?.followers_count || 0}</p>
                 <p className="text-sm text-muted-foreground">Abonnés</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{userData.followingCount}</p>
+                <p className="text-xl font-bold">{userData.profile?.following_count || 0}</p>
                 <p className="text-sm text-muted-foreground">Abonnements</p>
               </div>
               <div className="text-center">

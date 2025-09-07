@@ -1,5 +1,38 @@
 import { useState, useMemo } from 'react';
-import { mockUsers } from "@/contexts/AuthContext";
+
+// Mock users for search
+const mockUsers = [
+  {
+    id: "1",
+    username: "AmadouD",
+    phone: "+221771234567",
+    isVerified: false,
+    followersCount: 156,
+    followingCount: 89,
+    joinDate: "2024-01-15",
+    bio: "Passionné de football sénégalais 🦁⚽"
+  },
+  {
+    id: "2", 
+    username: "FatimaK",
+    phone: "+221781234567",
+    isVerified: true,
+    followersCount: 342,
+    followingCount: 127,
+    joinDate: "2023-11-20",
+    bio: "Chef cuisinière - Spécialiste de la cuisine traditionnelle sénégalaise"
+  },
+  {
+    id: "3",
+    username: "OmarB", 
+    phone: "+221791234567",
+    isVerified: false,
+    followersCount: 98,
+    followingCount: 67,
+    joinDate: "2024-02-08",
+    bio: "Développeur Tech à Dakar 💻"
+  }
+];
 
 // Données mockées pour les posts (centralisées)
 export const mockPosts = [

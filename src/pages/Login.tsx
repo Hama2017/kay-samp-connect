@@ -1,52 +1,49 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  
+  const { signIn, isLoading } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading } = useAuth();
-  const { toast } = useToast();
   
-  const [formData, setFormData] = useState({
-    phone: "",
-    password: ""
-  });
-  const [showPassword, setShowPassword] = useState(false);
-
   const from = location.state?.from?.pathname || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.phone || !formData.password) {
+    if (!email || !password) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    const success = await login(formData.phone, formData.password);
+    const { error } = await signIn(email, password);
     
-    if (success) {
+    if (!error) {
       toast({
         title: "Connexion réussie !",
-        description: "Bienvenue sur KaaySamp"
+        description: "Bienvenue sur KaaySamp",
       });
       navigate(from, { replace: true });
     } else {
       toast({
         title: "Erreur de connexion",
-        description: "Numéro de téléphone ou mot de passe incorrect",
-        variant: "destructive"
+        description: error,
+        variant: "destructive",
       });
     }
   };
@@ -73,27 +70,31 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Numéro de téléphone</Label>
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
+                Adresse email
+              </label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="+221771234567"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                disabled={isLoading}
+                id="email"
+                type="email"
+                placeholder="email@exemple.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pr-4"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
+                Mot de passe
+              </label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  disabled={isLoading}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-12"
                 />
                 <Button
                   type="button"
@@ -101,7 +102,6 @@ export default function Login() {
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -140,15 +140,11 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Demo credentials */}
-          <div className="mt-4 p-3 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground text-center mb-2">
-              Comptes de démonstration :
-            </p>
-            <div className="text-xs space-y-1">
-              <p><strong>+221771234567</strong> (mot de passe: 123456)</p>
-              <p><strong>+221781234567</strong> (mot de passe: 123456)</p>
-              <p><strong>+221791234567</strong> (mot de passe: 123456)</p>
+          <div className="bg-muted/50 border rounded-lg p-4">
+            <h3 className="font-medium text-sm mb-2">Test avec votre compte :</h3>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p>Créez votre compte en cliquant sur "Créer un compte"</p>
+              <p>Ou connectez-vous avec votre email/mot de passe</p>
             </div>
           </div>
         </CardContent>
