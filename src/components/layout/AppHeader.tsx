@@ -1,8 +1,17 @@
-import { Search, Menu, Bell } from "lucide-react";
+import { Search, Menu, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import kaaysampLogo from "@/assets/kaaysamp-logo.jpg";
 
 interface AppHeaderProps {
@@ -11,6 +20,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const unreadNotifications = 3; // Mock count
   
   return (
@@ -64,7 +74,41 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             )}
           </Button>
           
-          <Button variant="ghost" size="icon" className="sm:hidden">
+          {/* User Profile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/5">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={user?.profilePicture} />
+                  <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                    {user?.username?.substring(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium leading-none">@{user?.username}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                Mon profil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="text-destructive">
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Button variant="ghost" size="icon" className="sm:hidden hover:bg-primary/5">
             <Search className="h-5 w-5" />
           </Button>
         </div>
