@@ -72,8 +72,26 @@ export default function Register() {
     return null;
   };
 
-  // Simple vérification - on laisse Supabase gérer les doublons d'email
-  const checkEmailExists = () => false;
+  const checkEmailExists = async (email: string) => {
+    try {
+      console.log('Checking email:', email);
+      const { data, error } = await supabase.rpc('check_email_exists', { 
+        email_input: email 
+      });
+      
+      console.log('Email check result:', { data, error });
+      
+      if (error) {
+        console.error('Error checking email:', error);
+        return false;
+      }
+      
+      return data === true;
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false;
+    }
+  };
 
   const checkUsernameExists = async (username: string) => {
     try {
@@ -81,7 +99,7 @@ export default function Register() {
       const { data, error } = await supabase
         .from('profiles')
         .select('username')
-        .eq('username', username)
+        .ilike('username', username)
         .single();
       
       console.log('Username check result:', { data, error });
@@ -134,7 +152,16 @@ export default function Register() {
       return false;
     }
 
-    // On laisse Supabase gérer les doublons d'email automatiquement
+    // Vérifier si l'email existe déjà
+    const emailExists = await checkEmailExists(formData.email);
+    if (emailExists) {
+      toast({
+        title: "Erreur",
+        description: "Un compte existe déjà avec cet email",
+        variant: "destructive",
+      });
+      return false;
+    }
 
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
