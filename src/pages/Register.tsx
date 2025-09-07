@@ -72,36 +72,30 @@ export default function Register() {
     return null;
   };
 
-  const checkEmailExists = async (email: string) => {
-    try {
-      // Utiliser resetPasswordForEmail pour tester si l'email existe
-      // Cette méthode ne renvoie pas d'erreur même si l'email n'existe pas
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password-test`
-      });
-      
-      // Si aucune erreur, on ne peut pas vraiment savoir si l'email existe
-      // On va donc utiliser une approche différente
-      return false; // Laisser Supabase gérer cela lors de l'inscription
-    } catch (error) {
-      return false;
-    }
-  };
+  // Simple vérification - on laisse Supabase gérer les doublons d'email
+  const checkEmailExists = () => false;
 
   const checkUsernameExists = async (username: string) => {
     try {
+      console.log('Checking username:', username);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id')
+        .select('username')
         .eq('username', username)
-        .maybeSingle();
+        .single();
       
-      if (error) {
-        console.error('Error checking username:', error);
-        return false;
+      console.log('Username check result:', { data, error });
+      
+      if (error && error.code === 'PGRST116') {
+        // Code PGRST116 = "The result contains 0 rows"
+        return false; // Nom d'utilisateur disponible
       }
       
-      return data !== null;
+      if (data) {
+        return true; // Nom d'utilisateur déjà pris
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error checking username:', error);
       return false;
@@ -140,8 +134,7 @@ export default function Register() {
       return false;
     }
 
-    // Vérifier si l'email existe déjà - on laisse Supabase gérer cela
-    // car on ne peut pas facilement vérifier côté client
+    // On laisse Supabase gérer les doublons d'email automatiquement
 
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
