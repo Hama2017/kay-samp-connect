@@ -8,19 +8,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
-  const [phone, setPhone] = useState("");
+  const [formData, setFormData] = useState({
+    phone: "",
+    otpCode: ""
+  });
   
-  const { signInWithPhone, isLoading } = useAuth();
+  const { sendOTP, verifyOTP, isLoading, otpStep, setOtpStep, pendingPhone } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || "/";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!phone) {
+    if (!formData.phone) {
       toast({
         title: "Erreur",
         description: "Veuillez saisir votre numéro de téléphone",
@@ -29,7 +39,35 @@ export default function Login() {
       return;
     }
 
-    const { error } = await signInWithPhone(phone);
+    const { error } = await sendOTP(formData.phone, false);
+    
+    if (!error) {
+      toast({
+        title: "Code OTP envoyé !",
+        description: "Vérifiez votre téléphone pour recevoir le code OTP",
+      });
+    } else {
+      toast({
+        title: "Erreur d'envoi",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.otpCode || formData.otpCode.length !== 6) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir le code OTP à 6 chiffres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await verifyOTP(formData.phone, formData.otpCode, false);
     
     if (!error) {
       toast({
@@ -44,6 +82,11 @@ export default function Login() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleBackToPhone = () => {
+    setOtpStep('phone');
+    setFormData(prev => ({ ...prev, otpCode: '' }));
   };
 
   return (
@@ -66,35 +109,83 @@ export default function Login() {
         </CardHeader>
         
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="phone" className="text-sm font-medium text-foreground">
-                Numéro de téléphone
-              </label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+221 77 123 45 67"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
+          {otpStep === 'phone' && (
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="phone" className="text-sm font-medium text-foreground">
+                  Numéro de téléphone
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+221 77 123 45 67"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                />
+              </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connexion...
-                </>
-              ) : (
-                "Se connecter"
-              )}
-            </Button>
-          </form>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Envoi du code...
+                  </>
+                ) : (
+                  "Envoyer le code OTP"
+                )}
+              </Button>
+            </form>
+          )}
+
+          {otpStep === 'code' && (
+            <form onSubmit={handleOtpSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="otpCode" className="text-sm font-medium text-foreground">
+                  Code OTP
+                </label>
+                <Input
+                  id="otpCode"
+                  type="text"
+                  placeholder="123456"
+                  maxLength={6}
+                  value={formData.otpCode}
+                  onChange={(e) => handleInputChange('otpCode', e.target.value)}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Un code OTP à 6 chiffres a été envoyé au {pendingPhone || formData.phone}
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={handleBackToPhone}
+                  disabled={isLoading}
+                >
+                  Retour
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Vérification...
+                    </>
+                  ) : (
+                    "Se connecter"
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">

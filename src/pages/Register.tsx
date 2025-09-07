@@ -14,7 +14,7 @@ export default function Register() {
     verificationCode: ""
   });
   
-  const { sendVerificationCode, verifyPhoneAndSignUp, isLoading, verificationStep, setVerificationStep } = useAuth();
+  const { sendOTP, verifyOTP, isLoading, otpStep, setOtpStep, pendingPhone } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -83,12 +83,12 @@ export default function Register() {
     
     if (!validatePhoneForm()) return;
 
-    const { error } = await sendVerificationCode(formData.phone, formData.username);
+    const { error } = await sendOTP(formData.phone, true, formData.username);
     
     if (!error) {
       toast({
-        title: "Code envoyé !",
-        description: "Vérifiez votre téléphone pour le code de vérification",
+        title: "Code OTP envoyé !",
+        description: "Vérifiez votre téléphone pour recevoir le code OTP",
       });
     } else {
       toast({
@@ -104,7 +104,7 @@ export default function Register() {
     
     if (!validateCodeForm()) return;
 
-    const { error } = await verifyPhoneAndSignUp(formData.phone, formData.verificationCode, formData.username);
+    const { error } = await verifyOTP(formData.phone, formData.verificationCode, true, formData.username);
     
     if (!error) {
       toast({
@@ -122,7 +122,7 @@ export default function Register() {
   };
 
   const handleBackToPhone = () => {
-    setVerificationStep('phone');
+    setOtpStep('phone');
     setFormData(prev => ({ ...prev, verificationCode: '' }));
   };
 
@@ -146,7 +146,7 @@ export default function Register() {
         </CardHeader>
         
         <CardContent>
-          {verificationStep === 'phone' && (
+          {otpStep === 'phone' && (
             <form onSubmit={handlePhoneSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="username" className="text-sm font-medium text-foreground">
@@ -185,17 +185,17 @@ export default function Register() {
                     Envoi du code...
                   </>
                 ) : (
-                  "Envoyer le code de vérification"
+                  "Envoyer le code OTP"
                 )}
               </Button>
             </form>
           )}
 
-          {verificationStep === 'code' && (
+          {otpStep === 'code' && (
             <form onSubmit={handleCodeSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="verificationCode" className="text-sm font-medium text-foreground">
-                  Code de vérification
+                  Code OTP
                 </label>
                 <Input
                   id="verificationCode"
@@ -206,7 +206,7 @@ export default function Register() {
                   onChange={(e) => handleInputChange('verificationCode', e.target.value)}
                 />
                 <p className="text-sm text-muted-foreground">
-                  Un code à 6 chiffres a été envoyé au {formData.phone}
+                  Un code OTP à 6 chiffres a été envoyé au {pendingPhone || formData.phone}
                 </p>
               </div>
 
