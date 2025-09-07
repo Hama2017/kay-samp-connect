@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, ArrowUp, Heart, Send } from "lucide-react";
+import { MessageCircle, ChevronUp, ChevronDown, Eye, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -19,6 +19,7 @@ interface Post {
     id: string;
   };
   content: string;
+  image?: string;
   publicationDate: string;
   votesUp: number;
   votesDown: number;
@@ -112,12 +113,12 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] p-0">
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-lg font-semibold">Commentaires</DialogTitle>
         </DialogHeader>
 
-        {/* Original Post */}
+        {/* Post complet avec tous les détails */}
         <div className="px-6 py-4 border-b">
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10">
@@ -140,22 +141,54 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                 </span>
               </div>
               
-              <p className="text-foreground leading-relaxed mb-3">
+              {/* Contenu complet du post */}
+              <p className="text-foreground leading-relaxed mb-3 whitespace-pre-wrap">
                 {post.content}
               </p>
+
+              {/* Image si présente */}
+              {post.image && (
+                <div className="mb-3">
+                  <img 
+                    src={post.image} 
+                    alt="Post image" 
+                    className="rounded-lg max-w-full h-auto"
+                  />
+                </div>
+              )}
+
+              {/* Hashtags */}
+              {post.hashtags && post.hashtags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {post.hashtags.map((tag) => (
+                    <span key={tag} className="text-sm text-primary">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-primary">
-                    <ArrowUp className="h-4 w-4" />
-                    <span className="text-xs ml-1">{post.votesUp}</span>
-                  </Button>
+              {/* Statistiques complètes */}
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1 text-green-600">
+                    <ChevronUp className="h-4 w-4" />
+                    {post.votesUp}
+                  </span>
+                  <span className="flex items-center gap-1 text-red-600">
+                    <ChevronDown className="h-4 w-4" />
+                    {post.votesDown}
+                  </span>
                 </div>
-                
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <span className="flex items-center gap-1 text-muted-foreground">
                   <MessageCircle className="h-4 w-4" />
-                  <span className="text-xs">{post.commentsCount}</span>
-                </div>
+                  {post.commentsCount} commentaires
+                </span>
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Eye className="h-4 w-4" />
+                  {post.viewsCount} vues
+                </span>
+                <span className="text-muted-foreground">{formatDate(post.publicationDate)}</span>
               </div>
             </div>
           </div>
@@ -190,10 +223,24 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                     {comment.content}
                   </p>
                   
-                  <Button variant="ghost" size="sm" className="h-6 px-2 text-muted-foreground hover:text-primary">
-                    <Heart className="h-3 w-3 mr-1" />
-                    <span className="text-xs">{comment.likes}</span>
-                  </Button>
+                  {/* Boutons Up/Down pour les commentaires */}
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-6 px-2 text-xs hover:text-green-600"
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">{comment.likes}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-6 px-2 text-xs hover:text-red-600"
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
