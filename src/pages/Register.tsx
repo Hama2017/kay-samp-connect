@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -58,11 +59,8 @@ export default function Register() {
     if (!password) {
       return "Le mot de passe est requis";
     }
-    if (password.length < 8) {
-      return "Le mot de passe doit contenir au moins 8 caractères";
-    }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return "Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre";
+    if (password.length < 6) {
+      return "Le mot de passe doit contenir au moins 6 caractères";
     }
     return null;
   };
@@ -74,12 +72,59 @@ export default function Register() {
     return null;
   };
 
-  const validateForm = () => {
+  const checkEmailExists = async (email: string) => {
+    try {
+      // Utiliser resetPasswordForEmail pour tester si l'email existe
+      // Cette méthode ne renvoie pas d'erreur même si l'email n'existe pas
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password-test`
+      });
+      
+      // Si aucune erreur, on ne peut pas vraiment savoir si l'email existe
+      // On va donc utiliser une approche différente
+      return false; // Laisser Supabase gérer cela lors de l'inscription
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const checkUsernameExists = async (username: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking username:', error);
+        return false;
+      }
+      
+      return data !== null;
+    } catch (error) {
+      console.error('Error checking username:', error);
+      return false;
+    }
+  };
+
+  const validateForm = async () => {
     const usernameError = validateUsername(formData.username);
     if (usernameError) {
       toast({
         title: "Erreur",
         description: usernameError,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Vérifier si le nom d'utilisateur existe déjà
+    const usernameExists = await checkUsernameExists(formData.username);
+    if (usernameExists) {
+      toast({
+        title: "Erreur",
+        description: "Ce nom d'utilisateur est déjà pris",
         variant: "destructive",
       });
       return false;
@@ -94,6 +139,9 @@ export default function Register() {
       });
       return false;
     }
+
+    // Vérifier si l'email existe déjà - on laisse Supabase gérer cela
+    // car on ne peut pas facilement vérifier côté client
 
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
@@ -121,7 +169,8 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    const isValid = await validateForm();
+    if (!isValid) return;
 
     const { error } = await signUp(formData.email, formData.password, formData.username, formData.phone);
     
@@ -135,12 +184,14 @@ export default function Register() {
       let errorMessage = error;
       
       // Gestion des erreurs spécifiques
-      if (error.includes("User already registered")) {
+      if (error.includes("User already registered") || error.includes("already registered")) {
         errorMessage = "Un compte existe déjà avec cet email";
       } else if (error.includes("Invalid email")) {
         errorMessage = "L'adresse email n'est pas valide";
       } else if (error.includes("Password")) {
         errorMessage = "Le mot de passe ne respecte pas les critères requis";
+      } else if (error.includes("signup is disabled")) {
+        errorMessage = "L'inscription est temporairement désactivée";
       }
       
       toast({
@@ -241,7 +292,7 @@ export default function Register() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Au moins 8 caractères avec majuscule, minuscule et chiffre
+                Minimum 6 caractères
               </p>
             </div>
 
