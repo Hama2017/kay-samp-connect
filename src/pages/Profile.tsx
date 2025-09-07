@@ -93,7 +93,7 @@ export default function Profile() {
                 </h2>
                 {mockUser.isVerified && (
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    ✓ Vérifié
+                    ✓ Certifié
                   </Badge>
                 )}
               </div>
@@ -103,7 +103,6 @@ export default function Profile() {
                   <span className="text-primary font-semibold">{mockUser.points}</span>
                   <span className="text-muted-foreground">points</span>
                 </div>
-                <Badge variant="outline">{mockUser.reputationLevel}</Badge>
               </div>
             </div>
           </div>

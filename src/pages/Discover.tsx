@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Users, Hash, Plus } from "lucide-react";
+import { Search, Users, Hash, Plus, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mock data for popular spaces
 const mockSpaces = [
@@ -52,10 +53,18 @@ const mockSpaces = [
 
 const categories = ["Tous", "Sport", "Culture & Musique", "Cuisine", "Technologie", "Religion"];
 
+const sortOptions = [
+  { value: "popular", label: "Plus populaires" },
+  { value: "discussed", label: "Plus discutés" },
+  { value: "recent", label: "Plus récents" },
+  { value: "subscribers", label: "Plus d'abonnés" },
+];
+
 export default function Discover() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [sortBy, setSortBy] = useState("popular");
 
   const filteredSpaces = mockSpaces.filter((space) => {
     const matchesSearch = space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -87,19 +96,39 @@ export default function Discover() {
         />
       </div>
 
-      {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={selectedCategory === category ? "senegal" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(category)}
-            className="whitespace-nowrap"
-          >
-            {category}
-          </Button>
-        ))}
+      {/* Filters */}
+      <div className="space-y-4 mb-6">
+        {/* Category filter */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "senegal" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(category)}
+              className="whitespace-nowrap"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+        
+        {/* Sort filter */}
+        <div className="flex items-center gap-3">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Trier par..." />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Spaces list */}

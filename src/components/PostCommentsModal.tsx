@@ -247,8 +247,8 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
           </div>
         </ScrollArea>
 
-        {/* Add Comment */}
-        <div className="p-6 pt-4 border-t">
+        {/* Add Comment - Fixed inside modal */}
+        <div className="p-6 pt-4 border-t bg-background">
           <div className="flex gap-3">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">

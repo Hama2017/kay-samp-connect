@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy } from "lucide-react";
+import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,35 +13,70 @@ const mockTrendingData = {
       {
         position: 1,
         id: "post_789",
-        title: "Les Lions vont affronter le Nigeria demain !",
         author: "AmadouD",
         space: "Lions du Sénégal 🦁",
+        content: "On va affronter le Nigeria demain ! J'espère qu'on va avoir une bonne formation avec Mané en pointe.",
         interactionScore: 176,
         votesUp: 23,
         comments: 8,
         views: 145,
+        hashtags: ["#CAN2024", "#LionsDuSenegal"]
       },
       {
         position: 2,
         id: "post_892",
-        title: "Nouvelle mosquée inaugurée à Touba",
         author: "MoussaK",
         space: "Religion & Société",
+        content: "Nouvelle mosquée inaugurée à Touba, c'est vraiment magnifique l'architecture !",
         interactionScore: 134,
         votesUp: 19,
         comments: 12,
         views: 103,
+        hashtags: ["#Touba", "#Mosquee"]
       },
       {
         position: 3,
         id: "post_456",
-        title: "Recette spéciale thiébou dieune",
         author: "AminaD",
         space: "Cuisine Sénégalaise",
+        content: "Ma recette spéciale thiébou dieune avec des légumes frais du marché. Qui veut la recette ?",
         interactionScore: 98,
         votesUp: 15,
         comments: 6,
         views: 77,
+        hashtags: ["#ThiebouDieune", "#CuisineSenegalaise"]
+      },
+    ],
+    topSpaces: [
+      {
+        position: 1,
+        id: "space_001",
+        name: "Lions du Sénégal 🦁",
+        category: "Sport",
+        subscribersCount: 1247,
+        postsToday: 23,
+        activeMembers: 89,
+        isVerified: true,
+      },
+      {
+        position: 2,
+        id: "space_002",
+        name: "Cuisine Sénégalaise",
+        category: "Cuisine", 
+        subscribersCount: 634,
+        postsToday: 15,
+        activeMembers: 67,
+        isVerified: true,
+      },
+      {
+        position: 3,
+        id: "space_003",
+        name: "Tech Dakar",
+        category: "Technologie",
+        subscribersCount: 453,
+        postsToday: 12,
+        activeMembers: 45,
+        isVerified: false,
       },
     ],
     topContributors: [
@@ -118,10 +153,14 @@ export default function Trending() {
       </div>
 
       <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="posts" className="flex items-center gap-2">
             <Trophy className="h-4 w-4" />
             Top Posts
+          </TabsTrigger>
+          <TabsTrigger value="spaces" className="flex items-center gap-2">
+            <Hash className="h-4 w-4" />
+            Top Espaces
           </TabsTrigger>
           <TabsTrigger value="contributors" className="flex items-center gap-2">
             <Crown className="h-4 w-4" />
@@ -146,9 +185,19 @@ export default function Trending() {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground mb-1 leading-tight">
-                      {post.title}
-                    </h3>
+                    <p className="text-foreground mb-2 leading-relaxed">
+                      {post.content}
+                    </p>
+                    
+                    {post.hashtags && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {post.hashtags.map((tag) => (
+                          <span key={tag} className="text-sm text-primary">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>par @{post.author}</span>
@@ -182,6 +231,75 @@ export default function Trending() {
                     <div className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
                       <span>{post.views}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="spaces" className="space-y-4">
+          {mockTrendingData.daily.topSpaces.map((space) => (
+            <Card key={space.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    <Badge 
+                      variant={space.position === 1 ? "default" : "secondary"}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                        space.position === 1 ? "bg-gradient-primary" : ""
+                      }`}
+                    >
+                      {space.position}
+                    </Badge>
+                  </div>
+                  
+                  <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Hash className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-foreground">
+                        {space.name}
+                      </h3>
+                      {space.isVerified && (
+                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                          ✓
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Badge variant="outline" className="text-xs">
+                        {space.category}
+                      </Badge>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        <span>{space.subscribersCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div>
+                        <div className="text-sm font-semibold text-primary">
+                          {space.postsToday}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Posts
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-primary">
+                          {space.activeMembers}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Actifs
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

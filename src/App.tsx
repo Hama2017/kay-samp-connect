@@ -10,6 +10,8 @@ import CreateSpace from "./pages/CreateSpace";
 import CreatePost from "./pages/CreatePost";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
 
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="create-space" element={<CreateSpace />} />
             <Route path="trending" element={<Trending />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="user/:username" element={<UserProfile />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="space/:spaceId" element={<SpaceDetail />} />
           </Route>
           {/* Routes without layout for full screen pages */}

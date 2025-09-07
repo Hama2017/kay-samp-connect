@@ -1,6 +1,8 @@
-import { Search, Menu } from "lucide-react";
+import { Search, Menu, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import kaaysampLogo from "@/assets/kaaysamp-logo.jpg";
 
 interface AppHeaderProps {
@@ -8,6 +10,9 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const navigate = useNavigate();
+  const unreadNotifications = 3; // Mock count
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4">
@@ -34,7 +39,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </div>
         </div>
 
-        {/* Right side - Search */}
+        {/* Right side - Search and Notifications */}
         <div className="flex items-center gap-2">
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -43,6 +48,22 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
               className="w-64 pl-9 border-primary/20 focus:border-primary/40"
             />
           </div>
+          
+          {/* Notifications */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/notifications')}
+            className="relative hover:bg-primary/5"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadNotifications > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
+                {unreadNotifications}
+              </Badge>
+            )}
+          </Button>
+          
           <Button variant="ghost" size="icon" className="sm:hidden">
             <Search className="h-5 w-5" />
           </Button>
