@@ -22,7 +22,7 @@ interface AuthUser extends User {
 interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
-  signUp: (email: string, password: string, username: string, phone?: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, username: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   isLoading: boolean;
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, username: string, phone?: string) => {
+  const signUp = async (email: string, password: string, username: string) => {
     setIsLoading(true);
     
     try {
@@ -109,8 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            username,
-            phone
+            username
           }
         }
       });
