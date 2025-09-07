@@ -1,7 +1,7 @@
 import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import kaaysampLogo from "@/assets/kaaysamp-logo.png";
+import kaaysampLogo from "@/assets/kaaysamp-logo.jpg";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
@@ -26,7 +26,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             <img 
               src={kaaysampLogo} 
               alt="KaaySamp" 
-              className="h-8 w-8 object-contain"
+              className="h-8 w-12 object-cover rounded-md"
             />
             <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent hidden sm:block">
               KaaySamp
