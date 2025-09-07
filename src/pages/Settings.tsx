@@ -13,8 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, BarChart3 } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, logout } = useAuth();
@@ -84,11 +85,12 @@ export default function Settings() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="appearance">Thème</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
 
@@ -399,6 +401,24 @@ export default function Settings() {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analytics et statistiques
+                </CardTitle>
+                <CardDescription>
+                  Découvrez comment votre contenu performe et optimisez votre engagement
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AnalyticsDashboard />
               </CardContent>
             </Card>
           </TabsContent>

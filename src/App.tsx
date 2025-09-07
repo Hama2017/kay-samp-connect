@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { PWAPrompt } from "@/components/PWAPrompt";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import Home from "./pages/Home";
 import Discover from "./pages/Discover";
 import CreateSpace from "./pages/CreateSpace";
@@ -22,6 +23,12 @@ import Register from "./pages/Register";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 
+// Composant pour tracker les pages
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,6 +38,7 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <BrowserRouter>
+          <PageTracker />
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
