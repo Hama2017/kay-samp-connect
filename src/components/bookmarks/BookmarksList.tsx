@@ -249,16 +249,6 @@ export function BookmarksList() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{stats.posts}</div>
-            <p className="text-sm text-muted-foreground">Posts favoris</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center gap-2 w-full sm:w-auto">
