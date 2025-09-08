@@ -5,7 +5,6 @@ const mockUsers = [
   {
     id: "1",
     username: "AmadouD",
-    phone: "+221771234567",
     isVerified: false,
     followersCount: 156,
     followingCount: 89,
@@ -15,7 +14,6 @@ const mockUsers = [
   {
     id: "2", 
     username: "FatimaK",
-    phone: "+221781234567",
     isVerified: true,
     followersCount: 342,
     followingCount: 127,
@@ -24,8 +22,7 @@ const mockUsers = [
   },
   {
     id: "3",
-    username: "OmarB", 
-    phone: "+221791234567",
+    username: "OmarB",
     isVerified: false,
     followersCount: 98,
     followingCount: 67,
