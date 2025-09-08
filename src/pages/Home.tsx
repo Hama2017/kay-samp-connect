@@ -216,7 +216,7 @@ export default function Home() {
             
             <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
               <div 
-                className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap"
+                className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap break-words overflow-hidden"
                 dangerouslySetInnerHTML={{
                   __html: getDisplayContent(post).replace(/#(\w+)/g, '<span style="color: hsl(var(--primary)); font-weight: 600;">#$1</span>')
                 }}
