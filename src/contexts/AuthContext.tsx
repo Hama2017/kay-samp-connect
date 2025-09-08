@@ -13,6 +13,9 @@ interface Profile {
   following_count: number;
   created_at: string;
   updated_at: string;
+  profile_visible: boolean;
+  show_email: boolean;
+  show_followers: boolean;
 }
 
 interface AuthUser extends User {

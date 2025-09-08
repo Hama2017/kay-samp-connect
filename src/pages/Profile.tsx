@@ -95,19 +95,30 @@ export default function Profile() {
                     Rejoint le {new Date(user.profile?.created_at || new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                   </span>
                 </div>
+                {user.profile?.show_email && user.email && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             
             {/* Stats */}
             <div className="flex gap-6">
-              <div className="text-center">
-                <p className="text-xl font-bold">{user.profile?.followers_count || 0}</p>
-                <p className="text-sm text-muted-foreground">Abonnés</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-bold">{user.profile?.following_count || 0}</p>
-                <p className="text-sm text-muted-foreground">Abonnements</p>
-              </div>
+              {user.profile?.show_followers !== false && (
+                <>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{user.profile?.followers_count || 0}</p>
+                    <p className="text-sm text-muted-foreground">Abonnés</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{user.profile?.following_count || 0}</p>
+                    <p className="text-sm text-muted-foreground">Abonnements</p>
+                  </div>
+                </>
+              )}
               <div className="text-center">
                 <p className="text-xl font-bold">{userPosts.length}</p>
                 <p className="text-sm text-muted-foreground">Posts</p>

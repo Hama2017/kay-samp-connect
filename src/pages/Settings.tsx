@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +28,21 @@ export default function Settings() {
   });
 
   const [privacy, setPrivacy] = useState({
-    profileVisible: true,
-    showEmail: false,
-    showFollowers: true
+    profileVisible: user?.profile?.profile_visible ?? true,
+    showEmail: user?.profile?.show_email ?? false,
+    showFollowers: user?.profile?.show_followers ?? true
   });
+
+  // Update privacy state when user profile changes
+  useEffect(() => {
+    if (user?.profile) {
+      setPrivacy({
+        profileVisible: user.profile.profile_visible ?? true,
+        showEmail: user.profile.show_email ?? false,
+        showFollowers: user.profile.show_followers ?? true
+      });
+    }
+  }, [user?.profile]);
 
   const handleProfileUpdate = async () => {
     try {
@@ -44,6 +55,38 @@ export default function Settings() {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour le profil",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePrivacyUpdate = async (field: keyof typeof privacy, value: boolean) => {
+    const updatedPrivacy = { ...privacy, [field]: value };
+    setPrivacy(updatedPrivacy);
+    
+    try {
+      const privacyData: any = {};
+      
+      if (field === 'profileVisible') {
+        privacyData.profile_visible = value;
+      } else if (field === 'showEmail') {
+        privacyData.show_email = value;
+      } else if (field === 'showFollowers') {
+        privacyData.show_followers = value;
+      }
+      
+      await updateProfile(privacyData);
+      
+      toast({
+        title: "Paramètres mis à jour",
+        description: "Vos préférences de confidentialité ont été sauvegardées"
+      });
+    } catch (error) {
+      // Revert local state on error
+      setPrivacy(privacy);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les paramètres",
         variant: "destructive"
       });
     }
@@ -284,7 +327,7 @@ export default function Settings() {
                     <Switch
                       checked={privacy.profileVisible}
                       onCheckedChange={(checked) => 
-                        setPrivacy(prev => ({ ...prev, profileVisible: checked }))
+                        handlePrivacyUpdate('profileVisible', checked)
                       }
                     />
                   </div>
@@ -299,7 +342,7 @@ export default function Settings() {
                     <Switch
                       checked={privacy.showEmail}
                       onCheckedChange={(checked) => 
-                        setPrivacy(prev => ({ ...prev, showEmail: checked }))
+                        handlePrivacyUpdate('showEmail', checked)
                       }
                     />
                   </div>
@@ -314,7 +357,7 @@ export default function Settings() {
                     <Switch
                       checked={privacy.showFollowers}
                       onCheckedChange={(checked) => 
-                        setPrivacy(prev => ({ ...prev, showFollowers: checked }))
+                        handlePrivacyUpdate('showFollowers', checked)
                       }
                     />
                   </div>

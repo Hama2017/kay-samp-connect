@@ -429,6 +429,9 @@ export type Database = {
           is_verified: boolean | null
           phone: string | null
           profile_picture_url: string | null
+          profile_visible: boolean | null
+          show_email: boolean | null
+          show_followers: boolean | null
           updated_at: string | null
           username: string
         }
@@ -441,6 +444,9 @@ export type Database = {
           is_verified?: boolean | null
           phone?: string | null
           profile_picture_url?: string | null
+          profile_visible?: boolean | null
+          show_email?: boolean | null
+          show_followers?: boolean | null
           updated_at?: string | null
           username: string
         }
@@ -453,6 +459,9 @@ export type Database = {
           is_verified?: boolean | null
           phone?: string | null
           profile_picture_url?: string | null
+          profile_visible?: boolean | null
+          show_email?: boolean | null
+          show_followers?: boolean | null
           updated_at?: string | null
           username?: string
         }
