@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,35 @@ export default function SpaceDetail() {
     }
   }, [spacePosts, selectedFilter]);
 
+  // All functions that depend on state/props should be defined with useCallback
+  const handleSubscriptionToggle = useCallback(async () => {
+    if (!space) return;
+    try {
+      if (space.is_subscribed) {
+        await unsubscribeFromSpace(space.id);
+      } else {
+        await subscribeToSpace(space.id);
+      }
+      fetchSpaces(); // Refresh to update subscription status
+    } catch (error) {
+      console.error('Error toggling subscription:', error);
+    }
+  }, [space, unsubscribeFromSpace, subscribeToSpace, fetchSpaces]);
+
+  const formatDate = useCallback((dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+    
+    if (diffInMinutes < 60) {
+      return `il y a ${diffInMinutes}min`;
+    } else if (diffInMinutes < 1440) {
+      return `il y a ${Math.floor(diffInMinutes / 60)}h`;
+    } else {
+      return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
+    }
+  }, []);
+
   console.log('SpaceDetail render', { 
     spacesLength: spaces.length, 
     postsLength: posts.length, 
@@ -79,33 +108,6 @@ export default function SpaceDetail() {
       </div>
     );
   }
-
-  const handleSubscriptionToggle = async () => {
-    try {
-      if (space.is_subscribed) {
-        await unsubscribeFromSpace(space.id);
-      } else {
-        await subscribeToSpace(space.id);
-      }
-      fetchSpaces(); // Refresh to update subscription status
-    } catch (error) {
-      console.error('Error toggling subscription:', error);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-    
-    if (diffInMinutes < 60) {
-      return `il y a ${diffInMinutes}min`;
-    } else if (diffInMinutes < 1440) {
-      return `il y a ${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
