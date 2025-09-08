@@ -40,7 +40,7 @@ export interface CreatePostData {
   title?: string;
   space_id?: string;
   hashtags?: string[];
-  media_files?: File[];
+  media_files?: (File | { name: string; type: string; url: string; isGifUrl: true })[];
 }
 
 export function usePosts() {
@@ -143,42 +143,56 @@ export function usePosts() {
       if (postData.media_files && postData.media_files.length > 0) {
         for (let i = 0; i < postData.media_files.length; i++) {
           const file = postData.media_files[i];
-          const fileExtension = file.name.split('.').pop();
-          const fileName = `${user.id}/${data.id}_${i}_${Date.now()}.${fileExtension}`;
-          
-          // Upload file to Supabase Storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('post-media')
-            .upload(fileName, file);
-
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
-            continue;
-          }
-
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from('post-media')
-            .getPublicUrl(fileName);
-
-          // Determine media type
+          let mediaUrl = '';
           let mediaType = 'image';
-          if (file.type.startsWith('video/')) {
-            mediaType = 'video';
-          } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+          
+          // Vérifier si c'est un GIF depuis une URL (Giphy)
+          if ('isGifUrl' in file && file.isGifUrl) {
+            mediaUrl = file.url;
             mediaType = 'gif';
-          } else if (file.type.startsWith('image/')) {
-            mediaType = 'image';
+            console.log('GIF depuis URL:', mediaUrl, mediaType);
+          } else {
+            // Upload normal du fichier
+            const fileExtension = file.name.split('.').pop();
+            const fileName = `${user.id}/${data.id}_${i}_${Date.now()}.${fileExtension}`;
+            
+            console.log('Upload fichier:', { fileName, fileType: (file as File).type, fileSize: (file as File).size });
+            
+            // Upload file to Supabase Storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('post-media')
+              .upload(fileName, file as File);
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              continue;
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('post-media')
+              .getPublicUrl(fileName);
+            
+            mediaUrl = urlData.publicUrl;
+
+            // Determine media type
+            if ((file as File).type.startsWith('video/')) {
+              mediaType = 'video';
+            } else if ((file as File).type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+              mediaType = 'gif';
+            } else if ((file as File).type.startsWith('image/')) {
+              mediaType = 'image';
+            }
           }
           
-          console.log('Media upload:', { fileName, fileType: file.type, mediaType });
+          console.log('Media upload:', { mediaUrl, mediaType });
 
           // Save media record to database
           await supabase
             .from('post_media')
             .insert({
               post_id: data.id,
-              media_url: urlData.publicUrl,
+              media_url: mediaUrl,
               media_type: mediaType,
               media_order: i
             });

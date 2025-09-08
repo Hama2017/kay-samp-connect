@@ -25,7 +25,7 @@ export default function CreatePost() {
 
   const [formData, setFormData] = useState({
     content: "",
-    selectedFiles: [] as File[],
+    selectedFiles: [] as (File | { name: string; type: string; url: string; isGifUrl: true })[],
   });
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -75,17 +75,19 @@ export default function CreatePost() {
   const handleGifSelect = async (gifUrl: string) => {
     console.log('GIF sélectionné:', gifUrl);
     try {
-      // Télécharger le GIF et le convertir en File
-      const response = await fetch(gifUrl);
-      console.log('Réponse fetch GIF:', response.status);
-      const blob = await response.blob();
-      console.log('Blob GIF:', blob.type, blob.size);
-      const file = new File([blob], `gif-${Date.now()}.gif`, { type: 'image/gif' });
-      console.log('Fichier GIF créé:', file.name, file.type, file.size);
+      // Utiliser directement l'URL du GIF au lieu de le télécharger
+      const gifFile = {
+        name: `gif-${Date.now()}.gif`,
+        type: 'image/gif',
+        url: gifUrl // Stocker l'URL directement
+      };
       
+      console.log('Fichier GIF créé:', gifFile.name, gifFile.type, gifFile.url);
+      
+      // Ajouter le GIF comme un fichier spécial avec l'URL
       setFormData(prev => ({ 
         ...prev, 
-        selectedFiles: [...prev.selectedFiles, file] 
+        selectedFiles: [...prev.selectedFiles, { ...gifFile, isGifUrl: true } as any] 
       }));
       
       setPreviewUrls(prev => [...prev, gifUrl]);
