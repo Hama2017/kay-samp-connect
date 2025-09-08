@@ -31,7 +31,7 @@ export default function SpaceDetail() {
   }, [spaceId, fetchSpaces, fetchPosts]);
 
   const space = spaces.find(s => s.id === spaceId);
-  const spacePosts = posts.filter(post => post.space_id === spaceId);
+  const spacePosts = useMemo(() => posts.filter(post => post.space_id === spaceId), [posts, spaceId]);
 
   if (spacesLoading || postsLoading) {
     return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
