@@ -25,7 +25,7 @@ export default function CreatePost() {
 
   const [formData, setFormData] = useState({
     content: "",
-    selectedFiles: [] as (File | { name: string; type: string; url: string; isGifUrl: true })[],
+    selectedFiles: [] as any[],
   });
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -72,29 +72,26 @@ export default function CreatePost() {
     });
   };
 
-  const handleGifSelect = async (gifUrl: string) => {
+  const handleGifSelect = (gifUrl: string) => {
     console.log('GIF sélectionné:', gifUrl);
-    try {
-      // Utiliser directement l'URL du GIF au lieu de le télécharger
-      const gifFile = {
-        name: `gif-${Date.now()}.gif`,
-        type: 'image/gif',
-        url: gifUrl // Stocker l'URL directement
-      };
-      
-      console.log('Fichier GIF créé:', gifFile.name, gifFile.type, gifFile.url);
-      
-      // Ajouter le GIF comme un fichier spécial avec l'URL
-      setFormData(prev => ({ 
-        ...prev, 
-        selectedFiles: [...prev.selectedFiles, { ...gifFile, isGifUrl: true } as any] 
-      }));
-      
-      setPreviewUrls(prev => [...prev, gifUrl]);
-      console.log('GIF ajouté aux fichiers sélectionnés');
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout du GIF:', error);
-    }
+    
+    // Créer un objet fichier simple pour le GIF
+    const gifFile = {
+      name: `gif-${Date.now()}.gif`,
+      type: 'image/gif',
+      size: 0,
+      url: gifUrl,
+      isGifUrl: true
+    };
+    
+    console.log('Ajout du GIF:', gifFile);
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      selectedFiles: [...prev.selectedFiles, gifFile as any] 
+    }));
+    
+    setPreviewUrls(prev => [...prev, gifUrl]);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {

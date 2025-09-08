@@ -40,7 +40,7 @@ export interface CreatePostData {
   title?: string;
   space_id?: string;
   hashtags?: string[];
-  media_files?: (File | { name: string; type: string; url: string; isGifUrl: true })[];
+  media_files?: any[];
 }
 
 export function usePosts() {
@@ -141,30 +141,34 @@ export function usePosts() {
 
       // Handle media upload if any
       if (postData.media_files && postData.media_files.length > 0) {
+        console.log('Traitement des médias:', postData.media_files);
+        
         for (let i = 0; i < postData.media_files.length; i++) {
           const file = postData.media_files[i];
           let mediaUrl = '';
           let mediaType = 'image';
           
+          console.log('Traitement fichier:', file);
+          
           // Vérifier si c'est un GIF depuis une URL (Giphy)
-          if ('isGifUrl' in file && file.isGifUrl) {
+          if (file.isGifUrl) {
             mediaUrl = file.url;
             mediaType = 'gif';
-            console.log('GIF depuis URL:', mediaUrl, mediaType);
+            console.log('GIF depuis URL:', { mediaUrl, mediaType });
           } else {
             // Upload normal du fichier
             const fileExtension = file.name.split('.').pop();
             const fileName = `${user.id}/${data.id}_${i}_${Date.now()}.${fileExtension}`;
             
-            console.log('Upload fichier:', { fileName, fileType: (file as File).type, fileSize: (file as File).size });
+            console.log('Upload fichier vers storage:', { fileName, fileType: file.type });
             
             // Upload file to Supabase Storage
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('post-media')
-              .upload(fileName, file as File);
+              .upload(fileName, file);
 
             if (uploadError) {
-              console.error('Upload error:', uploadError);
+              console.error('Erreur upload storage:', uploadError);
               continue;
             }
 
@@ -176,19 +180,19 @@ export function usePosts() {
             mediaUrl = urlData.publicUrl;
 
             // Determine media type
-            if ((file as File).type.startsWith('video/')) {
+            if (file.type && file.type.startsWith('video/')) {
               mediaType = 'video';
-            } else if ((file as File).type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+            } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
               mediaType = 'gif';
-            } else if ((file as File).type.startsWith('image/')) {
+            } else if (file.type && file.type.startsWith('image/')) {
               mediaType = 'image';
             }
           }
           
-          console.log('Media upload:', { mediaUrl, mediaType });
+          console.log('Insertion en base:', { postId: data.id, mediaUrl, mediaType, order: i });
 
           // Save media record to database
-          await supabase
+          const { error: mediaError } = await supabase
             .from('post_media')
             .insert({
               post_id: data.id,
@@ -196,6 +200,12 @@ export function usePosts() {
               media_type: mediaType,
               media_order: i
             });
+            
+          if (mediaError) {
+            console.error('Erreur insertion post_media:', mediaError);
+          } else {
+            console.log('Média sauvegardé avec succès');
+          }
         }
       }
 
