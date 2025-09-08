@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, ChevronUp, ChevronDown, Eye, Send } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MessageCircle, ChevronUp, ChevronDown, Eye, Send, X } from "lucide-react";
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerTitle, 
+  DrawerClose 
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useComments, Comment } from "@/hooks/useComments";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Post {
   id: string;
@@ -48,6 +55,7 @@ interface PostCommentsModalProps {
 export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalProps) {
   const [newComment, setNewComment] = useState("");
   const { comments, isLoading, fetchComments, createComment } = useComments();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (post?.id && isOpen) {
@@ -88,106 +96,107 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
   const postImage = post.post_media?.[0]?.media_url;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-lg font-semibold">Commentaires</DialogTitle>
-        </DialogHeader>
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent className="max-h-[90vh] flex flex-col">
+        {/* Header avec titre et bouton fermer */}
+        <DrawerHeader className="flex-shrink-0 p-4 pb-2">
+          <div className="flex items-center justify-between">
+            <DrawerTitle className="text-lg font-semibold">
+              Commentaires
+            </DrawerTitle>
+            <DrawerClose asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <X className="h-5 w-5" />
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerHeader>
 
-        {/* Post complet avec tous les détails */}
-        <div className="px-6 py-4 border-b">
+        {/* Post résumé optimisé pour mobile */}
+        <div className="flex-shrink-0 p-4 pt-2 border-b bg-muted/20">
           <div className="flex items-start gap-3">
-            <Avatar className="h-10 w-10">
+            <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={post.profiles?.profile_picture_url || ""} />
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold text-sm">
                 {post.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="font-semibold text-sm">@{post.profiles?.username || "Unknown"}</span>
                 {post.profiles?.is_verified && (
-                  <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                  <Badge variant="secondary" className="text-xs bg-primary/10 text-primary px-1.5 py-0.5">
                     ✓
                   </Badge>
                 )}
-                {post.spaces && (
-                  <span className="text-xs text-muted-foreground">
-                    dans {post.spaces.name}
-                  </span>
-                )}
+                <span className="text-xs text-muted-foreground">
+                  {formatDate(post.created_at)}
+                </span>
               </div>
               
-              {/* Contenu complet du post */}
-              <p className="text-foreground leading-relaxed mb-3 whitespace-pre-wrap">
+              {/* Contenu du post - limité sur mobile */}
+              <p className="text-sm text-foreground leading-relaxed mb-2 line-clamp-3">
                 {post.content}
               </p>
 
-              {/* Médias si présents */}
-              <PostMediaDisplay 
-                media={post.post_media || []} 
-                maxHeight="max-h-96"
-                showControls={true}
-              />
-
-              {/* Hashtags */}
-              {post.hashtags && post.hashtags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {post.hashtags.map((tag) => (
-                    <span key={tag} className="text-sm text-primary">
-                      {tag}
-                    </span>
-                  ))}
+              {/* Médias si présents - plus petits sur mobile */}
+              {post.post_media && post.post_media.length > 0 && (
+                <div className="mb-2">
+                  <PostMediaDisplay 
+                    media={post.post_media} 
+                    maxHeight="max-h-32"
+                    className="rounded-md"
+                  />
                 </div>
               )}
               
-              {/* Statistiques complètes */}
-              <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1 text-green-600">
-                    <ChevronUp className="h-4 w-4" />
-                    {post.votes_up}
-                  </span>
-                  <span className="flex items-center gap-1 text-red-600">
-                    <ChevronDown className="h-4 w-4" />
-                    {post.votes_down}
-                  </span>
-                </div>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <MessageCircle className="h-4 w-4" />
-                  {post.comments_count} commentaires
+              {/* Statistiques compactes */}
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <ChevronUp className="h-3 w-3 text-green-600" />
+                  {post.votes_up}
                 </span>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Eye className="h-4 w-4" />
-                  {post.views_count} vues
+                <span className="flex items-center gap-1">
+                  <ChevronDown className="h-3 w-3 text-red-600" />
+                  {post.votes_down}
                 </span>
-                <span className="text-muted-foreground">{formatDate(post.created_at)}</span>
+                <span className="flex items-center gap-1">
+                  <MessageCircle className="h-3 w-3" />
+                  {post.comments_count}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  {post.views_count}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Comments List */}
-        <ScrollArea className="flex-1 max-h-60">
-          <div className="px-6 py-4 space-y-4">
+        {/* Liste des commentaires - scrollable */}
+        <ScrollArea className="flex-1 px-4">
+          <div className="py-4 space-y-4">
             {isLoading ? (
-              <div className="text-center text-muted-foreground">Chargement des commentaires...</div>
+              <div className="text-center text-muted-foreground py-8">
+                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                Chargement...
+              </div>
             ) : comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
+                <div key={comment.id} className="flex items-start gap-3 py-2">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
                     <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                       {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
                     </AvatarFallback>
                   </Avatar>
                   
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-semibold text-sm">@{comment.profiles?.username || "Unknown"}</span>
                       {comment.profiles?.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary px-1 py-0">
                           ✓
                         </Badge>
                       )}
@@ -196,66 +205,72 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                       </span>
                     </div>
                     
-                    <p className="text-sm text-foreground mb-2 leading-relaxed">
+                    <p className="text-sm text-foreground mb-2 leading-relaxed break-words">
                       {comment.content}
                     </p>
                     
-                    {/* Boutons Up/Down pour les commentaires */}
-                    <div className="flex items-center gap-1">
+                    {/* Votes pour commentaires - plus compacts */}
+                    <div className="flex items-center gap-2">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-6 px-2 text-xs hover:text-green-600"
+                        className="h-7 px-2 text-xs hover:text-green-600 hover:bg-green-50"
                       >
-                        <ChevronUp className="h-3 w-3" />
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        {comment.votes_up}
                       </Button>
-                      <span className="text-xs text-muted-foreground">{comment.votes_up}</span>
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-6 px-2 text-xs hover:text-red-600"
+                        className="h-7 px-2 text-xs hover:text-red-600 hover:bg-red-50"
                       >
-                        <ChevronDown className="h-3 w-3" />
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                        {comment.votes_down || 0}
                       </Button>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-muted-foreground">Aucun commentaire pour le moment</div>
+              <div className="text-center text-muted-foreground py-8">
+                <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm">Aucun commentaire</p>
+                <p className="text-xs text-muted-foreground/70">Soyez le premier à commenter !</p>
+              </div>
             )}
           </div>
         </ScrollArea>
 
-        {/* Add Comment - Fixed inside modal */}
-        <div className="p-6 pt-4 border-t bg-background">
-          <div className="flex gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
+        {/* Zone d'ajout de commentaire - fixe en bas */}
+        <div className="flex-shrink-0 p-4 pt-3 border-t bg-background/95 backdrop-blur-sm">
+          <div className="flex gap-3 items-end">
+            <Avatar className="h-8 w-8 flex-shrink-0">
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs font-semibold">
                 Moi
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1 flex gap-3 items-end">
+            <div className="flex-1 flex gap-2 items-end">
               <Textarea
-                placeholder="Ajouter un commentaire..."
+                placeholder="Votre commentaire..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[60px] resize-none flex-1"
+                className="min-h-[44px] max-h-24 resize-none flex-1 text-sm"
+                rows={2}
               />
               
               <Button 
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim() || isLoading}
                 size="icon"
-                className="rounded-full h-10 w-10 flex-shrink-0"
+                className="rounded-full h-11 w-11 flex-shrink-0 bg-gradient-primary hover:opacity-90"
               >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }
