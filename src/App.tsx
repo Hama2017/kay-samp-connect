@@ -69,7 +69,7 @@ const App = () => (
                 <CreatePost />
               </ProtectedRoute>
             } />
-            <Route path="space/:spaceId/create-post" element={
+            <Route path="create/:spaceId" element={
               <ProtectedRoute>
                 <CreatePost />
               </ProtectedRoute>

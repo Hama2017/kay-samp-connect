@@ -182,7 +182,7 @@ export default function SpaceDetail() {
             
             <Button 
               variant="outline" 
-              onClick={() => navigate(`/create-post?spaceId=${spaceId}`)}
+              onClick={() => navigate(`/create/${spaceId}`)}
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
