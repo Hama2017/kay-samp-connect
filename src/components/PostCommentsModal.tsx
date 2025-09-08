@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { MessageCircle, ChevronUp, ChevronDown, Eye, Send, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { MessageCircle, ChevronUp, ChevronDown, Eye, Send, X, Image } from "lucide-react";
 import { 
   Drawer, 
   DrawerContent, 
@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useComments, Comment } from "@/hooks/useComments";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { useIsMobile } from "@/hooks/use-mobile";
+import GifSelector from "@/components/GifSelector";
 
 interface Post {
   id: string;
@@ -54,6 +55,8 @@ interface PostCommentsModalProps {
 
 export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalProps) {
   const [newComment, setNewComment] = useState("");
+  const [selectedGif, setSelectedGif] = useState<string | null>(null);
+  const [showGifSelector, setShowGifSelector] = useState(false);
   const { comments, isLoading, fetchComments, createComment } = useComments();
   const isMobile = useIsMobile();
 
@@ -66,17 +69,25 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
   if (!post) return null;
 
   const handleSubmitComment = async () => {
-    if (newComment.trim() && post?.id) {
+    if ((newComment.trim() || selectedGif) && post?.id) {
       try {
         await createComment({
           postId: post.id,
-          content: newComment.trim()
+          content: newComment.trim() || "",
+          gifUrl: selectedGif || undefined
         });
         setNewComment("");
+        setSelectedGif(null);
+        setShowGifSelector(false);
       } catch (error) {
         console.error("Error creating comment:", error);
       }
     }
+  };
+
+  const handleGifSelect = (gifUrl: string) => {
+    setSelectedGif(gifUrl);
+    setShowGifSelector(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -209,6 +220,20 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                       {comment.content}
                     </p>
                     
+                    {/* Afficher les médias du commentaire (GIFs) */}
+                    {comment.comment_media && comment.comment_media.length > 0 && (
+                      <div className="mb-2">
+                        {comment.comment_media.map((media) => (
+                          <img
+                            key={media.id}
+                            src={media.media_url}
+                            alt="Comment GIF"
+                            className="max-w-full h-auto rounded-md max-h-32"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
                     {/* Votes pour commentaires - plus compacts */}
                     <div className="flex items-center gap-2">
                       <Button 
@@ -243,6 +268,28 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
 
         {/* Zone d'ajout de commentaire - fixe en bas */}
         <div className="flex-shrink-0 p-4 pt-3 border-t bg-background/95 backdrop-blur-sm">
+          {/* Prévisualisation du GIF sélectionné */}
+          {selectedGif && (
+            <div className="mb-3 p-2 border rounded-md bg-muted/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">GIF sélectionné:</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedGif(null)}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <img
+                src={selectedGif}
+                alt="GIF sélectionné"
+                className="max-w-full h-auto rounded-md max-h-20"
+              />
+            </div>
+          )}
+          
           <div className="flex gap-3 items-end">
             <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs font-semibold">
@@ -251,17 +298,33 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
             </Avatar>
             
             <div className="flex-1 flex gap-2 items-end">
-              <Textarea
-                placeholder="Votre commentaire..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[44px] max-h-24 resize-none flex-1 text-sm"
-                rows={2}
-              />
+              <div className="flex-1">
+                <Textarea
+                  placeholder="Votre commentaire..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="min-h-[44px] max-h-24 resize-none text-sm"
+                  rows={2}
+                />
+                
+                {/* Bouton pour ouvrir le sélecteur de GIF */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGifSelector(true)}
+                    className="h-8 px-2 text-muted-foreground hover:text-primary"
+                  >
+                    <Image className="h-4 w-4 mr-1" />
+                    GIF
+                  </Button>
+                </div>
+              </div>
               
               <Button 
                 onClick={handleSubmitComment}
-                disabled={!newComment.trim() || isLoading}
+                disabled={(!newComment.trim() && !selectedGif) || isLoading}
                 size="icon"
                 className="rounded-full h-11 w-11 flex-shrink-0 bg-gradient-primary hover:opacity-90"
               >
@@ -270,6 +333,13 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
             </div>
           </div>
         </div>
+        
+        {/* Sélecteur de GIF */}
+        <GifSelector
+          isOpen={showGifSelector}
+          onClose={() => setShowGifSelector(false)}
+          onSelectGif={handleGifSelect}
+        />
       </DrawerContent>
     </Drawer>
   );

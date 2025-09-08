@@ -102,6 +102,36 @@ export type Database = {
           },
         ]
       }
+      comment_media: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          media_order: number
+          media_type: string
+          media_url: string
+          thumbnail_url: string | null
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          media_order?: number
+          media_type: string
+          media_url: string
+          thumbnail_url?: string | null
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          media_order?: number
+          media_type?: string
+          media_url?: string
+          thumbnail_url?: string | null
+        }
+        Relationships: []
+      }
       comment_votes: {
         Row: {
           comment_id: string

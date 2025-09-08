@@ -21,6 +21,12 @@ export interface Comment {
     profile_picture_url?: string;
     is_verified?: boolean;
   };
+  comment_media?: Array<{
+    id: string;
+    media_url: string;
+    media_type: string;
+    media_order: number;
+  }>;
   replies?: Comment[];
 }
 
@@ -45,6 +51,12 @@ export function useComments() {
             username,
             profile_picture_url,
             is_verified
+          ),
+          comment_media (
+            id,
+            media_url,
+            media_type,
+            media_order
           )
         `)
         .eq('post_id', postId)
@@ -53,12 +65,12 @@ export function useComments() {
       if (error) throw error;
 
       // Organize comments into threads (parent comments with their replies)
-      const parentComments = data?.filter(comment => !comment.parent_comment_id) || [];
-      const childComments = data?.filter(comment => comment.parent_comment_id) || [];
+      const parentComments = (data as any)?.filter((comment: any) => !comment.parent_comment_id) || [];
+      const childComments = (data as any)?.filter((comment: any) => comment.parent_comment_id) || [];
 
-      const organizedComments = parentComments.map(parent => ({
+      const organizedComments: Comment[] = parentComments.map((parent: any) => ({
         ...parent,
-        replies: childComments.filter(child => child.parent_comment_id === parent.id)
+        replies: childComments.filter((child: any) => child.parent_comment_id === parent.id)
       }));
 
       setComments(organizedComments);
@@ -74,6 +86,7 @@ export function useComments() {
     postId: string;
     content: string;
     parentCommentId?: string;
+    gifUrl?: string;
   }) => {
     if (!user) throw new Error('User must be authenticated');
 
@@ -86,18 +99,31 @@ export function useComments() {
           content: data.content,
           parent_comment_id: data.parentCommentId
         })
-        .select(`
-          *,
-          profiles (
-            id,
-            username,
-            profile_picture_url,
-            is_verified
-          )
-        `)
+        .select('id')
         .single();
 
       if (error) throw error;
+
+      // Si un GIF est sélectionné, l'ajouter comme média
+      if (data.gifUrl && newComment) {
+        const { error: mediaError } = await supabase
+          .from('comment_media')
+          .insert([{
+            comment_id: newComment.id,
+            media_url: data.gifUrl,
+            media_type: 'image', // Les GIFs sont traités comme des images
+            media_order: 0
+          }]);
+
+        if (mediaError) {
+          console.error("Error adding comment media:", mediaError);
+          toast({
+            title: "Attention",
+            description: "Commentaire créé mais le GIF n'a pas pu être ajouté",
+            variant: "destructive"
+          });
+        }
+      }
 
       toast({
         title: "Commentaire ajouté !",
