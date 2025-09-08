@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { X, Image, Video, Play } from "lucide-react";
+import { X, Image, Video, Play, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useAuth } from "@/contexts/AuthContext";
+import GifSelector from "@/components/GifSelector";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function CreatePost() {
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [currentSpace, setCurrentSpace] = useState<any>(null);
+  const [isGifSelectorOpen, setIsGifSelectorOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Load space details if in a space
@@ -68,6 +70,24 @@ export default function CreatePost() {
       URL.revokeObjectURL(prev[index]); // Clean up memory
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  const handleGifSelect = async (gifUrl: string) => {
+    try {
+      // Télécharger le GIF et le convertir en File
+      const response = await fetch(gifUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `gif-${Date.now()}.gif`, { type: 'image/gif' });
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        selectedFiles: [...prev.selectedFiles, file] 
+      }));
+      
+      setPreviewUrls(prev => [...prev, gifUrl]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du GIF:', error);
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -262,9 +282,26 @@ export default function CreatePost() {
                 </span>
               </Button>
             </label>
+            
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={() => setIsGifSelectorOpen(true)}
+              className="gap-3 hover:bg-primary/10 hover:text-primary border-2 border-dashed border-primary/30 hover:border-primary/60 px-6 py-3"
+            >
+              <FileImage className="h-5 w-5" />
+              GIF
+            </Button>
           </div>
         </div>
       </div>
+
+      <GifSelector
+        isOpen={isGifSelectorOpen}
+        onClose={() => setIsGifSelectorOpen(false)}
+        onSelectGif={handleGifSelect}
+      />
     </div>
   );
 }
