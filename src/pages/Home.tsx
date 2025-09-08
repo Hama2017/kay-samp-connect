@@ -10,6 +10,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { usePageTracking, useInteractionTracking } from "@/hooks/usePageTracking";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data for posts
 const mockPosts = [
@@ -127,6 +128,7 @@ const sortFilters = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { posts, isLoading, fetchPosts, votePost, incrementViews } = usePosts();
   const { spaces } = useSpaces();
   const { isBookmarked, toggleBookmark } = useRealBookmarks();
@@ -268,7 +270,12 @@ export default function Home() {
                      className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity"
                      onClick={(e) => {
                        e.stopPropagation();
-                       navigate(`/user/${post.profiles.username}`);
+                       // Redirect to own profile if it's the current user
+                       if (user?.profile?.username === post.profiles.username) {
+                         navigate('/profile');
+                       } else {
+                         navigate(`/user/${post.profiles.username}`);
+                       }
                      }}
                    >
                      <AvatarImage src={post.profiles.profile_picture_url} />
@@ -279,13 +286,18 @@ export default function Home() {
                    
                    <div>
                      <div className="flex items-center gap-2">
-                       <span 
-                         className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           navigate(`/user/${post.profiles.username}`);
-                         }}
-                       >
+                        <span 
+                          className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Redirect to own profile if it's the current user
+                            if (user?.profile?.username === post.profiles.username) {
+                              navigate('/profile');
+                            } else {
+                              navigate(`/user/${post.profiles.username}`);
+                            }
+                          }}
+                        >
                          @{post.profiles.username}
                        </span>
                        {post.profiles.is_verified && (

@@ -210,7 +210,7 @@ export function BookmarksList() {
   } = useRealBookmarks();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('post');
 
   const stats = getStats();
   
@@ -238,11 +238,10 @@ export function BookmarksList() {
     URL.revokeObjectURL(url);
   };
   
+  const postBookmarks = getBookmarksByType('post');
   const filteredBookmarks = searchQuery 
-    ? searchBookmarks(searchQuery)
-    : selectedCategory === 'all' 
-    ? bookmarks 
-    : getBookmarksByType(selectedCategory as any);
+    ? searchBookmarks(searchQuery).filter(b => b.item_type === 'post')
+    : postBookmarks;
 
   if (isLoading) {
     return <LoadingSpinner size="lg" text="Chargement de vos favoris..." />;
@@ -325,18 +324,9 @@ export function BookmarksList() {
 
       {/* Bookmarks List */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">
-            Tous ({stats.total})
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="post">
-            Posts ({stats.posts})
-          </TabsTrigger>
-          <TabsTrigger value="space">
-            Espaces ({stats.spaces})
-          </TabsTrigger>
-          <TabsTrigger value="user">
-            Utilisateurs ({stats.users})
+            Posts favoris ({stats.posts})
           </TabsTrigger>
         </TabsList>
 

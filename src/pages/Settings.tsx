@@ -143,25 +143,6 @@ export default function Settings() {
                 {/* Form */}
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Nom d'utilisateur</Label>
-                    <Input
-                      id="username"
-                      value={profileData.username}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, username: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profileData.phone}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="bio">Biographie</Label>
                     <Textarea
                       id="bio"
