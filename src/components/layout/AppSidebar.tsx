@@ -25,6 +25,13 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
   // Filter only subscribed spaces
   const subscribedSpaces = spaces.filter(space => space.is_subscribed);
   
+  console.log('AppSidebar debug:', { 
+    spacesTotal: spaces.length, 
+    subscribedSpaces: subscribedSpaces.length,
+    allSpaces: spaces,
+    filteredSpaces: subscribedSpaces 
+  });
+  
   if (!open) return null;
 
   return (
