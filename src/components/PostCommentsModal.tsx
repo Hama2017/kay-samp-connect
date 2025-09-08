@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, ChevronUp, ChevronDown, Eye, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,39 +6,36 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useComments, Comment } from "@/hooks/useComments";
 
 interface Post {
   id: string;
-  author: {
-    username: string;
-    profilePicture: string;
-    isVerified: boolean;
-  };
-  space: {
-    name: string;
+  author_id: string;
+  space_id?: string;
+  content: string;
+  title?: string;
+  created_at: string;
+  votes_up: number;
+  votes_down: number;
+  comments_count: number;
+  views_count: number;
+  hashtags?: string[];
+  // Relations
+  profiles: {
     id: string;
-  };
-  content: string;
-  image?: string;
-  publicationDate: string;
-  votesUp: number;
-  votesDown: number;
-  commentsCount: number;
-  viewsCount: number;
-  category: string;
-  hashtags: string[];
-}
-
-interface Comment {
-  id: string;
-  author: {
     username: string;
-    profilePicture: string;
-    isVerified: boolean;
+    profile_picture_url?: string;
+    is_verified?: boolean;
   };
-  content: string;
-  date: string;
-  likes: number;
+  spaces?: {
+    id: string;
+    name: string;
+  };
+  post_media?: Array<{
+    id: string;
+    media_url: string;
+    media_type: string;
+  }>;
 }
 
 interface PostCommentsModalProps {
@@ -47,53 +44,29 @@ interface PostCommentsModalProps {
   onClose: () => void;
 }
 
-// Mock comments data
-const mockComments: Comment[] = [
-  {
-    id: "1",
-    author: {
-      username: "MarieD",
-      profilePicture: "",
-      isVerified: true,
-    },
-    content: "Excellente analyse ! J'espère vraiment qu'ils vont jouer avec cette formation.",
-    date: "2024-03-15T09:15:00Z",
-    likes: 12,
-  },
-  {
-    id: "2",
-    author: {
-      username: "OusmaneSy",
-      profilePicture: "",
-      isVerified: false,
-    },
-    content: "Mané doit absolument être titulaire ! 🔥",
-    date: "2024-03-15T09:30:00Z",
-    likes: 8,
-  },
-  {
-    id: "3",
-    author: {
-      username: "AminaK",
-      profilePicture: "",
-      isVerified: false,
-    },
-    content: "Je pense que Sarr va faire la différence sur l'aile droite",
-    date: "2024-03-15T10:00:00Z",
-    likes: 5,
-  },
-];
-
 export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalProps) {
   const [newComment, setNewComment] = useState("");
+  const { comments, isLoading, fetchComments, createComment } = useComments();
+
+  useEffect(() => {
+    if (post?.id && isOpen) {
+      fetchComments(post.id);
+    }
+  }, [post?.id, isOpen, fetchComments]);
 
   if (!post) return null;
 
-  const handleSubmitComment = () => {
-    if (newComment.trim()) {
-      // Here you would typically send the comment to your backend
-      console.log("New comment:", newComment);
-      setNewComment("");
+  const handleSubmitComment = async () => {
+    if (newComment.trim() && post?.id) {
+      try {
+        await createComment({
+          postId: post.id,
+          content: newComment.trim()
+        });
+        setNewComment("");
+      } catch (error) {
+        console.error("Error creating comment:", error);
+      }
     }
   };
 
@@ -111,6 +84,8 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
     }
   };
 
+  const postImage = post.post_media?.[0]?.media_url;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[85vh] p-0">
@@ -122,23 +97,25 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
         <div className="px-6 py-4 border-b">
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={post.author.profilePicture} />
+              <AvatarImage src={post.profiles?.profile_picture_url || ""} />
               <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                {post.author.username.substring(0, 2).toUpperCase()}
+                {post.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-semibold text-sm">@{post.author.username}</span>
-                {post.author.isVerified && (
+                <span className="font-semibold text-sm">@{post.profiles?.username || "Unknown"}</span>
+                {post.profiles?.is_verified && (
                   <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
                     ✓
                   </Badge>
                 )}
-                <span className="text-xs text-muted-foreground">
-                  dans {post.space.name}
-                </span>
+                {post.spaces && (
+                  <span className="text-xs text-muted-foreground">
+                    dans {post.spaces.name}
+                  </span>
+                )}
               </div>
               
               {/* Contenu complet du post */}
@@ -147,10 +124,10 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               </p>
 
               {/* Image si présente */}
-              {post.image && (
+              {postImage && (
                 <div className="mb-3">
                   <img 
-                    src={post.image} 
+                    src={postImage} 
                     alt="Post image" 
                     className="rounded-lg max-w-full h-auto"
                   />
@@ -173,22 +150,22 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1 text-green-600">
                     <ChevronUp className="h-4 w-4" />
-                    {post.votesUp}
+                    {post.votes_up}
                   </span>
                   <span className="flex items-center gap-1 text-red-600">
                     <ChevronDown className="h-4 w-4" />
-                    {post.votesDown}
+                    {post.votes_down}
                   </span>
                 </div>
                 <span className="flex items-center gap-1 text-muted-foreground">
                   <MessageCircle className="h-4 w-4" />
-                  {post.commentsCount} commentaires
+                  {post.comments_count} commentaires
                 </span>
                 <span className="flex items-center gap-1 text-muted-foreground">
                   <Eye className="h-4 w-4" />
-                  {post.viewsCount} vues
+                  {post.views_count} vues
                 </span>
-                <span className="text-muted-foreground">{formatDate(post.publicationDate)}</span>
+                <span className="text-muted-foreground">{formatDate(post.created_at)}</span>
               </div>
             </div>
           </div>
@@ -197,53 +174,59 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
         {/* Comments List */}
         <ScrollArea className="flex-1 max-h-60">
           <div className="px-6 py-4 space-y-4">
-            {mockComments.map((comment) => (
-              <div key={comment.id} className="flex items-start gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={comment.author.profilePicture} />
-                  <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                    {comment.author.username.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm">@{comment.author.username}</span>
-                    {comment.author.isVerified && (
-                      <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                        ✓
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(comment.date)}
-                    </span>
-                  </div>
+            {isLoading ? (
+              <div className="text-center text-muted-foreground">Chargement des commentaires...</div>
+            ) : comments.length > 0 ? (
+              comments.map((comment) => (
+                <div key={comment.id} className="flex items-start gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
+                    <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                      {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
+                    </AvatarFallback>
+                  </Avatar>
                   
-                  <p className="text-sm text-foreground mb-2 leading-relaxed">
-                    {comment.content}
-                  </p>
-                  
-                  {/* Boutons Up/Down pour les commentaires */}
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-6 px-2 text-xs hover:text-green-600"
-                    >
-                      <ChevronUp className="h-3 w-3" />
-                    </Button>
-                    <span className="text-xs text-muted-foreground">{comment.likes}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-6 px-2 text-xs hover:text-red-600"
-                    >
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm">@{comment.profiles?.username || "Unknown"}</span>
+                      {comment.profiles?.is_verified && (
+                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                          ✓
+                        </Badge>
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(comment.created_at)}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm text-foreground mb-2 leading-relaxed">
+                      {comment.content}
+                    </p>
+                    
+                    {/* Boutons Up/Down pour les commentaires */}
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-6 px-2 text-xs hover:text-green-600"
+                      >
+                        <ChevronUp className="h-3 w-3" />
+                      </Button>
+                      <span className="text-xs text-muted-foreground">{comment.votes_up}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-6 px-2 text-xs hover:text-red-600"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="text-center text-muted-foreground">Aucun commentaire pour le moment</div>
+            )}
           </div>
         </ScrollArea>
 
@@ -266,7 +249,7 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               
               <Button 
                 onClick={handleSubmitComment}
-                disabled={!newComment.trim()}
+                disabled={!newComment.trim() || isLoading}
                 size="icon"
                 className="rounded-full h-10 w-10 flex-shrink-0"
               >
