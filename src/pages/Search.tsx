@@ -21,7 +21,7 @@ const categories = [
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { query, setQuery, filters, setFilters, searchResults, isSearching } = useSearch();
+  const { query, setQuery, filters, setFilters, searchResults, isSearching, isLoading: searchLoading } = useSearch();
   
   const [localQuery, setLocalQuery] = useState(query);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +100,7 @@ export default function Search() {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <div className="container mx-auto px-4 py-6 max-w-4xl animate-fade-in-up">
+      <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl animate-fade-in-up overflow-hidden">
         {/* Barre de recherche */}
         <Card className="mb-6 shadow-warm">
           <CardContent className="p-4 sm:p-6">
@@ -175,7 +175,7 @@ export default function Search() {
         </Card>
 
         {/* Résultats */}
-        {isLoading ? (
+        {searchLoading ? (
           <div className="space-y-6">
             <LoadingSpinner size="lg" text="Recherche en cours..." />
             <FeedSkeleton />
@@ -227,7 +227,7 @@ export default function Search() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold text-foreground">Posts populaires</h3>
                       {searchResults.posts.slice(0, 3).map((post) => (
-                        <Card key={post.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                         <Card key={post.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
                           <CardContent className="p-4" onClick={() => handlePostClick(post.id)}>
                             <div className="flex items-start space-x-3">
                               <Avatar className="h-10 w-10 ring-2 ring-primary/10">
@@ -245,7 +245,7 @@ export default function Search() {
                                   <span className="text-muted-foreground hidden sm:inline">•</span>
                                   <Badge variant="outline" className="text-xs">{post.category}</Badge>
                                 </div>
-                                <p className="text-sm text-foreground leading-relaxed">{post.content}</p>
+                                <p className="text-sm text-foreground leading-relaxed break-words">{post.content}</p>
                                 <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     👍 {post.votesUp}
@@ -318,8 +318,8 @@ export default function Search() {
                           <CardContent className="p-4" onClick={() => handleUserClick(user.username)}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                <Avatar className="h-12 w-12 ring-2 ring-primary/10">
-                                <AvatarImage src="" />
+                <Avatar className="h-12 w-12 ring-2 ring-primary/10">
+                                <AvatarImage src={user.profilePicture} />
                                 <AvatarFallback className="bg-gradient-primary text-white">
                                     {user.username[0]?.toUpperCase()}
                                   </AvatarFallback>
