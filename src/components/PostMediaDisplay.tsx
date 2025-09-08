@@ -32,24 +32,16 @@ export default function PostMediaDisplay({
     const { media_url, media_type } = mediaItem;
 
     switch (media_type) {
+      case 'gif':
       case 'image':
         return (
           <img 
             src={media_url}
             alt="Post media" 
             className={cn("rounded-lg w-full object-cover", maxHeight, className)}
-          />
-        );
-      
-      case 'gif':
-        return (
-          <img 
-            src={media_url}
-            alt="Post GIF" 
-            className={cn("rounded-lg w-full object-cover", maxHeight, className)}
             loading="lazy"
             onError={(e) => {
-              console.error('GIF loading error:', media_url);
+              console.error('Media loading error:', media_url);
               e.currentTarget.style.display = 'none';
             }}
           />

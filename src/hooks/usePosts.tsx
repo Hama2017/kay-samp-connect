@@ -153,7 +153,7 @@ export function usePosts() {
           // Vérifier si c'est un GIF depuis une URL (Giphy)
           if (file.isGifUrl) {
             mediaUrl = file.url;
-            mediaType = 'gif';
+            mediaType = 'image'; // Les GIFs sont traités comme des images
             console.log('GIF depuis URL:', { mediaUrl, mediaType });
           } else {
             // Upload normal du fichier
@@ -183,7 +183,7 @@ export function usePosts() {
             if (file.type && file.type.startsWith('video/')) {
               mediaType = 'video';
             } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
-              mediaType = 'gif';
+              mediaType = 'image'; // Les GIFs sont traités comme des images
             } else if (file.type && file.type.startsWith('image/')) {
               mediaType = 'image';
             }
