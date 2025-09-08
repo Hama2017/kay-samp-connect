@@ -91,7 +91,7 @@ export default function Home() {
   }, [posts, selectedCategory]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+    <div className="min-h-screen w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
       {/* Welcome section */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
