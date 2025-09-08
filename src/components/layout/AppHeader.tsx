@@ -1,12 +1,10 @@
-import { Search, Menu, Bell, Settings } from "lucide-react";
+import { Search, Menu, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNotifications } from "@/hooks/useNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +21,6 @@ interface AppHeaderProps {
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { unreadCount } = useNotifications();
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -51,7 +48,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </div>
         </div>
 
-        {/* Right side - Search and Notifications */}
+        {/* Right side - Search */}
         <div className="flex items-center gap-2">
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -65,21 +62,6 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           
           {/* Theme Toggle */}
           <ThemeToggle />
-
-          {/* Notifications */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/notifications')}
-            className="relative hover:bg-primary/5"
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
-                {unreadCount}
-              </Badge>
-            )}
-          </Button>
           
           {/* User Profile */}
           <DropdownMenu>

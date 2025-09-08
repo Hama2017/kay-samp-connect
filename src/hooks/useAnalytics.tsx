@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface AnalyticsEvent {
   id: string;
   type: 'page_view' | 'post_create' | 'post_like' | 'post_share' | 'comment_create' | 
-        'space_join' | 'space_create' | 'user_follow' | 'search' | 'notification_read' |
+        'space_join' | 'space_create' | 'user_follow' | 'search' |
         'session_end' | 'click';
   timestamp: Date;
   metadata?: Record<string, any>;

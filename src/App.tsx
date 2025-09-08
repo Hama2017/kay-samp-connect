@@ -16,7 +16,6 @@ import CreatePost from "./pages/CreatePost";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
-import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
 import Login from "./pages/Login";
@@ -58,7 +57,6 @@ const App = () => (
               <Route path="trending" element={<Trending />} />
               <Route path="profile" element={<Profile />} />
               <Route path="user/:username" element={<UserProfile />} />
-              <Route path="notifications" element={<Notifications />} />
               <Route path="space/:spaceId" element={<SpaceDetail />} />
               <Route path="settings" element={<Settings />} />
               <Route path="search" element={<Search />} />

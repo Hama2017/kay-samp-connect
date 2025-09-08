@@ -15,7 +15,7 @@ import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BookmarksList } from "@/components/bookmarks/BookmarksList";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, Bookmark } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Eye, Settings as SettingsIcon, Users, Palette, Bookmark } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, signOut } = useAuth();
@@ -25,13 +25,6 @@ export default function Settings() {
   
   const [profileData, setProfileData] = useState({
     bio: user?.profile?.bio || ""
-  });
-
-  const [notifications, setNotifications] = useState({
-    newPosts: true,
-    comments: true,
-    follows: true,
-    mentions: true
   });
 
   const [privacy, setPrivacy] = useState({
@@ -91,11 +84,10 @@ export default function Settings() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="bookmarks">Favoris</TabsTrigger>
             <TabsTrigger value="appearance">Thème</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
           </TabsList>
 
@@ -262,84 +254,6 @@ export default function Settings() {
                         </span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Préférences de notifications
-                </CardTitle>
-                <CardDescription>
-                  Choisissez quand vous souhaitez être notifié
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Nouveaux posts</p>
-                      <p className="text-sm text-muted-foreground">
-                        Des espaces auxquels vous êtes abonné
-                      </p>
-                    </div>
-                    <Switch
-                      checked={notifications.newPosts}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, newPosts: checked }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Commentaires</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quand quelqu'un commente vos posts
-                      </p>
-                    </div>
-                    <Switch
-                      checked={notifications.comments}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, comments: checked }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Nouveaux abonnés</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quand quelqu'un vous suit
-                      </p>
-                    </div>
-                    <Switch
-                      checked={notifications.follows}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, follows: checked }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Mentions</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quand quelqu'un vous mentionne
-                      </p>
-                    </div>
-                    <Switch
-                      checked={notifications.mentions}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, mentions: checked }))
-                      }
-                    />
                   </div>
                 </div>
               </CardContent>
