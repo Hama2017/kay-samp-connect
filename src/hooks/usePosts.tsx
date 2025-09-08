@@ -203,6 +203,7 @@ export function usePosts() {
             
           if (mediaError) {
             console.error('Erreur insertion post_media:', mediaError);
+            throw mediaError; // Arrêter si erreur
           } else {
             console.log('Média sauvegardé avec succès');
           }
