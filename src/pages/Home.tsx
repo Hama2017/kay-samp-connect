@@ -91,7 +91,7 @@ export default function Home() {
   }, [posts, selectedCategory]);
 
   return (
-    <div className="min-h-screen w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
+    <div className="min-h-screen w-full max-w-2xl mx-auto px-4 py-2 sm:py-6 overflow-x-hidden">
       {/* Welcome section */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
@@ -103,7 +103,7 @@ export default function Home() {
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-3 sm:mb-4 scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-3 sm:mb-4 scrollbar-hide">
         {categories.map((category) => (
           <Button
             key={category}
@@ -118,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* Sort filters */}
-      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 sm:mb-6 scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 sm:mb-6 scrollbar-hide">
         {sortFilters.map((filter) => {
           const Icon = filter.icon;
           return (
@@ -131,7 +131,7 @@ export default function Home() {
             >
               <Icon className="h-3 w-3" />
               <span className="hidden xs:inline">{filter.label}</span>
-              <span className="xs:hidden">{filter.label.split(' ')[1] || filter.label}</span>
+              <span className="xs:hidden">{filter.label.split(" ")[1] || filter.label}</span>
             </Button>
           );
         })}
