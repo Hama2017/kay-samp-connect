@@ -700,6 +700,10 @@ export type Database = {
         Args: { email_input: string }
         Returns: boolean
       }
+      increment_post_views: {
+        Args: { post_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

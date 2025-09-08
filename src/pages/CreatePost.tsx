@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { usePosts } from "@/hooks/usePosts";
+import { useSpaces } from "@/hooks/useSpaces";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function CreatePost() {
   const navigate = useNavigate();
   const { spaceId } = useParams();
   const location = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { createPost, isLoading } = usePosts();
+  const { getSpaceById } = useSpaces();
   
   // Déterminer si on est dans un espace spécifique
   const isInSpace = Boolean(spaceId);
@@ -22,7 +28,17 @@ export default function CreatePost() {
   });
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [currentSpace, setCurrentSpace] = useState<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load space details if in a space
+  useState(() => {
+    if (spaceId) {
+      getSpaceById(spaceId).then(space => {
+        setCurrentSpace(space);
+      }).catch(console.error);
+    }
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,7 +70,7 @@ export default function CreatePost() {
     });
   };
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
     if (!formData.content.trim()) {
@@ -66,16 +82,34 @@ export default function CreatePost() {
       return;
     }
 
-    toast({
-      title: "Post créé !",
-      description: `Votre post a été publié ${isInSpace ? `dans l'espace ${spaceName}` : `dans l'espace Général`}`,
-    });
+    if (!user) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être connecté pour publier",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Rediriger vers l'espace ou l'accueil
-    if (isInSpace) {
-      navigate(`/space/${spaceId}`);
-    } else {
-      navigate("/");
+    try {
+      // Extract hashtags from content
+      const hashtags = formData.content.match(/#\w+/g) || [];
+      
+      await createPost({
+        content: formData.content,
+        space_id: spaceId,
+        hashtags,
+        media_files: formData.selectedFiles.length > 0 ? formData.selectedFiles : undefined
+      });
+
+      // Rediriger vers l'espace ou l'accueil
+      if (isInSpace) {
+        navigate(`/space/${spaceId}`);
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
     }
   };
 
@@ -92,18 +126,18 @@ export default function CreatePost() {
             Annuler
           </Button>
           
-          {isInSpace && (
+          {isInSpace && currentSpace && (
             <div className="text-sm text-muted-foreground">
-              Publication dans <span className="font-medium text-foreground">{spaceName}</span>
+              Publication dans <span className="font-medium text-foreground">{currentSpace.name}</span>
             </div>
           )}
           
           <Button 
             onClick={() => handleSubmit()}
             className="px-6 font-medium"
-            disabled={!formData.content.trim()}
+            disabled={!formData.content.trim() || isLoading}
           >
-            Publier
+            {isLoading ? "Publication..." : "Publier"}
           </Button>
         </div>
       </div>
@@ -114,8 +148,10 @@ export default function CreatePost() {
           {/* User Avatar and Input */}
           <div className="flex gap-3">
             <Avatar className="h-12 w-12 flex-shrink-0">
-              <AvatarImage src="/placeholder-avatar.jpg" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage src={user?.profile?.profile_picture_url} />
+              <AvatarFallback>
+                {user?.profile?.username?.substring(0, 2).toUpperCase() || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="relative">

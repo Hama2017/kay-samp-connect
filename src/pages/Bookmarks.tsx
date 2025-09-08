@@ -2,9 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BookmarksList } from "@/components/bookmarks/BookmarksList";
+import { usePageTracking } from "@/hooks/usePageTracking";
 
 export default function Bookmarks() {
   const navigate = useNavigate();
+
+  // Track page view
+  usePageTracking();
 
   return (
     <div className="min-h-screen bg-background">

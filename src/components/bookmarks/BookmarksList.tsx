@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { useBookmarks, BookmarkedItem } from '@/hooks/useBookmarks';
+import { useRealBookmarks, RealBookmark } from '@/hooks/useRealBookmarks';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
@@ -46,13 +46,13 @@ import { EmptyState } from '@/components/EmptyState';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 interface BookmarkItemCardProps {
-  bookmark: BookmarkedItem;
-  onRemove: (id: string) => void;
+  bookmark: RealBookmark;
+  onRemove: (id: string, itemType: string) => void;
 }
 
 function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
   const getIcon = () => {
-    switch (bookmark.type) {
+    switch (bookmark.item_type) {
       case 'post':
         return <FileText className="h-4 w-4" />;
       case 'space':
@@ -63,7 +63,7 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
   };
 
   const getMetadata = () => {
-    switch (bookmark.type) {
+    switch (bookmark.item_type) {
       case 'post':
         return (
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -122,17 +122,17 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
       <CardContent className="p-4">
         <div className="flex gap-3">
           {/* Thumbnail/Avatar */}
-          {bookmark.type === 'user' ? (
+          {bookmark.item_type === 'user' ? (
             <Avatar className="h-12 w-12">
-              <AvatarImage src={bookmark.thumbnail} alt={bookmark.title} />
+              <AvatarImage src={bookmark.thumbnail_url} alt={bookmark.title} />
               <AvatarFallback>
                 {bookmark.title.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-          ) : bookmark.thumbnail ? (
+          ) : bookmark.thumbnail_url ? (
             <div 
               className="w-12 h-12 bg-muted rounded-lg bg-cover bg-center flex-shrink-0"
-              style={{ backgroundImage: `url(${bookmark.thumbnail})` }}
+              style={{ backgroundImage: `url(${bookmark.thumbnail_url})` }}
             />
           ) : (
             <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -161,7 +161,7 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onRemove(bookmark.id)}>
+                  <DropdownMenuItem onClick={() => onRemove(bookmark.item_id, bookmark.item_type)}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Supprimer
                   </DropdownMenuItem>
@@ -175,19 +175,7 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
               </p>
             )}
 
-            {bookmark.author && (
-              <div className="flex items-center gap-2 mb-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarImage src={bookmark.author.avatar} />
-                  <AvatarFallback className="text-xs">
-                    {bookmark.author.name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">
-                  {bookmark.author.name}
-                </span>
-              </div>
-            )}
+            {/* Author info would go here if available in metadata */}
 
             {getMetadata()}
 
@@ -198,7 +186,7 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
                 </Badge>
               )}
               <span className="text-xs text-muted-foreground">
-                Ajouté {formatDistanceToNow(bookmark.bookmarkedAt, { 
+                Ajouté {formatDistanceToNow(new Date(bookmark.created_at), { 
                   addSuffix: true, 
                   locale: fr 
                 })}
@@ -217,22 +205,44 @@ export function BookmarksList() {
     isLoading,
     removeBookmark,
     getBookmarksByType,
-    searchBookmarks,
     clearAllBookmarks,
-    exportBookmarks,
     getStats
-  } = useBookmarks();
+  } = useRealBookmarks();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const stats = getStats();
   
+  // Simple search function
+  const searchBookmarks = (query: string) => {
+    const lowercaseQuery = query.toLowerCase();
+    return bookmarks.filter(b => 
+      b.title.toLowerCase().includes(lowercaseQuery) ||
+      b.description?.toLowerCase().includes(lowercaseQuery)
+    );
+  };
+
+  // Export function
+  const exportBookmarks = () => {
+    const dataStr = JSON.stringify(bookmarks, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kaaysamp-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  
   const filteredBookmarks = searchQuery 
     ? searchBookmarks(searchQuery)
     : selectedCategory === 'all' 
     ? bookmarks 
-    : getBookmarksByType(selectedCategory as BookmarkedItem['type']);
+    : getBookmarksByType(selectedCategory as any);
 
   if (isLoading) {
     return <LoadingSpinner size="lg" text="Chargement de vos favoris..." />;

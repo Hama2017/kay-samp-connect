@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Users, Hash, Plus, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSpaces } from "@/hooks/useSpaces";
+import { usePageTracking } from "@/hooks/usePageTracking";
 
 // Mock data for popular spaces
 const mockSpaces = [
@@ -62,16 +64,30 @@ const sortOptions = [
 
 export default function Discover() {
   const navigate = useNavigate();
+  const { spaces, isLoading, fetchSpaces, subscribeToSpace, unsubscribeFromSpace } = useSpaces();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [sortBy, setSortBy] = useState("popular");
 
-  const filteredSpaces = mockSpaces.filter((space) => {
-    const matchesSearch = space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         space.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "Tous" || space.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Track page view
+  usePageTracking();
+
+  // Fetch spaces on component mount and when filters change
+  useEffect(() => {
+    fetchSpaces({
+      category: selectedCategory,
+      search: searchQuery,
+      sort_by: sortBy as any
+    });
+  }, [fetchSpaces, selectedCategory, searchQuery, sortBy]);
+
+  const handleSubscriptionToggle = async (space: any) => {
+    if (space.is_subscribed) {
+      await unsubscribeFromSpace(space.id);
+    } else {
+      await subscribeToSpace(space.id);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -133,79 +149,88 @@ export default function Discover() {
 
       {/* Spaces list */}
       <div className="space-y-4">
-        {filteredSpaces.map((space) => (
-          <Card 
-            key={space.id} 
-            className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
-            onClick={() => navigate(`/space/${space.id}`)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Hash className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {space.name}
-                      </h3>
-                      {space.isVerified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓ Certifié
-                        </Badge>
-                      )}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement des espaces...</p>
+          </div>
+        ) : spaces.length === 0 ? (
+          <div className="text-center py-12">
+            <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold text-foreground mb-2">Aucun espace trouvé</h3>
+            <p className="text-muted-foreground">
+              Essayez avec d'autres mots-clés ou explorez d'autres catégories
+            </p>
+          </div>
+        ) : (
+          spaces.map((space) => (
+            <Card 
+              key={space.id} 
+              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+              onClick={() => navigate(`/space/${space.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Hash className="h-6 w-6 text-primary-foreground" />
                     </div>
                     
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Badge variant="outline" className="text-xs">
-                        {space.category}
-                      </Badge>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        <span>{space.subscribersCount}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-foreground truncate">
+                          {space.name}
+                        </h3>
+                        {space.is_verified && (
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                            ✓ Certifié
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant="outline" className="text-xs">
+                          {space.category}
+                        </Badge>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          <span>{space.subscribers_count}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  
+                  <Button
+                    variant={space.is_subscribed ? "outline" : "senegal"}
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubscriptionToggle(space);
+                    }}
+                  >
+                    {space.is_subscribed ? (
+                      "Abonné"
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-1" />
+                        S'abonner
+                      </>
+                    )}
+                  </Button>
                 </div>
-                
-                <Button
-                  variant={space.isSubscribed ? "outline" : "senegal"}
-                  size="sm"
-                  className="flex-shrink-0"
-                >
-                  {space.isSubscribed ? (
-                    "Abonné"
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-1" />
-                      S'abonner
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {space.description}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {space.description || "Aucune description disponible"}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
-
-      {filteredSpaces.length === 0 && (
-        <div className="text-center py-12">
-          <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold text-foreground mb-2">Aucun espace trouvé</h3>
-          <p className="text-muted-foreground">
-            Essaie avec d'autres mots-clés ou explore d'autres catégories
-          </p>
-        </div>
-      )}
     </div>
   );
 }

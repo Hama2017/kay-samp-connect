@@ -216,12 +216,7 @@ export function usePosts() {
 
   const incrementViews = useCallback(async (postId: string) => {
     try {
-      const { error } = await supabase
-        .from('posts')
-        .update({ views_count: supabase.raw('views_count + 1') })
-        .eq('id', postId);
-      
-      if (error) throw error;
+      await supabase.rpc('increment_post_views', { post_id: postId });
     } catch (err) {
       console.error('Error incrementing views:', err);
     }

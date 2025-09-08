@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
-import { useNotifications, Notification } from "@/hooks/useNotifications";
+import { useRealNotifications } from "@/hooks/useRealNotifications";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -31,7 +31,7 @@ import {
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
-const getNotificationIcon = (type: Notification['type']) => {
+const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'like':
       return <Heart className="h-4 w-4 text-red-500" />;
@@ -51,7 +51,7 @@ const getNotificationIcon = (type: Notification['type']) => {
 };
 
 interface NotificationItemProps {
-  notification: Notification;
+  notification: any;
   onMarkAsRead: (id: string) => void;
   onDelete: (id: string) => void;
   onClick?: () => void;
@@ -75,12 +75,12 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onClick }: Not
   return (
     <div 
       className={`flex items-start gap-3 p-4 rounded-lg border transition-colors cursor-pointer hover:bg-muted/50 relative ${
-        !notification.isRead ? 'bg-primary/5 border-primary/20' : 'bg-background'
+        !notification.is_read ? 'bg-primary/5 border-primary/20' : 'bg-background'
       }`}
       onClick={handleClick}
     >
       {/* Unread indicator */}
-      {!notification.isRead && (
+      {!notification.is_read && (
         <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary rounded-full" />
       )}
 
@@ -90,11 +90,11 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onClick }: Not
       </div>
 
       {/* Avatar (if user notification) */}
-      {notification.userAvatar && (
+      {notification.actor_profile && (
         <Avatar className="h-10 w-10">
-          <AvatarImage src={notification.userAvatar} alt={notification.userName} />
+          <AvatarImage src={notification.actor_profile.profile_picture_url} alt={notification.actor_profile.username} />
           <AvatarFallback>
-            {notification.userName?.substring(0, 2).toUpperCase()}
+            {notification.actor_profile.username?.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
@@ -103,14 +103,14 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onClick }: Not
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <p className={`text-sm ${!notification.isRead ? 'font-semibold' : 'font-medium'}`}>
+            <p className={`text-sm ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
               {notification.title}
             </p>
             <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
               {notification.message}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: fr })}
+              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: fr })}
             </p>
           </div>
 
@@ -122,7 +122,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete, onClick }: Not
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {!notification.isRead && (
+              {!notification.is_read && (
                 <DropdownMenuItem 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -161,10 +161,10 @@ export default function Notifications() {
     markAllAsRead, 
     deleteNotification,
     fetchNotifications 
-  } = useNotifications();
+  } = useRealNotifications();
 
-  const unreadNotifications = notifications.filter(n => !n.isRead);
-  const readNotifications = notifications.filter(n => n.isRead);
+  const unreadNotifications = notifications.filter(n => !n.is_read);
+  const readNotifications = notifications.filter(n => n.is_read);
 
   if (isLoading) {
     return (

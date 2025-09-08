@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -6,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
 import { useNavigate } from "react-router-dom";
+import { usePosts } from "@/hooks/usePosts";
+import { useSpaces } from "@/hooks/useSpaces";
+import { useRealBookmarks } from "@/hooks/useRealBookmarks";
+import { usePageTracking, useInteractionTracking } from "@/hooks/usePageTracking";
 
 // Mock data for posts
 const mockPosts = [
@@ -123,15 +127,35 @@ const sortFilters = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { posts, isLoading, fetchPosts, votePost, incrementViews } = usePosts();
+  const { spaces } = useSpaces();
+  const { isBookmarked, toggleBookmark } = useRealBookmarks();
+  const { trackClick, trackLike, trackShare } = useInteractionTracking();
+  
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [selectedFilter, setSelectedFilter] = useState("recent");
-  const [selectedPost, setSelectedPost] = useState<typeof mockPosts[0] | null>(null);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  const handlePostClick = (post: typeof mockPosts[0]) => {
+  // Fetch posts on component mount
+  useEffect(() => {
+    fetchPosts({ sort_by: selectedFilter as any });
+  }, [fetchPosts, selectedFilter]);
+
+  // Track page view
+  usePageTracking();
+
+  const handlePostClick = (post: any) => {
     setSelectedPost(post);
     setIsCommentsOpen(true);
+    incrementViews(post.id);
+    trackClick('post_view', { postId: post.id });
+  };
+
+  const handleVote = async (postId: string, voteType: 'up' | 'down') => {
+    await votePost(postId, voteType);
+    trackLike(postId, { voteType });
   };
 
   const handleCloseComments = () => {
@@ -161,23 +185,13 @@ export default function Home() {
   };
 
   const filteredAndSortedPosts = useMemo(() => {
-    let posts = selectedCategory === "Tous" 
-      ? mockPosts 
-      : mockPosts.filter(post => post.category === selectedCategory);
+    let filteredPosts = selectedCategory === "Tous" 
+      ? posts 
+      : posts.filter(post => post.spaces?.name === selectedCategory);
     
-    switch (selectedFilter) {
-      case "recent":
-        return posts.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
-      case "viral":
-        return posts.sort((a, b) => (b.votesUp + b.viewsCount) - (a.votesUp + a.viewsCount));
-      case "popular":
-        return posts.sort((a, b) => b.votesUp - a.votesUp);
-      case "discussed":
-        return posts.sort((a, b) => b.commentsCount - a.commentsCount);
-      default:
-        return posts;
-    }
-  }, [selectedCategory, selectedFilter]);
+    // Posts are already sorted by the backend based on selectedFilter
+    return filteredPosts;
+  }, [posts, selectedCategory]);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -227,7 +241,21 @@ export default function Home() {
 
       {/* Posts feed */}
       <div className="space-y-4">
-        {filteredAndSortedPosts.map((post) => (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement des posts...</p>
+          </div>
+        ) : filteredAndSortedPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold text-foreground mb-2">Aucun post trouvé</h3>
+            <p className="text-muted-foreground">
+              Soyez le premier à publier dans cette catégorie !
+            </p>
+          </div>
+        ) : (
+          filteredAndSortedPosts.map((post) => (
           <Card 
             key={post.id} 
             className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
@@ -236,45 +264,45 @@ export default function Home() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <Avatar 
-                    className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/user/${post.author.username}`);
-                    }}
-                  >
-                    <AvatarImage src={post.author.profilePicture} />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                      {post.author.username.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/user/${post.author.username}`);
-                        }}
-                      >
-                        @{post.author.username}
-                      </span>
-                      {post.author.isVerified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      dans {post.space.name}
-                    </p>
-                  </div>
-                </div>
-                
-                <Badge variant="outline" className="text-xs">
-                  {post.category}
-                </Badge>
+                   <Avatar 
+                     className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity"
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       navigate(`/user/${post.profiles.username}`);
+                     }}
+                   >
+                     <AvatarImage src={post.profiles.profile_picture_url} />
+                     <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                       {post.profiles.username.substring(0, 2).toUpperCase()}
+                     </AvatarFallback>
+                   </Avatar>
+                   
+                   <div>
+                     <div className="flex items-center gap-2">
+                       <span 
+                         className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           navigate(`/user/${post.profiles.username}`);
+                         }}
+                       >
+                         @{post.profiles.username}
+                       </span>
+                       {post.profiles.is_verified && (
+                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                           ✓
+                         </Badge>
+                       )}
+                     </div>
+                     <p className="text-xs text-muted-foreground">
+                       {post.spaces?.name && `dans ${post.spaces.name}`}
+                     </p>
+                   </div>
+                 </div>
+                 
+                 <Badge variant="outline" className="text-xs">
+                   Général
+                 </Badge>
               </div>
             </CardHeader>
             
@@ -299,54 +327,73 @@ export default function Home() {
                 </button>
               )}
               
-              {/* Image si présente */}
-              {post.image && (
-                <div className="mb-3">
-                  <img 
-                    src={post.image} 
-                    alt="Post image" 
-                    className="rounded-lg w-full h-48 object-cover"
-                  />
-                </div>
-              )}
-              
-              {/* Hashtags */}
-              <div className="flex flex-wrap gap-1 mb-4">
-                {post.hashtags.map((tag) => (
-                  <span key={tag} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              
-              {/* Actions avec Up/Down */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-green-600">
-                      <ChevronUp className="h-4 w-4" />
-                      <span className="text-xs ml-1">{post.votesUp}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-red-600">
-                      <ChevronDown className="h-4 w-4" />
-                      <span className="text-xs ml-1">{post.votesDown}</span>
-                    </Button>
-                  </div>
-                  
-                  <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-primary">
-                    <MessageCircle className="h-4 w-4" />
-                    <span className="text-xs ml-1">{post.commentsCount}</span>
-                  </Button>
-                </div>
-                
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Eye className="h-3 w-3" />
-                  <span className="text-xs">{post.viewsCount}</span>
-                </div>
-              </div>
+               {/* Image si présente */}
+               {post.post_media && post.post_media.length > 0 && (
+                 <div className="mb-3">
+                   <img 
+                     src={post.post_media[0].media_url} 
+                     alt="Post image" 
+                     className="rounded-lg w-full h-48 object-cover"
+                   />
+                 </div>
+               )}
+               
+               {/* Hashtags */}
+               {post.hashtags && post.hashtags.length > 0 && (
+                 <div className="flex flex-wrap gap-1 mb-4">
+                   {post.hashtags.map((tag, index) => (
+                     <span key={index} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
+                       {tag}
+                     </span>
+                   ))}
+                 </div>
+               )}
+               
+               {/* Actions avec Up/Down */}
+               <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                   <div className="flex items-center gap-1">
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       className="h-8 px-2 text-muted-foreground hover:text-green-600"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         handleVote(post.id, 'up');
+                       }}
+                     >
+                       <ChevronUp className="h-4 w-4" />
+                       <span className="text-xs ml-1">{post.votes_up}</span>
+                     </Button>
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       className="h-8 px-2 text-muted-foreground hover:text-red-600"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         handleVote(post.id, 'down');
+                       }}
+                     >
+                       <ChevronDown className="h-4 w-4" />
+                       <span className="text-xs ml-1">{post.votes_down}</span>
+                     </Button>
+                   </div>
+                   
+                   <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-primary">
+                     <MessageCircle className="h-4 w-4" />
+                     <span className="text-xs ml-1">{post.comments_count}</span>
+                   </Button>
+                 </div>
+                 
+                 <div className="flex items-center gap-1 text-muted-foreground">
+                   <Eye className="h-3 w-3" />
+                   <span className="text-xs">{post.views_count}</span>
+                 </div>
+               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Comments Modal */}
