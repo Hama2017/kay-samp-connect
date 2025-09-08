@@ -73,11 +73,15 @@ export default function CreatePost() {
   };
 
   const handleGifSelect = async (gifUrl: string) => {
+    console.log('GIF sélectionné:', gifUrl);
     try {
       // Télécharger le GIF et le convertir en File
       const response = await fetch(gifUrl);
+      console.log('Réponse fetch GIF:', response.status);
       const blob = await response.blob();
+      console.log('Blob GIF:', blob.type, blob.size);
       const file = new File([blob], `gif-${Date.now()}.gif`, { type: 'image/gif' });
+      console.log('Fichier GIF créé:', file.name, file.type, file.size);
       
       setFormData(prev => ({ 
         ...prev, 
@@ -85,6 +89,7 @@ export default function CreatePost() {
       }));
       
       setPreviewUrls(prev => [...prev, gifUrl]);
+      console.log('GIF ajouté aux fichiers sélectionnés');
     } catch (error) {
       console.error('Erreur lors de l\'ajout du GIF:', error);
     }
