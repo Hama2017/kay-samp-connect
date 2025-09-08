@@ -90,7 +90,7 @@ export default function Discover() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-full overflow-hidden">
       {/* Header */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
