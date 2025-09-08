@@ -111,6 +111,7 @@ export function usePosts() {
       if (error) throw error;
 
       setPosts(data || []);
+      console.log('usePosts: setPosts called', { postsLength: data?.length || 0 });
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching posts:', err);

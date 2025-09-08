@@ -31,7 +31,18 @@ export default function SpaceDetail() {
   }, [spaceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const space = spaces.find(s => s.id === spaceId);
-  const spacePosts = useMemo(() => posts.filter(post => post.space_id === spaceId), [posts, spaceId]);
+  const spacePosts = useMemo(() => {
+    console.log('spacePosts useMemo called', { postsLength: posts.length, spaceId });
+    return posts.filter(post => post.space_id === spaceId);
+  }, [posts, spaceId]);
+
+  console.log('SpaceDetail render', { 
+    spacesLength: spaces.length, 
+    postsLength: posts.length, 
+    spacePostsLength: spacePosts.length,
+    selectedFilter,
+    spaceId
+  });
 
   if (spacesLoading || postsLoading) {
     return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
@@ -50,6 +61,7 @@ export default function SpaceDetail() {
   }
 
   const sortedPosts = useMemo(() => {
+    console.log('sortedPosts useMemo called', { spacePostsLength: spacePosts.length, selectedFilter });
     const posts = [...spacePosts];
     
     switch (selectedFilter) {
