@@ -28,7 +28,7 @@ export default function SpaceDetail() {
       fetchSpaces();
       fetchPosts({ space_id: spaceId });
     }
-  }, [spaceId, fetchSpaces, fetchPosts]);
+  }, [spaceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const space = spaces.find(s => s.id === spaceId);
   const spacePosts = useMemo(() => posts.filter(post => post.space_id === spaceId), [posts, spaceId]);
