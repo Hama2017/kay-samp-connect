@@ -323,14 +323,14 @@ export function BookmarksList() {
       </div>
 
       {/* Bookmarks List */}
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+      <Tabs value="post" onValueChange={() => {}}>
         <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="post">
             Posts favoris ({stats.posts})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={selectedCategory} className="mt-6">
+        <TabsContent value="post" className="mt-6">
           {filteredBookmarks.length === 0 ? (
             <EmptyState
               icon={Bookmark}

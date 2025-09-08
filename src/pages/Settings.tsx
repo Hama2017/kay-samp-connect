@@ -25,8 +25,6 @@ export default function Settings() {
   const { theme, setTheme } = useTheme();
   
   const [profileData, setProfileData] = useState({
-    username: user?.profile?.username || "",
-    phone: user?.profile?.phone || "",
     bio: user?.profile?.bio || ""
   });
 
@@ -161,23 +159,23 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          {/* Bookmarks Tab */}
-          <TabsContent value="bookmarks" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bookmark className="h-5 w-5" />
-                  Mes favoris
-                </CardTitle>
-                <CardDescription>
-                  Gérez vos posts, espaces et utilisateurs sauvegardés
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BookmarksList />
-              </CardContent>
-            </Card>
-          </TabsContent>
+      {/* Bookmarks Tab */}
+      <TabsContent value="bookmarks" className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bookmark className="h-5 w-5" />
+              Mes posts favoris
+            </CardTitle>
+            <CardDescription>
+              Gérez vos posts sauvegardés
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BookmarksList />
+          </CardContent>
+        </Card>
+      </TabsContent>
 
           {/* Appearance Tab */}
           <TabsContent value="appearance">

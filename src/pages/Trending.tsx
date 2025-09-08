@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
+import { useTopContributors } from "@/hooks/useTopContributors";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 // Mock data for trending
@@ -124,13 +125,15 @@ export default function Trending() {
   const [selectedPeriod, setSelectedPeriod] = useState("day");
   const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
   const { spaces, fetchSpaces, isLoading: spacesLoading } = useSpaces();
+  const { contributors, fetchTopContributors, isLoading: contributorsLoading } = useTopContributors();
 
   useEffect(() => {
     fetchPosts({ sort_by: "popular" });
     fetchSpaces({ sort_by: "popular" });
-  }, [fetchPosts, fetchSpaces]);
+    fetchTopContributors(selectedPeriod as any);
+  }, [fetchPosts, fetchSpaces, fetchTopContributors, selectedPeriod]);
 
-  if (postsLoading || spacesLoading) {
+  if (postsLoading || spacesLoading || contributorsLoading) {
     return <LoadingSpinner size="lg" text="Chargement des tendances..." />;
   }
 
@@ -327,34 +330,41 @@ export default function Trending() {
         </TabsContent>
 
         <TabsContent value="contributors" className="space-y-4">
-          {mockTrendingData.daily.topContributors.map((contributor) => (
-            <Card key={contributor.username} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+          {contributors.map((contributor, index) => (
+            <Card key={contributor.user_id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
                     <Badge 
-                      variant={contributor.position === 1 ? "default" : "secondary"}
+                      variant={index === 0 ? "default" : "secondary"}
                       className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        contributor.position === 1 ? "bg-gradient-primary" : ""
+                        index === 0 ? "bg-gradient-primary" : ""
                       }`}
                     >
-                      {contributor.position}
+                      {index + 1}
                     </Badge>
                   </div>
                   
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={contributor.photo} />
+                    <AvatarImage src={contributor.profile_picture_url} />
                     <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
                       {contributor.username.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1">
-                    <div className="font-semibold text-foreground">
-                      @{contributor.username}
+                    <div className="flex items-center gap-2">
+                      <div className="font-semibold text-foreground">
+                        @{contributor.username}
+                      </div>
+                      {contributor.is_verified && (
+                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                          ✓
+                        </Badge>
+                      )}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Score d'activité: {contributor.activityScore}
+                      Score d'activité: {contributor.activity_score}
                     </div>
                   </div>
                   
@@ -362,7 +372,7 @@ export default function Trending() {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
                         <div className="text-sm font-semibold text-primary">
-                          {contributor.postsPublished}
+                          {contributor.posts_count}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Posts
@@ -370,7 +380,7 @@ export default function Trending() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-primary">
-                          {contributor.commentsWritten}
+                          {contributor.comments_count}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Comm.
@@ -378,7 +388,7 @@ export default function Trending() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-primary">
-                          {contributor.votesGiven}
+                          {contributor.votes_given}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Votes
@@ -390,6 +400,16 @@ export default function Trending() {
               </CardContent>
             </Card>
           ))}
+          
+          {contributors.length === 0 && (
+            <div className="text-center py-12">
+              <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold text-foreground mb-2">Aucun contributeur trouvé</h3>
+              <p className="text-muted-foreground">
+                Soyez le premier à contribuer !
+              </p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

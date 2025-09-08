@@ -208,18 +208,8 @@ export function usePosts() {
           });
       }
 
-      // Update posts locally for immediate UI feedback
-      setPosts(prevPosts => prevPosts.map(post => 
-        post.id === postId 
-          ? {
-              ...post,
-              votes_up: post.votes_up + (voteType === 'up' ? 1 : 0),
-              votes_down: post.votes_down + (voteType === 'down' ? 1 : 0)
-            }
-          : post
-      ));
-      
-      // Refresh posts to get accurate counts from server
+      // The trigger will automatically update the vote counts
+      // Refresh posts to get updated counts from server
       fetchPosts();
     } catch (err) {
       console.error('Error voting on post:', err);
