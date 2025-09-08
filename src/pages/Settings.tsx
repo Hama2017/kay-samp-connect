@@ -13,9 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { BookmarksList } from "@/components/bookmarks/BookmarksList";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Eye, Settings as SettingsIcon, Users, Palette, Bookmark } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Eye, Settings as SettingsIcon, Users, Palette } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, signOut } = useAuth();
@@ -127,9 +126,8 @@ export default function Settings() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="bookmarks">Favoris</TabsTrigger>
             <TabsTrigger value="appearance">Thème</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
           </TabsList>
@@ -191,24 +189,6 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
-
-      {/* Bookmarks Tab */}
-      <TabsContent value="bookmarks" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bookmark className="h-5 w-5" />
-              Mes posts favoris
-            </CardTitle>
-            <CardDescription>
-              Gérez vos posts sauvegardés
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <BookmarksList />
-          </CardContent>
-        </Card>
-      </TabsContent>
 
           {/* Appearance Tab */}
           <TabsContent value="appearance">
