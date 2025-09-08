@@ -163,8 +163,15 @@ export function usePosts() {
 
           // Determine media type
           let mediaType = 'image';
-          if (file.type.startsWith('video/')) mediaType = 'video';
-          if (file.name.toLowerCase().endsWith('.gif')) mediaType = 'gif';
+          if (file.type.startsWith('video/')) {
+            mediaType = 'video';
+          } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
+            mediaType = 'gif';
+          } else if (file.type.startsWith('image/')) {
+            mediaType = 'image';
+          }
+          
+          console.log('Media upload:', { fileName, fileType: file.type, mediaType });
 
           // Save media record to database
           await supabase

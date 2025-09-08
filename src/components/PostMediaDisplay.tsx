@@ -23,6 +23,8 @@ export default function PostMediaDisplay({
 }: PostMediaDisplayProps) {
   if (!media || media.length === 0) return null;
 
+  console.log('PostMediaDisplay rendering media:', media);
+  
   // Si plusieurs médias, on affiche juste le premier pour l'instant
   const firstMedia = media[0];
 
@@ -45,6 +47,11 @@ export default function PostMediaDisplay({
             src={media_url}
             alt="Post GIF" 
             className={cn("rounded-lg w-full object-cover", maxHeight, className)}
+            loading="lazy"
+            onError={(e) => {
+              console.error('GIF loading error:', media_url);
+              e.currentTarget.style.display = 'none';
+            }}
           />
         );
       
