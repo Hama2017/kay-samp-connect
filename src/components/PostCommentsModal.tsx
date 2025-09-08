@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useComments, Comment } from "@/hooks/useComments";
+import PostMediaDisplay from "@/components/PostMediaDisplay";
 
 interface Post {
   id: string;
@@ -123,16 +124,12 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                 {post.content}
               </p>
 
-              {/* Image si présente */}
-              {postImage && (
-                <div className="mb-3">
-                  <img 
-                    src={postImage} 
-                    alt="Post image" 
-                    className="rounded-lg max-w-full h-auto"
-                  />
-                </div>
-              )}
+              {/* Médias si présents */}
+              <PostMediaDisplay 
+                media={post.post_media || []} 
+                maxHeight="max-h-96"
+                showControls={true}
+              />
 
               {/* Hashtags */}
               {post.hashtags && post.hashtags.length > 0 && (

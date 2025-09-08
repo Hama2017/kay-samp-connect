@@ -143,10 +143,38 @@ export function usePosts() {
       if (postData.media_files && postData.media_files.length > 0) {
         for (let i = 0; i < postData.media_files.length; i++) {
           const file = postData.media_files[i];
-          const fileName = `${data.id}_${i}_${file.name}`;
+          const fileExtension = file.name.split('.').pop();
+          const fileName = `${user.id}/${data.id}_${i}_${Date.now()}.${fileExtension}`;
           
-          // Upload to Supabase Storage would go here
-          // For now, we'll skip actual file upload
+          // Upload file to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('post-media')
+            .upload(fileName, file);
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('post-media')
+            .getPublicUrl(fileName);
+
+          // Determine media type
+          let mediaType = 'image';
+          if (file.type.startsWith('video/')) mediaType = 'video';
+          if (file.name.toLowerCase().endsWith('.gif')) mediaType = 'gif';
+
+          // Save media record to database
+          await supabase
+            .from('post_media')
+            .insert({
+              post_id: data.id,
+              media_url: urlData.publicUrl,
+              media_type: mediaType,
+              media_order: i
+            });
         }
       }
 

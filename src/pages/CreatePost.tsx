@@ -180,7 +180,7 @@ export default function CreatePost() {
                   {formData.selectedFiles.map((file, index) => (
                     <div key={index} className="relative group">
                       <div className="aspect-square bg-muted rounded-xl overflow-hidden relative">
-                        {file.type.startsWith('image/') ? (
+                        {file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif') ? (
                           <img 
                             src={previewUrls[index]} 
                             alt={file.name}
@@ -229,7 +229,7 @@ export default function CreatePost() {
               type="file"
               id="file-upload"
               multiple
-              accept="image/*,video/*"
+              accept="image/*,video/*,.gif"
               onChange={(e) => handleFileUpload(e.target.files)}
               className="hidden"
             />

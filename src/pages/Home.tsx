@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
+import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
@@ -233,16 +234,11 @@ export default function Home() {
                 </button>
               )}
               
-               {/* Image si présente */}
-               {post.post_media && post.post_media.length > 0 && (
-                 <div className="mb-3">
-                   <img 
-                     src={post.post_media[0].media_url} 
-                     alt="Post image" 
-                     className="rounded-lg w-full h-48 object-cover"
-                   />
-                 </div>
-               )}
+               {/* Médias si présents */}
+               <PostMediaDisplay 
+                 media={post.post_media || []} 
+                 showControls={false}
+               />
                
                {/* Hashtags */}
                {post.hashtags && post.hashtags.length > 0 && (
