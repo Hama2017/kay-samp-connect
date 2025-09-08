@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useBookmarks } from "@/hooks/useBookmarks";
+import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,22 +31,22 @@ export function BookmarkButton({
   showText = false,
   className 
 }: BookmarkButtonProps) {
-  const { toggleBookmark, isBookmarked } = useBookmarks();
-  const bookmarked = isBookmarked(item.id);
+  const { toggleBookmark, isBookmarked } = useRealBookmarks();
+  const bookmarked = isBookmarked(item.id, 'post');
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     toggleBookmark({
-      id: item.id,
-      type: item.type,
+      item_type: 'post',
+      item_id: item.id,
       title: item.title,
       description: item.description,
-      author: item.author,
-      thumbnail: item.thumbnail,
-      createdAt: item.createdAt,
-      metadata: item.metadata
+      metadata: {
+        author: item.author?.name,
+        category: item.type
+      }
     });
   };
 

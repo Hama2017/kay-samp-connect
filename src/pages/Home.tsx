@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
+import { MessageCircle, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,114 +8,9 @@ import { PostCommentsModal } from "@/components/PostCommentsModal";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
-import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { usePageTracking, useInteractionTracking } from "@/hooks/usePageTracking";
 import { useAuth } from "@/contexts/AuthContext";
-
-// Mock data for posts
-const mockPosts = [
-  {
-    id: "1",
-    author: {
-      username: "AmadouD",
-      profilePicture: "",
-      isVerified: false,
-    },
-    space: {
-      name: "Lions du Sénégal 🦁",
-      id: "space_001",
-    },
-    content: "Les Lions vont affronter le Nigeria demain ! Qui pensez-vous sera dans le onze de départ ? 🇸🇳⚽",
-    publicationDate: "2024-03-15T08:30:00Z",
-    votesUp: 23,
-    votesDown: 2,
-    commentsCount: 8,
-    viewsCount: 145,
-    category: "Sport",
-    hashtags: ["#Lions", "#Nigeria", "#CAN2024"],
-  },
-  {
-    id: "2",
-    author: {
-      username: "FatimaK",
-      profilePicture: "",
-      isVerified: true,
-    },
-    space: {
-      name: "Cuisine Sénégalaise",
-      id: "space_002",
-    },
-    content: "Qui connaît la recette authentique du thieboudienne de grand-mère ? Je cherche les vraies techniques traditionnelles qui se transmettent de génération en génération. Ma grand-mère utilisait toujours des ingrédients spéciaux qu'elle achetait au marché de Sandaga, et elle avait une façon particulière de préparer le poisson qui donnait un goût unique au plat. J'aimerais vraiment retrouver ces saveurs d'antan et perpétuer cette tradition culinaire sénégalaise dans ma famille. Les épices qu'elle utilisait avaient des noms que je ne connais même plus aujourd'hui. Et son riz, il avait cette couleur dorée parfaite et cette texture qui fondait dans la bouche. Quelqu'un pourrait-il partager les secrets de leurs aînés ?",
-    publicationDate: "2024-03-15T07:15:00Z",
-    votesUp: 45,
-    votesDown: 1,
-    commentsCount: 12,
-    viewsCount: 203,
-    category: "Cuisine",
-    hashtags: ["#Thiébou", "#Recette", "#Tradition"],
-  },
-  {
-    id: "3",
-    author: {
-      username: "OmarB",
-      profilePicture: "",
-      isVerified: false,
-    },
-    space: {
-      name: "Tech Dakar",
-      id: "space_003",
-    },
-    content: "Le nouveau hub technologique à Diamniadio va changer la donne pour l'innovation au Sénégal 🚀",
-    publicationDate: "2024-03-15T12:45:00Z",
-    votesUp: 31,
-    votesDown: 3,
-    commentsCount: 6,
-    viewsCount: 187,
-    category: "Technologie",
-    hashtags: ["#TechDakar", "#Innovation", "#Diamniadio"],
-  },
-  {
-    id: "4",
-    author: {
-      username: "AissaN",
-      profilePicture: "",
-      isVerified: true,
-    },
-    space: {
-      name: "Mode & Style Sénégal",
-      id: "space_004",
-    },
-    content: "Nouveau design de boubou inspiré des motifs traditionnels ! Qu'est-ce que vous en pensez ? ✨",
-    image: "https://images.unsplash.com/photo-1594736797933-d0baac66dbdd?w=400&h=300&fit=crop",
-    publicationDate: "2024-03-15T14:20:00Z",
-    votesUp: 67,
-    votesDown: 2,
-    commentsCount: 24,
-    viewsCount: 312,
-    category: "Mode",
-    hashtags: ["#Boubou", "#Mode", "#Tradition", "#Design"],
-  },
-  {
-    id: "5",
-    author: {
-      username: "MoussaK",
-      profilePicture: "",
-      isVerified: false,
-    },
-    space: {
-      name: "Politique Sénégal",
-      id: "space_005",
-    },
-    content: "L'analyse des dernières réformes économiques au Sénégal révèle des tendances intéressantes qui méritent d'être débattues en profondeur. Les nouvelles politiques fiscales adoptées par le gouvernement visent à stimuler l'investissement privé tout en renforçant les recettes publiques. Cependant, plusieurs économistes s'interrogent sur l'impact réel de ces mesures sur les petites et moyennes entreprises qui constituent l'épine dorsale de notre économie. Il est crucial d'analyser les données macroéconomiques des six derniers mois pour évaluer l'efficacité de ces réformes et leur contribution à la croissance économique durable du pays. Les secteurs de l'agriculture, de la pêche et du tourisme semblent particulièrement affectés par ces changements de politique économique. Une étude approfondie s'impose pour comprendre les enjeux à long terme.",
-    publicationDate: "2024-03-15T16:30:00Z",
-    votesUp: 89,
-    votesDown: 12,
-    commentsCount: 45,
-    viewsCount: 567,
-    category: "Politique",
-    hashtags: ["#Économie", "#Réformes", "#Politique", "#Sénégal"],
-  },
-];
+import { PostActions } from "@/components/PostActions";
 
 const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
 
@@ -131,7 +26,6 @@ export default function Home() {
   const { user } = useAuth();
   const { posts, isLoading, fetchPosts, votePost, incrementViews } = usePosts();
   const { spaces } = useSpaces();
-  const { isBookmarked, toggleBookmark } = useRealBookmarks();
   const { trackClick, trackLike, trackShare } = useInteractionTracking();
   
   const [selectedCategory, setSelectedCategory] = useState("Tous");
@@ -307,13 +201,13 @@ export default function Home() {
                        )}
                      </div>
                      <p className="text-xs text-muted-foreground">
-                       {post.spaces?.name && `dans ${post.spaces.name}`}
+                       {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"}
                      </p>
                    </div>
                  </div>
                  
                  <Badge variant="outline" className="text-xs">
-                   Général
+                   {post.spaces?.name || "Général"}
                  </Badge>
               </div>
             </CardHeader>
@@ -362,46 +256,11 @@ export default function Home() {
                )}
                
                {/* Actions avec Up/Down */}
-               <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                   <div className="flex items-center gap-1">
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       className="h-8 px-2 text-muted-foreground hover:text-green-600"
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         handleVote(post.id, 'up');
-                       }}
-                     >
-                       <ChevronUp className="h-4 w-4" />
-                       <span className="text-xs ml-1">{post.votes_up}</span>
-                     </Button>
-                     <Button 
-                       variant="ghost" 
-                       size="sm" 
-                       className="h-8 px-2 text-muted-foreground hover:text-red-600"
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         handleVote(post.id, 'down');
-                       }}
-                     >
-                       <ChevronDown className="h-4 w-4" />
-                       <span className="text-xs ml-1">{post.votes_down}</span>
-                     </Button>
-                   </div>
-                   
-                   <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-primary">
-                     <MessageCircle className="h-4 w-4" />
-                     <span className="text-xs ml-1">{post.comments_count}</span>
-                   </Button>
-                 </div>
-                 
-                 <div className="flex items-center gap-1 text-muted-foreground">
-                   <Eye className="h-3 w-3" />
-                   <span className="text-xs">{post.views_count}</span>
-                 </div>
-               </div>
+               <PostActions 
+                 post={post}
+                 onVote={handleVote}
+                 onOpenComments={() => handlePostClick(post)}
+               />
             </CardContent>
           </Card>
           ))

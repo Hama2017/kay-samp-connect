@@ -13,10 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { BookmarksList } from "@/components/bookmarks/BookmarksList";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, BarChart3, Bookmark } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Bell, Eye, Settings as SettingsIcon, Users, Palette, Bookmark } from "lucide-react";
 
 export default function Settings() {
   const { user, updateProfile, signOut } = useAuth();
@@ -92,13 +91,12 @@ export default function Settings() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="bookmarks">Favoris</TabsTrigger>
             <TabsTrigger value="appearance">Thème</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}

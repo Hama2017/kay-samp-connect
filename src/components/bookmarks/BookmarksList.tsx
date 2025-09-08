@@ -250,29 +250,11 @@ export function BookmarksList() {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-1">
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{stats.total}</div>
-            <p className="text-sm text-muted-foreground">Total</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{stats.posts}</div>
-            <p className="text-sm text-muted-foreground">Posts</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{stats.spaces}</div>
-            <p className="text-sm text-muted-foreground">Espaces</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{stats.recentCount}</div>
-            <p className="text-sm text-muted-foreground">Cette semaine</p>
+            <div className="text-2xl font-bold text-primary">{stats.posts}</div>
+            <p className="text-sm text-muted-foreground">Posts favoris</p>
           </CardContent>
         </Card>
       </div>
@@ -292,11 +274,6 @@ export function BookmarksList() {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={exportBookmarks}>
-            <Download className="h-4 w-4 mr-2" />
-            Exporter
-          </Button>
-          
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm">

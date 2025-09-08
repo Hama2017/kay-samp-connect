@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSpaces } from "@/hooks/useSpaces";
 import { usePosts } from "@/hooks/usePosts";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PostActions } from "@/components/PostActions";
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock },
@@ -21,7 +22,7 @@ export default function SpaceDetail() {
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
-  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+  const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
   // All useMemo hooks MUST be before any conditional returns
   const space = spaces.find(s => s.id === spaceId);
@@ -76,6 +77,10 @@ export default function SpaceDetail() {
       return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
     }
   }, []);
+
+  const handleVote = useCallback(async (postId: string, voteType: 'up' | 'down') => {
+    await votePost(postId, voteType);
+  }, [votePost]);
 
   console.log('SpaceDetail render', { 
     spacesLength: spaces.length, 
@@ -270,26 +275,10 @@ export default function SpaceDetail() {
                       </div>
                     )}
                     
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1 text-green-600">
-                          <ChevronUp className="h-4 w-4" />
-                          {post.votes_up}
-                        </span>
-                        <span className="flex items-center gap-1 text-red-600">
-                          <ChevronDown className="h-4 w-4" />
-                          {post.votes_down}
-                        </span>
-                      </div>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <MessageCircle className="h-4 w-4" />
-                        {post.comments_count}
-                      </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Eye className="h-4 w-4" />
-                        {post.views_count}
-                      </span>
-                    </div>
+                    <PostActions 
+                      post={post}
+                      onVote={handleVote}
+                    />
                   </div>
                 </div>
               </CardContent>
