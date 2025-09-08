@@ -23,42 +23,12 @@ export default function SpaceDetail() {
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
 
-  useEffect(() => {
-    if (spaceId) {
-      fetchSpaces();
-      fetchPosts({ space_id: spaceId });
-    }
-  }, [spaceId]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // All useMemo hooks MUST be before any conditional returns
   const space = spaces.find(s => s.id === spaceId);
   const spacePosts = useMemo(() => {
     console.log('spacePosts useMemo called', { postsLength: posts.length, spaceId });
     return posts.filter(post => post.space_id === spaceId);
   }, [posts, spaceId]);
-
-  console.log('SpaceDetail render', { 
-    spacesLength: spaces.length, 
-    postsLength: posts.length, 
-    spacePostsLength: spacePosts.length,
-    selectedFilter,
-    spaceId
-  });
-
-  if (spacesLoading || postsLoading) {
-    return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
-  }
-
-  if (!space) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl text-center">
-        <h1 className="text-2xl font-bold mb-4">Espace introuvable</h1>
-        <Button onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
-        </Button>
-      </div>
-    );
-  }
 
   const sortedPosts = useMemo(() => {
     console.log('sortedPosts useMemo called', { spacePostsLength: spacePosts.length, selectedFilter });
@@ -77,6 +47,38 @@ export default function SpaceDetail() {
         return posts;
     }
   }, [spacePosts, selectedFilter]);
+
+  console.log('SpaceDetail render', { 
+    spacesLength: spaces.length, 
+    postsLength: posts.length, 
+    spacePostsLength: spacePosts.length,
+    selectedFilter,
+    spaceId
+  });
+
+  useEffect(() => {
+    if (spaceId) {
+      fetchSpaces();
+      fetchPosts({ space_id: spaceId });
+    }
+  }, [spaceId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // NOW we can have conditional returns after all hooks
+  if (spacesLoading || postsLoading) {
+    return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
+  }
+
+  if (!space) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-2xl text-center">
+        <h1 className="text-2xl font-bold mb-4">Espace introuvable</h1>
+        <Button onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour
+        </Button>
+      </div>
+    );
+  }
 
   const handleSubscriptionToggle = async () => {
     try {
