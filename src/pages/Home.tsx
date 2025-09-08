@@ -91,26 +91,26 @@ export default function Home() {
   }, [posts, selectedCategory]);
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Welcome section */}
-      <div className="text-center mb-6 animate-fade-in-up">
-        <h1 className="text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+      <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
           Bienvenue sur KaaySamp
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground px-2">
           Viens t'asseoir et découvre ta communauté sénégalaise
         </p>
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-3 sm:mb-4 scrollbar-hide -mx-1 px-1">
         {categories.map((category) => (
           <Button
             key={category}
             variant={selectedCategory === category ? "senegal" : "outline"}
             size="sm"
             onClick={() => setSelectedCategory(category)}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm flex-shrink-0"
           >
             {category}
           </Button>
@@ -118,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* Sort filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 sm:mb-6 scrollbar-hide -mx-1 px-1">
         {sortFilters.map((filter) => {
           const Icon = filter.icon;
           return (
@@ -127,17 +127,18 @@ export default function Home() {
               variant={selectedFilter === filter.id ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedFilter(filter.id)}
-              className="whitespace-nowrap gap-2"
+              className="whitespace-nowrap gap-1.5 sm:gap-2 text-xs sm:text-sm flex-shrink-0"
             >
               <Icon className="h-3 w-3" />
-              {filter.label}
+              <span className="hidden xs:inline">{filter.label}</span>
+              <span className="xs:hidden">{filter.label.split(' ')[1] || filter.label}</span>
             </Button>
           );
         })}
       </div>
 
       {/* Posts feed */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -158,11 +159,11 @@ export default function Home() {
             className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
             onClick={() => handlePostClick(post)}
           >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                    <Avatar 
-                     className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity"
+                     className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
                      onClick={(e) => {
                        e.stopPropagation();
                        // Redirect to own profile if it's the current user
@@ -174,15 +175,15 @@ export default function Home() {
                      }}
                    >
                      <AvatarImage src={post.profiles.profile_picture_url} />
-                     <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                     <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold text-xs sm:text-sm">
                        {post.profiles.username.substring(0, 2).toUpperCase()}
                      </AvatarFallback>
                    </Avatar>
                    
-                   <div>
-                     <div className="flex items-center gap-2">
+                   <div className="min-w-0 flex-1">
+                     <div className="flex items-center gap-1 sm:gap-2">
                         <span 
-                          className="font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
+                          className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-primary transition-colors truncate"
                           onClick={(e) => {
                             e.stopPropagation();
                             // Redirect to own profile if it's the current user
@@ -196,24 +197,24 @@ export default function Home() {
                          @{post.profiles.username}
                        </span>
                        {post.profiles.is_verified && (
-                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
                            ✓
                          </Badge>
                        )}
                      </div>
-                     <p className="text-xs text-muted-foreground">
+                     <p className="text-xs text-muted-foreground truncate">
                        {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"}
                      </p>
                    </div>
                  </div>
                  
-                 <Badge variant="outline" className="text-xs">
+                 <Badge variant="outline" className="text-xs flex-shrink-0 hidden sm:block">
                    {post.spaces?.name || "Général"}
                  </Badge>
               </div>
             </CardHeader>
             
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
               <div 
                 className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap"
                 dangerouslySetInnerHTML={{

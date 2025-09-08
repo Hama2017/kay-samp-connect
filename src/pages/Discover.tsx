@@ -90,39 +90,39 @@ export default function Discover() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Header */}
-      <div className="text-center mb-6 animate-fade-in-up">
-        <h1 className="text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+      <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
           Découvrir
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground px-2">
           Trouve des espaces qui t'intéressent
         </p>
       </div>
 
       {/* Search bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-4 sm:mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Rechercher des espaces..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 border-primary/20 focus:border-primary/40"
+          className="pl-9 border-primary/20 focus:border-primary/40 text-sm sm:text-base"
         />
       </div>
 
       {/* Filters */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
         {/* Category filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
           {categories.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "senegal" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap text-xs sm:text-sm flex-shrink-0"
             >
               {category}
             </Button>
@@ -130,10 +130,10 @@ export default function Discover() {
         </div>
         
         {/* Sort filter */}
-        <div className="flex items-center gap-3">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Trier par..." />
             </SelectTrigger>
             <SelectContent>
@@ -148,7 +148,7 @@ export default function Discover() {
       </div>
 
       {/* Spaces list */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -169,30 +169,30 @@ export default function Discover() {
               className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
               onClick={() => navigate(`/space/${space.id}`)}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Hash className="h-6 w-6 text-primary-foreground" />
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                <div className="flex items-start justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Hash className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground truncate">
+                      <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
                           {space.name}
                         </h3>
                         {space.is_verified && (
-                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                            ✓ Certifié
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                            ✓
                           </Badge>
                         )}
                       </div>
                       
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Badge variant="outline" className="text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
                           {space.category}
                         </Badge>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           <span>{space.subscribers_count}</span>
@@ -204,26 +204,26 @@ export default function Discover() {
                   <Button
                     variant={space.is_subscribed ? "outline" : "senegal"}
                     size="sm"
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-4"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSubscriptionToggle(space);
                     }}
                   >
                     {space.is_subscribed ? (
-                      "Abonné"
+                      <span className="sm:hidden">✓</span>
                     ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-1" />
-                        S'abonner
-                      </>
+                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
                     )}
+                    <span className="hidden sm:inline">
+                      {space.is_subscribed ? "Abonné" : "S'abonner"}
+                    </span>
                   </Button>
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0">
-                <p className="text-muted-foreground text-sm leading-relaxed">
+              <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
+                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
                   {space.description || "Aucune description disponible"}
                 </p>
               </CardContent>
