@@ -1,75 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-// Mock data for space details
-const mockSpaceDetails = {
-  "space_001": {
-    id: "space_001",
-    name: "Lions du Sénégal 🦁",
-    description: "Tout sur l'équipe nationale de football du Sénégal. Discussions, analyses, actualités et passion partagée pour nos Lions !",
-    category: "Sport",
-    subscribersCount: 1247,
-    isVerified: true,
-    coverImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-    isSubscribed: true,
-    rules: [
-      "Respecter tous les membres",
-      "Pas de spam ou de contenu inapproprié",
-      "Rester dans le sujet du football sénégalais",
-      "Partager des sources fiables"
-    ]
-  }
-};
-
-// Mock posts for this space
-const mockSpacePosts = [
-  {
-    id: "post_space_1",
-    author: {
-      username: "FootballFan221",
-      profilePicture: "",
-      isVerified: false,
-    },
-    space: {
-      name: "Lions du Sénégal 🦁",
-      id: "space_001",
-    },
-    content: "Quelle formation préférez-vous pour le prochain match des Lions ? 🦁⚽",
-    publicationDate: "2024-03-15T10:30:00Z",
-    votesUp: 24,
-    votesDown: 2,
-    commentsCount: 8,
-    viewsCount: 156,
-    category: "Sport",
-    hashtags: ["#Lions", "#Formation", "#Football"],
-  },
-  {
-    id: "post_space_2",
-    author: {
-      username: "SenegalPride",
-      profilePicture: "",
-      isVerified: true,
-    },
-    space: {
-      name: "Lions du Sénégal 🦁",
-      id: "space_001",
-    },
-    content: "Les statistiques du dernier match sont impressionnantes ! Nos Lions ont montré une belle performance collective.",
-    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-    publicationDate: "2024-03-15T09:15:00Z",
-    votesUp: 45,
-    votesDown: 1,
-    commentsCount: 12,
-    viewsCount: 289,
-    category: "Sport",
-    hashtags: ["#Lions", "#Performance", "#Statistiques"],
-  }
-];
+import { useSpaces } from "@/hooks/useSpaces";
+import { usePosts } from "@/hooks/usePosts";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock },
@@ -81,10 +19,23 @@ const sortFilters = [
 export default function SpaceDetail() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("recent");
+  const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
+  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
 
-  const space = mockSpaceDetails[spaceId as keyof typeof mockSpaceDetails];
+  useEffect(() => {
+    if (spaceId) {
+      fetchSpaces();
+      fetchPosts({ space_id: spaceId });
+    }
+  }, [spaceId, fetchSpaces, fetchPosts]);
+
+  const space = spaces.find(s => s.id === spaceId);
+  const spacePosts = posts.filter(post => post.space_id === spaceId);
+
+  if (spacesLoading || postsLoading) {
+    return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
+  }
 
   if (!space) {
     return (
@@ -99,21 +50,34 @@ export default function SpaceDetail() {
   }
 
   const sortedPosts = useMemo(() => {
-    const posts = [...mockSpacePosts];
+    const posts = [...spacePosts];
     
     switch (selectedFilter) {
       case "recent":
-        return posts.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+        return posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case "viral":
-        return posts.sort((a, b) => (b.votesUp + b.viewsCount) - (a.votesUp + a.viewsCount));
+        return posts.sort((a, b) => (b.votes_up + b.views_count) - (a.votes_up + a.views_count));
       case "popular":
-        return posts.sort((a, b) => b.votesUp - a.votesUp);
+        return posts.sort((a, b) => b.votes_up - a.votes_up);
       case "discussed":
-        return posts.sort((a, b) => b.commentsCount - a.commentsCount);
+        return posts.sort((a, b) => b.comments_count - a.comments_count);
       default:
         return posts;
     }
-  }, [selectedFilter]);
+  }, [spacePosts, selectedFilter]);
+
+  const handleSubscriptionToggle = async () => {
+    try {
+      if (space.is_subscribed) {
+        await unsubscribeFromSpace(space.id);
+      } else {
+        await subscribeToSpace(space.id);
+      }
+      fetchSpaces(); // Refresh to update subscription status
+    } catch (error) {
+      console.error('Error toggling subscription:', error);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -146,10 +110,10 @@ export default function SpaceDetail() {
 
       {/* Space header */}
       <Card className="mb-6">
-        {space.coverImage && (
+        {space.cover_image_url && (
           <div className="h-32 bg-gradient-primary rounded-t-lg relative overflow-hidden">
             <img 
-              src={space.coverImage} 
+              src={space.cover_image_url} 
               alt="Cover" 
               className="w-full h-full object-cover opacity-50"
             />
@@ -165,7 +129,7 @@ export default function SpaceDetail() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <h2 className="text-2xl font-bold">{space.name}</h2>
-                {space.isVerified && (
+                {space.is_verified && (
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
                     ✓ Certifié
                   </Badge>
@@ -176,7 +140,7 @@ export default function SpaceDetail() {
                 <Badge variant="outline">{space.category}</Badge>
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{space.subscribersCount} membres</span>
+                  <span>{space.subscribers_count} membres</span>
                 </div>
               </div>
               
@@ -188,18 +152,16 @@ export default function SpaceDetail() {
           
           <div className="flex gap-3">
             <Button
-              variant={isSubscribed ? "outline" : "default"}
+              variant={space.is_subscribed ? "outline" : "default"}
               className="flex-1"
-              onClick={() => setIsSubscribed(!isSubscribed)}
+              onClick={handleSubscriptionToggle}
             >
-              {isSubscribed ? "Abonné" : "S'abonner"}
+              {space.is_subscribed ? "Abonné" : "S'abonner"}
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={() => navigate(`/space/${spaceId}/create-post`, { 
-                state: { spaceName: space.name } 
-              })}
+              onClick={() => navigate(`/create-post?spaceId=${spaceId}`)}
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
@@ -210,21 +172,23 @@ export default function SpaceDetail() {
       </Card>
 
       {/* Rules section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <h3 className="font-semibold">Règles de l'espace</h3>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {space.rules.map((rule, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm">
-                <span className="text-primary font-semibold">{index + 1}.</span>
-                <span className="text-muted-foreground">{rule}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      {space.rules && space.rules.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <h3 className="font-semibold">Règles de l'espace</h3>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {space.rules.map((rule, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="text-primary font-semibold">{index + 1}.</span>
+                  <span className="text-muted-foreground">{rule}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Posts section */}
       <div className="space-y-4">
@@ -251,79 +215,79 @@ export default function SpaceDetail() {
           })}
         </div>
         
-        {sortedPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={post.author.profilePicture} />
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                    {post.author.username.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-sm">@{post.author.username}</span>
-                    {post.author.isVerified && (
-                      <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                        ✓
-                      </Badge>
+        {sortedPosts.length > 0 ? (
+          sortedPosts.map((post) => (
+            <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={post.profiles?.profile_picture_url} />
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                      {post.profiles?.username?.substring(0, 2).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-semibold text-sm">@{post.profiles?.username || "Utilisateur"}</span>
+                      {post.profiles?.is_verified && (
+                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                          ✓
+                        </Badge>
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(post.created_at)}
+                      </span>
+                    </div>
+                    
+                    <p className="text-foreground leading-relaxed mb-3">
+                      {post.content}
+                    </p>
+
+                    {post.hashtags && post.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {post.hashtags.map((tag) => (
+                          <span key={tag} className="text-sm text-primary">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     )}
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(post.publicationDate)}
-                    </span>
-                  </div>
-                  
-                  <p className="text-foreground leading-relaxed mb-3">
-                    {post.content}
-                  </p>
-
-                  {post.image && (
-                    <div className="mb-3">
-                      <img 
-                        src={post.image} 
-                        alt="Post image" 
-                        className="rounded-lg max-w-full h-auto"
-                      />
-                    </div>
-                  )}
-
-                  {post.hashtags && post.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {post.hashtags.map((tag) => (
-                        <span key={tag} className="text-sm text-primary">
-                          {tag}
+                    
+                    <div className="flex items-center gap-6 text-sm">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1 text-green-600">
+                          <ChevronUp className="h-4 w-4" />
+                          {post.votes_up}
                         </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1 text-green-600">
-                        <ChevronUp className="h-4 w-4" />
-                        {post.votesUp}
+                        <span className="flex items-center gap-1 text-red-600">
+                          <ChevronDown className="h-4 w-4" />
+                          {post.votes_down}
+                        </span>
+                      </div>
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <MessageCircle className="h-4 w-4" />
+                        {post.comments_count}
                       </span>
-                      <span className="flex items-center gap-1 text-red-600">
-                        <ChevronDown className="h-4 w-4" />
-                        {post.votesDown}
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Eye className="h-4 w-4" />
+                        {post.views_count}
                       </span>
                     </div>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <MessageCircle className="h-4 w-4" />
-                      {post.commentsCount}
-                    </span>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Eye className="h-4 w-4" />
-                      {post.viewsCount}
-                    </span>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Aucun post dans cet espace</h3>
+            <p className="text-muted-foreground">
+              Soyez le premier à publier dans cet espace !
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePosts } from "@/hooks/usePosts";
+import { useSpaces } from "@/hooks/useSpaces";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 // Mock data for trending
 const mockTrendingData = {
@@ -119,6 +122,21 @@ const timePeriods = [
 
 export default function Trending() {
   const [selectedPeriod, setSelectedPeriod] = useState("day");
+  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+  const { spaces, fetchSpaces, isLoading: spacesLoading } = useSpaces();
+
+  useEffect(() => {
+    fetchPosts({ sort_by: "popular" });
+    fetchSpaces({ sort_by: "popular" });
+  }, [fetchPosts, fetchSpaces]);
+
+  if (postsLoading || spacesLoading) {
+    return <LoadingSpinner size="lg" text="Chargement des tendances..." />;
+  }
+
+  // Get top posts, spaces
+  const topPosts = posts.slice(0, 5);
+  const topSpaces = spaces.slice(0, 5);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -169,18 +187,18 @@ export default function Trending() {
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
-          {mockTrendingData.daily.topPosts.map((post) => (
+          {topPosts.map((post, index) => (
             <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
               <CardHeader className="pb-3">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <Badge 
-                      variant={post.position === 1 ? "default" : "secondary"}
+                      variant={index === 0 ? "default" : "secondary"}
                       className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        post.position === 1 ? "bg-gradient-primary" : ""
+                        index === 0 ? "bg-gradient-primary" : ""
                       }`}
                     >
-                      {post.position}
+                      {index + 1}
                     </Badge>
                   </div>
                   
@@ -200,15 +218,15 @@ export default function Trending() {
                     )}
                     
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>par @{post.author}</span>
+                      <span>par @{post.profiles?.username || "Utilisateur"}</span>
                       <span>•</span>
-                      <span>{post.space}</span>
+                      <span>{post.spaces?.name || "Espace"}</span>
                     </div>
                   </div>
                   
                   <div className="text-right">
                     <div className="text-lg font-bold text-primary">
-                      {post.interactionScore}
+                      {post.votes_up + post.views_count}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       interactions
@@ -222,15 +240,15 @@ export default function Trending() {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <ArrowUp className="h-4 w-4" />
-                      <span>{post.votesUp}</span>
+                      <span>{post.votes_up}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MessageCircle className="h-4 w-4" />
-                      <span>{post.comments}</span>
+                      <span>{post.comments_count}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
-                      <span>{post.views}</span>
+                      <span>{post.views_count}</span>
                     </div>
                   </div>
                 </div>
@@ -240,18 +258,18 @@ export default function Trending() {
         </TabsContent>
 
         <TabsContent value="spaces" className="space-y-4">
-          {mockTrendingData.daily.topSpaces.map((space) => (
+          {topSpaces.map((space, index) => (
             <Card key={space.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
                     <Badge 
-                      variant={space.position === 1 ? "default" : "secondary"}
+                      variant={index === 0 ? "default" : "secondary"}
                       className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        space.position === 1 ? "bg-gradient-primary" : ""
+                        index === 0 ? "bg-gradient-primary" : ""
                       }`}
                     >
-                      {space.position}
+                      {index + 1}
                     </Badge>
                   </div>
                   
@@ -264,7 +282,7 @@ export default function Trending() {
                       <h3 className="font-semibold text-foreground">
                         {space.name}
                       </h3>
-                      {space.isVerified && (
+                      {space.is_verified && (
                         <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
                           ✓
                         </Badge>
@@ -277,7 +295,7 @@ export default function Trending() {
                       <span>•</span>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        <span>{space.subscribersCount}</span>
+                        <span>{space.subscribers_count}</span>
                       </div>
                     </div>
                   </div>
@@ -286,7 +304,7 @@ export default function Trending() {
                     <div className="grid grid-cols-2 gap-2 text-center">
                       <div>
                         <div className="text-sm font-semibold text-primary">
-                          {space.postsToday}
+                          {space.posts_count}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Posts
@@ -294,7 +312,7 @@ export default function Trending() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-primary">
-                          {space.activeMembers}
+                          {space.subscribers_count}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Actifs

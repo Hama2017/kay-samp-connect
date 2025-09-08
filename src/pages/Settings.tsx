@@ -43,12 +43,20 @@ export default function Settings() {
     showFollowers: true
   });
 
-  const handleProfileUpdate = () => {
-    updateProfile(profileData);
-    toast({
-      title: "Profil mis à jour",
-      description: "Vos informations ont été sauvegardées"
-    });
+  const handleProfileUpdate = async () => {
+    try {
+      await updateProfile(profileData);
+      toast({
+        title: "Profil mis à jour",
+        description: "Vos informations ont été sauvegardées"
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le profil",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleLogout = () => {

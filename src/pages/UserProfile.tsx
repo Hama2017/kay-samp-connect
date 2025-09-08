@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus, UserCheck, MoreHorizontal, MessageCircle, ArrowUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,57 +7,60 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock user data
-const mockUserData = {
-  fullName: "Aissatou Ndiaye",
-  username: "AissatouN",
-  bio: "Passionnée de cuisine sénégalaise et de culture wolof. Partage mes recettes traditionnelles avec amour 🍽️",
-  profilePicture: "",
-  isVerified: true,
-  points: 2456,
-  registrationDate: "2023-08-12T10:30:00Z",
-  followers: 1247,
-  following: 89,
-  posts: [
-    {
-      id: "1",
-      content: "Ma nouvelle recette de thiébou dieune aux légumes frais du marché de Sandaga ! Qui veut essayer ?",
-      publishedDate: "2024-03-15T10:30:00Z",
-      votesUp: 45,
-      votesDown: 2,
-      comments: 12,
-      views: 234,
-      hashtags: ["#ThiebouDieune", "#CuisineSenegalaise", "#Sandaga"],
-      space: "Cuisine Sénégalaise"
-    },
-    {
-      id: "2", 
-      content: "Les couleurs du coucher de soleil sur la corniche de Dakar sont vraiment magnifiques aujourd'hui 🌅",
-      publishedDate: "2024-03-14T18:45:00Z",
-      votesUp: 67,
-      votesDown: 1,
-      comments: 8,
-      views: 189,
-      hashtags: ["#Dakar", "#Corniche", "#Sunset"],
-      space: "Sénégal Photos"
-    }
-  ]
-};
+import { supabase } from "@/integrations/supabase/client";
+import { usePosts } from "@/hooks/usePosts";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!username) return;
+      
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', username)
+          .single();
+          
+        if (error) throw error;
+        
+        setUserProfile(profile);
+        
+        // Fetch user's posts
+        if (profile?.id) {
+          fetchPosts({ author_id: profile.id });
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le profil utilisateur",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [username, fetchPosts]);
   
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
     toast({
       title: isFollowing ? "Désabonné" : "Abonné",
       description: isFollowing 
-        ? `Vous ne suivez plus @${mockUserData.username}` 
-        : `Vous suivez maintenant @${mockUserData.username}`,
+        ? `Vous ne suivez plus @${userProfile?.username}` 
+        : `Vous suivez maintenant @${userProfile?.username}`,
     });
   };
 
@@ -74,6 +77,24 @@ export default function UserProfile() {
       return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner size="lg" text="Chargement du profil..." />;
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-2xl text-center">
+        <h1 className="text-2xl font-bold mb-4">Utilisateur introuvable</h1>
+        <Button onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour
+        </Button>
+      </div>
+    );
+  }
+
+  const userPosts = posts.filter(post => post.author_id === userProfile.id);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -93,37 +114,36 @@ export default function UserProfile() {
         <CardContent className="pt-6">
           <div className="flex items-start gap-4 mb-6">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={mockUserData.profilePicture} />
+              <AvatarImage src={userProfile.profile_picture_url} />
               <AvatarFallback className="bg-gradient-primary text-primary-foreground font-bold text-xl">
-                {mockUserData.username.substring(0, 2).toUpperCase()}
+                {userProfile.username?.substring(0, 2).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-xl font-bold text-foreground">
-                  @{mockUserData.username}
+                  @{userProfile.username}
                 </h1>
-                {mockUserData.isVerified && (
+                {userProfile.is_verified && (
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
                     ✓ Certifié
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground mb-3">{mockUserData.fullName}</p>
               
               <div className="flex items-center gap-4 text-sm mb-4">
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{mockUserData.followers}</span>
+                  <span className="font-semibold text-foreground">{userProfile.followers_count || 0}</span>
                   <span className="text-muted-foreground">abonnés</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{mockUserData.following}</span>
+                  <span className="font-semibold text-foreground">{userProfile.following_count || 0}</span>
                   <span className="text-muted-foreground">abonnements</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-primary">{mockUserData.points}</span>
-                  <span className="text-muted-foreground">points</span>
+                  <span className="font-semibold text-primary">{userPosts.length}</span>
+                  <span className="text-muted-foreground">posts</span>
                 </div>
               </div>
               
@@ -154,9 +174,9 @@ export default function UserProfile() {
             </div>
           </div>
           
-          {mockUserData.bio && (
+          {userProfile.bio && (
             <p className="text-foreground text-sm leading-relaxed bg-muted/50 p-3 rounded-lg">
-              {mockUserData.bio}
+              {userProfile.bio}
             </p>
           )}
         </CardContent>
@@ -166,83 +186,85 @@ export default function UserProfile() {
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-1 mb-6">
           <TabsTrigger value="posts">
-            Posts ({mockUserData.posts.length})
+            Posts ({userPosts.length})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
-          {mockUserData.posts.map((post) => (
-            <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={mockUserData.profilePicture} />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                      {mockUserData.username.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-sm">@{mockUserData.username}</span>
-                      {mockUserData.isVerified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
-                        </Badge>
+          {postsLoading ? (
+            <LoadingSpinner size="sm" text="Chargement des posts..." />
+          ) : userPosts.length > 0 ? (
+            userPosts.map((post) => (
+              <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={userProfile.profile_picture_url} />
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                        {userProfile.username?.substring(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-sm">@{userProfile.username}</span>
+                        {userProfile.is_verified && (
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+                            ✓
+                          </Badge>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {post.spaces?.name && `dans ${post.spaces.name}`}
+                        </span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(post.created_at)}
+                        </span>
+                      </div>
+                      
+                      <p className="text-foreground leading-relaxed mb-3">
+                        {post.content}
+                      </p>
+                      
+                      {post.hashtags && post.hashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {post.hashtags.map((tag) => (
+                            <span key={tag} className="text-sm text-primary">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       )}
-                      <span className="text-xs text-muted-foreground">
-                        dans {post.space}
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center gap-1 text-green-600">
+                        <ArrowUp className="h-4 w-4" />
+                        {post.votes_up}
                       </span>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(post.publishedDate)}
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <MessageCircle className="h-4 w-4" />
+                        {post.comments_count}
+                      </span>
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Eye className="h-4 w-4" />
+                        {post.views_count}
                       </span>
                     </div>
-                    
-                    <p className="text-foreground leading-relaxed mb-3">
-                      {post.content}
-                    </p>
-                    
-                    {post.hashtags && post.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {post.hashtags.map((tag) => (
-                          <span key={tag} className="text-sm text-primary">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <div className="flex items-center gap-6 text-sm">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1 text-green-600">
-                      <ArrowUp className="h-4 w-4" />
-                      {post.votesUp}
-                    </span>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <MessageCircle className="h-4 w-4" />
-                      {post.comments}
-                    </span>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Eye className="h-4 w-4" />
-                      {post.views}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {mockUserData.posts.length === 0 && (
+                </CardContent>
+              </Card>
+            ))
+          ) : (
             <div className="text-center py-12">
               <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Aucun post encore</h3>
               <p className="text-muted-foreground">
-                @{mockUserData.username} n'a pas encore publié de posts
+                @{userProfile.username} n'a pas encore publié de posts
               </p>
             </div>
           )}

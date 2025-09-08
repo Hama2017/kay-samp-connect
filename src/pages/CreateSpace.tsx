@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useSpaces } from "@/hooks/useSpaces";
 
 const categories = [
   "Sport",
@@ -26,6 +27,8 @@ const categories = [
 export default function CreateSpace() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { createSpace } = useSpaces();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -47,7 +50,7 @@ export default function CreateSpace() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.description || !formData.category || formData.whoCanPublish.length === 0) {
@@ -59,13 +62,29 @@ export default function CreateSpace() {
       return;
     }
 
-    // Mock creation success
-    toast({
-      title: "Espace créé !",
-      description: `L'espace "${formData.name}" a été créé avec succès`,
-    });
-    
-    navigate("/");
+    setIsLoading(true);
+    try {
+      await createSpace({
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+      });
+      
+      toast({
+        title: "Espace créé !",
+        description: `L'espace "${formData.name}" a été créé avec succès`,
+      });
+      
+      navigate("/discover");
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer l'espace. Réessayez plus tard.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -192,8 +211,9 @@ export default function CreateSpace() {
                 type="submit"
                 variant="senegal"
                 className="w-full"
+                disabled={isLoading}
               >
-                Créer l'espace
+                {isLoading ? "Création..." : "Créer l'espace"}
               </Button>
             </div>
           </form>
