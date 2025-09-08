@@ -91,7 +91,7 @@ export default function Home() {
   }, [posts, selectedCategory]);
 
   return (
-    <div className="min-h-screen w-full max-w-2xl mx-auto px-4 py-2 sm:py-6 overflow-x-hidden">
+    <div className="min-h-screen w-full max-w-2xl mx-auto px-4 py-2 sm:py-6 max-w-full overflow-hidden">
       {/* Welcome section */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
@@ -156,7 +156,7 @@ export default function Home() {
           filteredAndSortedPosts.map((post) => (
           <Card 
             key={post.id} 
-            className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+            className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer max-w-full overflow-hidden"
             onClick={() => handlePostClick(post)}
           >
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
@@ -216,7 +216,7 @@ export default function Home() {
             
             <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
               <div 
-                className="text-foreground mb-3 leading-relaxed whitespace-pre-wrap break-words overflow-hidden"
+                className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
                 dangerouslySetInnerHTML={{
                   __html: getDisplayContent(post).replace(/#(\w+)/g, '<span style="color: hsl(var(--primary)); font-weight: 600;">#$1</span>')
                 }}
