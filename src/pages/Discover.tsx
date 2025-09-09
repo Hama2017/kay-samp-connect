@@ -68,6 +68,7 @@ export default function Discover() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [sortBy, setSortBy] = useState("popular");
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState("tous");
 
   // Track page view
   usePageTracking();
@@ -77,9 +78,10 @@ export default function Discover() {
     fetchSpaces({
       category: selectedCategory,
       search: searchQuery,
-      sort_by: sortBy as any
+      sort_by: sortBy as any,
+      verified_only: showVerifiedOnly === "verifies"
     });
-  }, [fetchSpaces, selectedCategory, searchQuery, sortBy]);
+  }, [fetchSpaces, selectedCategory, searchQuery, sortBy, showVerifiedOnly]);
 
   const handleSubscriptionToggle = async (space: any) => {
     if (space.is_subscribed) {
@@ -129,7 +131,7 @@ export default function Discover() {
           ))}
         </div>
         
-        {/* Sort filter */}
+        {/* Sort and Verified filters */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <Select value={sortBy} onValueChange={setSortBy}>
@@ -142,6 +144,16 @@ export default function Discover() {
                   {option.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={showVerifiedOnly} onValueChange={setShowVerifiedOnly}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Statut..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tous">Tous</SelectItem>
+              <SelectItem value="verifies">Vérifiés ✓</SelectItem>
             </SelectContent>
           </Select>
         </div>

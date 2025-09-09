@@ -48,6 +48,7 @@ export function useSpaces() {
     search?: string;
     sort_by?: 'popular' | 'recent' | 'subscribers';
     user_spaces?: boolean;
+    verified_only?: boolean;
   }) => {
     setIsLoading(true);
     setError(null);
@@ -79,6 +80,11 @@ export function useSpaces() {
       // Apply search filter
       if (filters?.search) {
         query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      }
+
+      // Apply verified filter
+      if (filters?.verified_only) {
+        query = query.eq('is_verified', true);
       }
 
       // Apply sorting
