@@ -457,6 +457,7 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          cover_image_url: string | null
           created_at: string | null
           followers_count: number | null
           following_count: number | null
@@ -472,6 +473,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          cover_image_url?: string | null
           created_at?: string | null
           followers_count?: number | null
           following_count?: number | null
@@ -487,6 +489,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          cover_image_url?: string | null
           created_at?: string | null
           followers_count?: number | null
           following_count?: number | null

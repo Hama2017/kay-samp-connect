@@ -12,11 +12,14 @@ import { useSpaces } from "@/hooks/useSpaces";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { CoverImageUpload } from "@/components/CoverImageUpload";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("posts");
+  const [coverImageUrl, setCoverImageUrl] = useState<string>("");
   const { posts, isLoading: postsLoading, fetchPosts, votePost } = usePosts();
   const { spaces, isLoading: spacesLoading, fetchSpaces } = useSpaces();
   const { bookmarks, isLoading: bookmarksLoading, fetchBookmarks } = useRealBookmarks();
@@ -26,8 +29,23 @@ export default function Profile() {
       fetchPosts({ author_id: user.id });
       fetchSpaces({ user_spaces: true });
       fetchBookmarks();
+      
+      // Charger la photo de couverture
+      const loadCoverImage = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('cover_image_url')
+          .eq('id', user.id)
+          .single();
+        
+        if (data?.cover_image_url) {
+          setCoverImageUrl(data.cover_image_url);
+        }
+      };
+      
+      loadCoverImage();
     }
-  }, [user?.id]); // Supprimé les fonctions des dépendances
+  }, [user?.id]);
 
   if (!user) {
     return (
@@ -47,9 +65,9 @@ export default function Profile() {
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden">
       {/* Cover Image */}
-      <div 
-        className="h-48 bg-gradient-hero rounded-t-xl bg-cover bg-center"
-        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=300&fit=crop)' }}
+      <CoverImageUpload 
+        currentCoverUrl={coverImageUrl}
+        onUploadComplete={(url) => setCoverImageUrl(url)}
       />
       
       {/* Profile Header */}
