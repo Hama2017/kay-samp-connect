@@ -70,7 +70,7 @@ export default function UserProfile() {
     };
 
     fetchUserProfile();
-  }, [username, fetchPosts, updateCounts, toast]);
+  }, [username, updateCounts, toast]);
   
   // Vérifier si c'est le profil de l'utilisateur connecté
   const isOwnProfile = currentUser?.profile?.username === username;
