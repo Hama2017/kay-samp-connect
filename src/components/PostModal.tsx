@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, Eye, Share, Flag, MessageCircle, X } from 'lucide-react';
+import { Clock, Eye, Share, Flag, MessageCircle, X, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import GifSelector from '@/components/GifSelector';
 
 interface PostModalProps {
   postId: string | null;
@@ -25,15 +26,19 @@ export function PostModal({ postId, isOpen, onClose }: PostModalProps) {
   const { post, isLoading, error, votePost, addComment, voteComment } = usePostDetail(postId || '');
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<string>('');
+  const [showGifSelector, setShowGifSelector] = useState(false);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || isSubmitting) return;
+    if ((!newComment.trim() && !selectedGif) || isSubmitting) return;
 
     setIsSubmitting(true);
-    const success = await addComment(newComment);
+    const content = selectedGif ? `${newComment}\n\n![GIF](${selectedGif})` : newComment;
+    const success = await addComment(content);
     if (success) {
       setNewComment('');
+      setSelectedGif('');
     }
     setIsSubmitting(false);
   };
@@ -70,7 +75,7 @@ export function PostModal({ postId, isOpen, onClose }: PostModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
         <div className="flex flex-col h-full">
           {/* Header avec actions */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -251,15 +256,59 @@ export function PostModal({ postId, isOpen, onClose }: PostModalProps) {
                       className="min-h-[80px] resize-none"
                       disabled={isSubmitting}
                     />
-                    <div className="flex justify-end">
+                    
+                    {/* GIF sélectionné */}
+                    {selectedGif && (
+                      <div className="relative inline-block">
+                        <img 
+                          src={selectedGif} 
+                          alt="GIF sélectionné" 
+                          className="max-w-xs rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => setSelectedGif('')}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowGifSelector(!showGifSelector)}
+                        className="flex items-center gap-2"
+                      >
+                        <Image className="h-4 w-4" />
+                        GIF
+                      </Button>
+                      
                       <Button 
                         type="submit" 
-                        disabled={!newComment.trim() || isSubmitting}
+                        disabled={(!newComment.trim() && !selectedGif) || isSubmitting}
                         size="sm"
                       >
                         {isSubmitting ? 'Envoi...' : 'Commenter'}
                       </Button>
                     </div>
+                    
+                    {/* Sélecteur de GIF */}
+                    {showGifSelector && (
+                      <GifSelector
+                        isOpen={showGifSelector}
+                        onSelectGif={(gifUrl) => {
+                          setSelectedGif(gifUrl);
+                          setShowGifSelector(false);
+                        }}
+                        onClose={() => setShowGifSelector(false)}
+                      />
+                    )}
                   </form>
                   
                   {/* Liste des commentaires */}
@@ -298,9 +347,28 @@ export function PostModal({ postId, isOpen, onClose }: PostModalProps) {
                                   </span>
                                 </div>
                                 
-                                <p className="text-sm break-words whitespace-pre-wrap">
-                                  {comment.content}
-                                </p>
+                                <div className="text-sm break-words whitespace-pre-wrap">
+                                  {comment.content.includes('![GIF](') ? (
+                                    <div>
+                                      {comment.content.split('![GIF](').map((part, index) => {
+                                        if (index === 0) return part;
+                                        const [gifUrl, ...rest] = part.split(')');
+                                        return (
+                                          <div key={index}>
+                                            <img 
+                                              src={gifUrl} 
+                                              alt="GIF" 
+                                              className="max-w-xs rounded-lg my-2" 
+                                            />
+                                            {rest.join(')')}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    comment.content
+                                  )}
+                                </div>
                                 
                                 {/* Actions du commentaire */}
                                 <div className="flex items-center gap-4 pt-2">
