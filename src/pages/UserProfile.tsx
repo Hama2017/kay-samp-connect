@@ -160,27 +160,41 @@ export default function UserProfile() {
               
               {!isOwnProfile && canFollow && (
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant={isFollowing ? "outline" : "senegal"}
-                    size="sm"
-                    onClick={toggleFollow}
-                    disabled={followLoading}
-                    className="flex-1"
-                  >
-                    {followLoading ? (
-                      <LoadingSpinner size="sm" className="mr-2" />
-                    ) : isFollowing ? (
-                      <>
-                        <UserCheck className="h-4 w-4 mr-2" />
-                        Abonné
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        S'abonner
-                      </>
-                    )}
-                  </Button>
+                  {!isFollowing ? (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={toggleFollow}
+                      disabled={followLoading}
+                      className="flex-1 bg-gradient-primary hover:opacity-90"
+                    >
+                      {followLoading ? (
+                        <LoadingSpinner size="sm" className="mr-2" />
+                      ) : (
+                        <>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          S'abonner
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={toggleFollow}
+                      disabled={followLoading}
+                      className="flex-1 text-muted-foreground hover:text-destructive hover:border-destructive"
+                    >
+                      {followLoading ? (
+                        <LoadingSpinner size="sm" className="mr-2" />
+                      ) : (
+                        <>
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          Se désabonner
+                        </>
+                      )}
+                    </Button>
+                  )}
                   
                   <Button variant="outline" size="icon">
                     <MoreHorizontal className="h-4 w-4" />
