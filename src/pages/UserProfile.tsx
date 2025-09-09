@@ -27,7 +27,7 @@ export default function UserProfile() {
   const [followingCount, setFollowingCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
 
-  // Un seul useEffect pour tout charger
+  // Charger le profil utilisateur et ses posts
   useEffect(() => {
     const loadUserProfile = async () => {
       if (!username) return;
@@ -49,19 +49,7 @@ export default function UserProfile() {
         setFollowersCount(profile.followers_count || 0);
         setFollowingCount(profile.following_count || 0);
         
-        // 2. Vérifier si on suit cet utilisateur (seulement si connecté et pas notre profil)
-        if (currentUser?.id && profile.id !== currentUser.id) {
-          const { data: followData } = await supabase
-            .from('user_follows')
-            .select('id')
-            .eq('follower_id', currentUser.id)
-            .eq('following_id', profile.id)
-            .maybeSingle();
-            
-          setIsFollowing(!!followData);
-        }
-        
-        // 3. Charger les posts de l'utilisateur
+        // 2. Charger les posts de l'utilisateur
         const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select(`
@@ -93,7 +81,33 @@ export default function UserProfile() {
     };
 
     loadUserProfile();
-  }, [username]); // SEULEMENT username comme dépendance
+  }, [username]);
+
+  // Vérifier le statut de suivi séparément
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) {
+        setIsFollowing(false);
+        return;
+      }
+
+      try {
+        const { data: followData } = await supabase
+          .from('user_follows')
+          .select('id')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', userProfile.id)
+          .maybeSingle();
+          
+        setIsFollowing(!!followData);
+      } catch (error) {
+        console.error('Error checking follow status:', error);
+        setIsFollowing(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [currentUser?.id, userProfile?.id]);
 
   // Fonction pour gérer le suivi/désabonnement
   const handleFollowToggle = async () => {
