@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { usePosts } from "@/hooks/usePosts";
-import { useUserFollow } from "@/hooks/useUserFollow";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -18,77 +16,71 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+  
+  // États locaux pour éviter les boucles infinies
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
-  
-  // Hook de suivi - sera initialisé une fois qu'on a l'ID utilisateur
-  const { 
-    isFollowing, 
-    followersCount, 
-    followingCount, 
-    isLoading: followLoading, 
-    toggleFollow,
-    updateCounts,
-    canFollow 
-  } = useUserFollow(userProfile?.id || '');
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
+  // Un seul useEffect pour tout charger
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const loadUserProfile = async () => {
       if (!username) return;
       
       setIsLoading(true);
+      setPostsLoading(true);
       
       try {
-        const { data: profile, error } = await supabase
+        // 1. Charger le profil utilisateur
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('username', username)
           .single();
           
-        if (error) throw error;
+        if (profileError) throw profileError;
         
         setUserProfile(profile);
+        setFollowersCount(profile.followers_count || 0);
+        setFollowingCount(profile.following_count || 0);
         
-        // Mettre à jour les compteurs
-        if (profile) {
-          updateCounts(profile.followers_count || 0, profile.following_count || 0);
-        }
-        
-        // Fetch user's posts directement ici
-        if (profile?.id) {
-          setPostsLoading(true);
-          const { data: posts, error: postsError } = await supabase
-            .from('posts')
-            .select(`
-              *,
-              profiles:author_id (*),
-              spaces:space_id (*),
-              post_media (*),
-              _count_votes_up: post_votes!post_id(count),
-              _count_votes_down: post_votes!post_id(count),
-              _count_comments: comments!post_id(count)
-            `)
-            .eq('author_id', profile.id)
-            .order('created_at', { ascending: false });
+        // 2. Vérifier si on suit cet utilisateur (seulement si connecté et pas notre profil)
+        if (currentUser?.id && profile.id !== currentUser.id) {
+          const { data: followData } = await supabase
+            .from('user_follows')
+            .select('id')
+            .eq('follower_id', currentUser.id)
+            .eq('following_id', profile.id)
+            .maybeSingle();
             
-          if (postsError) {
-            console.error('Error fetching posts:', postsError);
-          } else {
-            // Process posts data
-            const processedPosts = (posts || []).map(post => ({
-              ...post,
-              votes_up: post._count_votes_up?.[0]?.count || 0,
-              votes_down: post._count_votes_down?.[0]?.count || 0,
-              comments_count: post._count_comments?.[0]?.count || 0,
-            }));
-            setUserPosts(processedPosts);
-          }
-          setPostsLoading(false);
+          setIsFollowing(!!followData);
         }
+        
+        // 3. Charger les posts de l'utilisateur
+        const { data: posts, error: postsError } = await supabase
+          .from('posts')
+          .select(`
+            *,
+            profiles:author_id (*),
+            spaces:space_id (*),
+            post_media (*)
+          `)
+          .eq('author_id', profile.id)
+          .order('created_at', { ascending: false });
+          
+        if (postsError) {
+          console.error('Error fetching posts:', postsError);
+        } else {
+          setUserPosts(posts || []);
+        }
+        
       } catch (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('Error loading user profile:', error);
         toast({
           title: "Erreur",
           description: "Impossible de charger le profil utilisateur",
@@ -96,14 +88,79 @@ export default function UserProfile() {
         });
       } finally {
         setIsLoading(false);
+        setPostsLoading(false);
       }
     };
 
-    fetchUserProfile();
-  }, [username]); // Seulement username comme dépendance
+    loadUserProfile();
+  }, [username]); // SEULEMENT username comme dépendance
+
+  // Fonction pour gérer le suivi/désabonnement
+  const handleFollowToggle = async () => {
+    if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de s'abonner à ce compte",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setFollowLoading(true);
+
+    try {
+      if (isFollowing) {
+        // Se désabonner
+        const { error } = await supabase
+          .from('user_follows')
+          .delete()
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', userProfile.id);
+
+        if (error) throw error;
+
+        setIsFollowing(false);
+        setFollowersCount(prev => Math.max(0, prev - 1));
+
+        toast({
+          title: "Désabonné",
+          description: "Vous ne suivez plus cet utilisateur",
+        });
+      } else {
+        // S'abonner
+        const { error } = await supabase
+          .from('user_follows')
+          .insert({
+            follower_id: currentUser.id,
+            following_id: userProfile.id
+          });
+
+        if (error) throw error;
+
+        setIsFollowing(true);
+        setFollowersCount(prev => prev + 1);
+
+        toast({
+          title: "Abonné !",
+          description: "Vous suivez maintenant cet utilisateur",
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Error toggling follow:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur s'est produite",
+        variant: "destructive"
+      });
+    } finally {
+      setFollowLoading(false);
+    }
+  };
   
   // Vérifier si c'est le profil de l'utilisateur connecté
   const isOwnProfile = currentUser?.profile?.username === username;
+  const canFollow = currentUser?.id && userProfile?.id && currentUser.id !== userProfile.id;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -134,8 +191,6 @@ export default function UserProfile() {
       </div>
     );
   }
-
-  const userPostsFiltered = userPosts.filter(post => post.author_id === userProfile?.id);
 
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl overflow-hidden">
@@ -182,10 +237,10 @@ export default function UserProfile() {
                   <span className="font-semibold text-foreground">{followingCount}</span>
                   <span className="text-muted-foreground">abonnements</span>
                 </div>
-                 <div className="flex items-center gap-1">
-                   <span className="font-semibold text-primary">{userPostsFiltered.length}</span>
-                   <span className="text-muted-foreground">posts</span>
-                 </div>
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-primary">{userPosts.length}</span>
+                  <span className="text-muted-foreground">posts</span>
+                </div>
               </div>
               
               {!isOwnProfile && canFollow && (
@@ -194,7 +249,7 @@ export default function UserProfile() {
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={toggleFollow}
+                      onClick={handleFollowToggle}
                       disabled={followLoading}
                       className="flex-1 bg-gradient-primary hover:opacity-90"
                     >
@@ -211,7 +266,7 @@ export default function UserProfile() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={toggleFollow}
+                      onClick={handleFollowToggle}
                       disabled={followLoading}
                       className="flex-1 text-muted-foreground hover:text-destructive hover:border-destructive"
                     >
@@ -245,16 +300,16 @@ export default function UserProfile() {
       {/* Posts */}
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-1 mb-6">
-           <TabsTrigger value="posts">
-             Posts ({userPostsFiltered.length})
-           </TabsTrigger>
+          <TabsTrigger value="posts">
+            Posts ({userPosts.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
           {postsLoading ? (
             <LoadingSpinner size="sm" text="Chargement des posts..." />
-           ) : userPostsFiltered.length > 0 ? (
-             userPostsFiltered.map((post) => (
+          ) : userPosts.length > 0 ? (
+            userPosts.map((post) => (
               <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
                     onClick={() => navigate(`/post/${post.id}`)}>
                 <CardHeader className="pb-3">
@@ -289,7 +344,7 @@ export default function UserProfile() {
                       
                       {post.hashtags && post.hashtags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-3">
-                          {post.hashtags.map((tag) => (
+                          {post.hashtags.map((tag: string) => (
                             <span key={tag} className="text-sm text-primary">
                               {tag}
                             </span>
