@@ -152,11 +152,25 @@ export function useSpaces() {
       return data;
     } catch (err: any) {
       setError(err.message);
-      toast({
-        title: "Erreur",
-        description: "Impossible de créer l'espace",
-        variant: "destructive",
-      });
+      
+      // Check if it's a duplicate name error
+      const isDuplicateName = err.code === '23505' || 
+                             err.message?.toLowerCase().includes('duplicate') ||
+                             err.message?.toLowerCase().includes('idx_spaces_name_unique');
+      
+      if (isDuplicateName) {
+        toast({
+          title: "Nom déjà utilisé",
+          description: "Un espace avec ce nom existe déjà. Choisissez un autre nom.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible de créer l'espace",
+          variant: "destructive",
+        });
+      }
       throw err;
     } finally {
       setIsLoading(false);
