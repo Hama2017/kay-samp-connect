@@ -9,16 +9,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePosts } from "@/hooks/usePosts";
+import { useUserFollow } from "@/hooks/useUserFollow";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isFollowing, setIsFollowing] = useState(false);
+  const { user: currentUser } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+  
+  // Hook de suivi - sera initialisé une fois qu'on a l'ID utilisateur
+  const { 
+    isFollowing, 
+    followersCount, 
+    followingCount, 
+    isLoading: followLoading, 
+    toggleFollow,
+    updateCounts,
+    canFollow 
+  } = useUserFollow(userProfile?.id || '');
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -34,6 +47,11 @@ export default function UserProfile() {
         if (error) throw error;
         
         setUserProfile(profile);
+        
+        // Mettre à jour les compteurs dans le hook de suivi
+        if (profile) {
+          updateCounts(profile.followers_count || 0, profile.following_count || 0);
+        }
         
         // Fetch user's posts
         if (profile?.id) {
@@ -52,17 +70,10 @@ export default function UserProfile() {
     };
 
     fetchUserProfile();
-  }, [username, fetchPosts]);
+  }, [username, fetchPosts, updateCounts, toast]);
   
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    toast({
-      title: isFollowing ? "Désabonné" : "Abonné",
-      description: isFollowing 
-        ? `Vous ne suivez plus @${userProfile?.username}` 
-        : `Vous suivez maintenant @${userProfile?.username}`,
-    });
-  };
+  // Vérifier si c'est le profil de l'utilisateur connecté
+  const isOwnProfile = currentUser?.profile?.username === username;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -84,7 +95,7 @@ export default function UserProfile() {
 
   if (!userProfile) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl text-center">
+      <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl text-center overflow-hidden">
         <h1 className="text-2xl font-bold mb-4">Utilisateur introuvable</h1>
         <Button onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -97,7 +108,7 @@ export default function UserProfile() {
   const userPosts = posts.filter(post => post.author_id === userProfile.id);
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl overflow-hidden">
       {/* Back button */}
       <Button 
         variant="ghost" 
@@ -134,11 +145,11 @@ export default function UserProfile() {
               
               <div className="flex items-center gap-4 text-sm mb-4">
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{userProfile.followers_count || 0}</span>
+                  <span className="font-semibold text-foreground">{followersCount}</span>
                   <span className="text-muted-foreground">abonnés</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{userProfile.following_count || 0}</span>
+                  <span className="font-semibold text-foreground">{followingCount}</span>
                   <span className="text-muted-foreground">abonnements</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -147,30 +158,35 @@ export default function UserProfile() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={isFollowing ? "outline" : "senegal"}
-                  size="sm"
-                  onClick={handleFollow}
-                  className="flex-1"
-                >
-                  {isFollowing ? (
-                    <>
-                      <UserCheck className="h-4 w-4 mr-2" />
-                      Abonné
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      S'abonner
-                    </>
-                  )}
-                </Button>
-                
-                <Button variant="outline" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
+              {!isOwnProfile && canFollow && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={isFollowing ? "outline" : "senegal"}
+                    size="sm"
+                    onClick={toggleFollow}
+                    disabled={followLoading}
+                    className="flex-1"
+                  >
+                    {followLoading ? (
+                      <LoadingSpinner size="sm" className="mr-2" />
+                    ) : isFollowing ? (
+                      <>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Abonné
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        S'abonner
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button variant="outline" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           
@@ -195,7 +211,8 @@ export default function UserProfile() {
             <LoadingSpinner size="sm" text="Chargement des posts..." />
           ) : userPosts.length > 0 ? (
             userPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
+              <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                    onClick={() => navigate(`/post/${post.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
