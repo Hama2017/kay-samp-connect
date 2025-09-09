@@ -30,6 +30,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isLoading: boolean;
   updateProfile: (data: Partial<Profile>) => Promise<{ error?: string }>;
+  updateUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -192,6 +193,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUserProfile = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const profile = await fetchProfile(user.id);
+      if (profile) {
+        setUser({
+          ...user,
+          profile
+        });
+      }
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -199,7 +216,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signOut,
     isLoading,
-    updateProfile
+    updateProfile,
+    updateUserProfile
   };
 
   return (

@@ -11,6 +11,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { AvatarUpload } from "@/components/AvatarUpload";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -44,7 +45,7 @@ export default function Profile() {
   const userSpaces = spaces.filter(space => space.creator_id === user.id);
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
+    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden">
       {/* Cover Image */}
       <div 
         className="h-48 bg-gradient-hero rounded-t-xl bg-cover bg-center"
@@ -56,12 +57,11 @@ export default function Profile() {
         <CardHeader className="pb-0">
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <div className="flex items-end gap-4 -mt-12">
-              <Avatar className="h-24 w-24 border-4 border-background">
-                <AvatarImage src={user.profile?.profile_picture_url} />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                  {user.profile?.username?.substring(0, 2).toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
+              <AvatarUpload
+                currentAvatarUrl={user.profile?.profile_picture_url}
+                fallbackText={user.profile?.username?.substring(0, 2).toUpperCase() || "U"}
+                size="xl"
+              />
               
               <Button 
                 variant="outline" 
