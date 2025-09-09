@@ -311,6 +311,33 @@ export type Database = {
           },
         ]
       }
+      phone_otp: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          otp_code: string
+          phone: string
+          used: boolean
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          otp_code: string
+          phone: string
+          used?: boolean
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          phone?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       post_media: {
         Row: {
           created_at: string

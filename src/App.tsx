@@ -18,8 +18,10 @@ import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import PhoneLogin from "@/pages/PhoneLogin";
+import VerifyOTP from "@/pages/VerifyOTP";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Bookmarks from "./pages/Bookmarks";
@@ -41,10 +43,12 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <PageTracker />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/phone-login" element={<PhoneLogin />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
             
             {/* Protected routes with layout */}
             <Route path="/" element={

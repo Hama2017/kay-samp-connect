@@ -128,7 +128,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-muted-foreground">
               Vous n'avez pas de compte ?{" "}
               <Link 
@@ -136,6 +136,15 @@ export default function Login() {
                 className="text-primary hover:underline font-medium"
               >
                 Créer un compte
+              </Link>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Ou{" "}
+              <Link 
+                to="/phone-login" 
+                className="text-primary hover:underline font-medium"
+              >
+                Connexion par SMS
               </Link>
             </p>
           </div>

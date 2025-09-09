@@ -332,7 +332,7 @@ export default function Register() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-muted-foreground">
               Vous avez déjà un compte ?{" "}
               <Link 
@@ -340,6 +340,15 @@ export default function Register() {
                 className="text-primary hover:underline font-medium"
               >
                 Se connecter
+              </Link>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Ou{" "}
+              <Link 
+                to="/phone-login" 
+                className="text-primary hover:underline font-medium"
+              >
+                Connexion par SMS
               </Link>
             </p>
           </div>
