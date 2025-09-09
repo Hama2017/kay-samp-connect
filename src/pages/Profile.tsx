@@ -147,8 +147,9 @@ export default function Profile() {
           {/* Posts Tab */}
           <TabsContent value="posts" className="space-y-4 mt-6">
             {userPosts.length > 0 ? (
-              userPosts.map((post) => (
-                <Card key={post.id} className="hover:shadow-lg transition-all duration-300">
+            userPosts.map((post) => (
+                <Card key={post.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      onClick={() => navigate(`/post/${post.id}`)}>
                   <CardContent className="pt-6">
                     <p className="text-foreground mb-3 leading-relaxed">
                       {post.content}
