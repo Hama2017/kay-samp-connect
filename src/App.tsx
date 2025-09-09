@@ -23,6 +23,7 @@ import Register from "./pages/Register";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Bookmarks from "./pages/Bookmarks";
+import PostDetail from "./pages/PostDetail";
 
 // Composant pour tracker les pages
 function PageTracker() {
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="trending" element={<Trending />} />
               <Route path="profile" element={<Profile />} />
               <Route path="user/:username" element={<UserProfile />} />
+              <Route path="post/:id" element={<PostDetail />} />
               <Route path="space/:spaceId" element={<SpaceDetail />} />
               <Route path="settings" element={<Settings />} />
               <Route path="search" element={<Search />} />

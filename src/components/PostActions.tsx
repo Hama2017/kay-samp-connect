@@ -12,15 +12,17 @@ interface PostActionsProps {
     votes_down: number;
     comments_count: number;
     views_count: number;
+    current_user_vote?: 'up' | 'down' | null;
     profiles: {
       username: string;
     };
   };
   onVote: (postId: string, voteType: 'up' | 'down') => void;
   onOpenComments?: () => void;
+  hideCommentButton?: boolean;
 }
 
-export function PostActions({ post, onVote, onOpenComments }: PostActionsProps) {
+export function PostActions({ post, onVote, onOpenComments, hideCommentButton = false }: PostActionsProps) {
   const { isBookmarked, toggleBookmark } = useRealBookmarks();
   const { toast } = useToast();
   
@@ -83,7 +85,11 @@ export function PostActions({ post, onVote, onOpenComments }: PostActionsProps) 
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 px-2 text-muted-foreground hover:text-green-600"
+            className={`h-8 px-2 ${
+              post.current_user_vote === 'up' 
+                ? 'text-green-600 bg-green-50' 
+                : 'text-muted-foreground hover:text-green-600'
+            }`}
             onClick={(e) => {
               e.stopPropagation();
               onVote(post.id, 'up');
@@ -95,7 +101,11 @@ export function PostActions({ post, onVote, onOpenComments }: PostActionsProps) 
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 px-2 text-muted-foreground hover:text-red-600"
+            className={`h-8 px-2 ${
+              post.current_user_vote === 'down' 
+                ? 'text-red-600 bg-red-50' 
+                : 'text-muted-foreground hover:text-red-600'
+            }`}
             onClick={(e) => {
               e.stopPropagation();
               onVote(post.id, 'down');
@@ -107,18 +117,20 @@ export function PostActions({ post, onVote, onOpenComments }: PostActionsProps) 
         </div>
         
         {/* Comments button */}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 px-2 text-muted-foreground hover:text-primary"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenComments?.();
-          }}
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-xs ml-1">{post.comments_count}</span>
-        </Button>
+        {!hideCommentButton && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 px-2 text-muted-foreground hover:text-primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenComments?.();
+            }}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs ml-1">{post.comments_count}</span>
+          </Button>
+        )}
 
         {/* Bookmark button */}
         <Button 

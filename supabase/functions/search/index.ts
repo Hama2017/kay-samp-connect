@@ -164,7 +164,8 @@ serve(async (req) => {
           bio,
           profile_picture_url,
           is_verified,
-          user_stats!left(followers_count, following_count)
+          followers_count,
+          following_count
         `)
         .or(`username.ilike.${searchTerm},bio.ilike.${searchTerm}`)
         .limit(limit);
@@ -192,8 +193,8 @@ serve(async (req) => {
           bio: user.bio,
           profile_picture_url: user.profile_picture_url,
           is_verified: user.is_verified,
-          followers_count: user.user_stats?.[0]?.followers_count || 0,
-          following_count: user.user_stats?.[0]?.following_count || 0
+          followers_count: user.followers_count || 0,
+          following_count: user.following_count || 0
         }));
       }
     }

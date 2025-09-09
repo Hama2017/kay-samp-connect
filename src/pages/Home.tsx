@@ -44,8 +44,8 @@ export default function Home() {
   usePageTracking();
 
   const handlePostClick = (post: any) => {
-    setSelectedPost(post);
-    setIsCommentsOpen(true);
+    // Navigate to post detail page instead of opening modal
+    navigate(`/post/${post.id}`);
     incrementViews(post.id);
     trackClick('post_view', { postId: post.id });
   };
@@ -252,12 +252,12 @@ export default function Home() {
                  </div>
                )}
                
-               {/* Actions avec Up/Down */}
-               <PostActions 
-                 post={post}
-                 onVote={handleVote}
-                 onOpenComments={() => handlePostClick(post)}
-               />
+                {/* Actions avec Up/Down */}
+                <PostActions 
+                  post={post}
+                  onVote={handleVote}
+                  onOpenComments={() => navigate(`/post/${post.id}`)}
+                />
             </CardContent>
           </Card>
           ))
