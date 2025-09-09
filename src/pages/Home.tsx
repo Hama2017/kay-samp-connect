@@ -8,6 +8,7 @@ import { usePageTracking, useInteractionTracking } from "@/hooks/usePageTracking
 import { useAuth } from "@/contexts/AuthContext";
 import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PostModal } from "@/components/PostModal";
 
 const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
 
@@ -27,6 +28,7 @@ export default function Home() {
   
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [selectedFilter, setSelectedFilter] = useState("viral");
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   // Fetch posts on component mount
   useEffect(() => {
@@ -39,6 +41,10 @@ export default function Home() {
   const handleVote = async (postId: string, voteType: 'up' | 'down') => {
     await votePost(postId, voteType);
     trackLike(postId, { voteType });
+  };
+
+  const handlePostClick = (postId: string) => {
+    setSelectedPostId(postId);
   };
 
   const filteredAndSortedPosts = useMemo(() => {
@@ -115,10 +121,18 @@ export default function Home() {
           onLoadMore={loadMorePosts}
           onVote={handleVote}
           onIncrementViews={incrementViews}
+          onPostClick={handlePostClick}
           hasMore={hasMore}
           isLoading={isLoading}
         />
       )}
+
+      {/* Modal de post */}
+      <PostModal
+        postId={selectedPostId}
+        isOpen={!!selectedPostId}
+        onClose={() => setSelectedPostId(null)}
+      />
     </div>
   );
 }

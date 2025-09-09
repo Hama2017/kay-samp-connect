@@ -9,6 +9,7 @@ import { useSpaces } from "@/hooks/useSpaces";
 import { usePosts } from "@/hooks/usePosts";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostActions } from "@/components/PostActions";
+import { PostModal } from "@/components/PostModal";
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock },
@@ -21,6 +22,7 @@ export default function SpaceDetail() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("recent");
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
@@ -81,6 +83,10 @@ export default function SpaceDetail() {
   const handleVote = useCallback(async (postId: string, voteType: 'up' | 'down') => {
     await votePost(postId, voteType);
   }, [votePost]);
+
+  const handlePostClick = useCallback((postId: string) => {
+    setSelectedPostId(postId);
+  }, []);
 
   console.log('SpaceDetail render', { 
     spacesLength: spaces.length, 
@@ -238,7 +244,11 @@ export default function SpaceDetail() {
         
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300">
+            <Card 
+              key={post.id} 
+              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
+              onClick={() => handlePostClick(post.id)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-10 w-10">
@@ -275,10 +285,12 @@ export default function SpaceDetail() {
                       </div>
                     )}
                     
-                    <PostActions 
-                      post={post}
-                      onVote={handleVote}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <PostActions 
+                        post={post}
+                        onVote={handleVote}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -294,6 +306,13 @@ export default function SpaceDetail() {
           </div>
         )}
       </div>
+
+      {/* Modal de post */}
+      <PostModal
+        postId={selectedPostId}
+        isOpen={!!selectedPostId}
+        onClose={() => setSelectedPostId(null)}
+      />
     </div>
   );
 }

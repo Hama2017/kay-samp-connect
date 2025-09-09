@@ -44,6 +44,7 @@ interface InfinitePostsListProps {
   onLoadMore: () => Promise<void>;
   onVote: (postId: string, voteType: 'up' | 'down') => Promise<void>;
   onIncrementViews: (postId: string) => void;
+  onPostClick?: (postId: string) => void;
   hasMore: boolean;
   isLoading: boolean;
 }
@@ -53,6 +54,7 @@ export function InfinitePostsList({
   onLoadMore, 
   onVote, 
   onIncrementViews,
+  onPostClick,
   hasMore, 
   isLoading 
 }: InfinitePostsListProps) {
@@ -74,7 +76,11 @@ export function InfinitePostsList({
   }, [handleScroll]);
 
   const handlePostClick = (post: Post) => {
-    navigate(`/post/${post.id}`);
+    if (onPostClick) {
+      onPostClick(post.id);
+    } else {
+      navigate(`/post/${post.id}`);
+    }
     onIncrementViews(post.id);
   };
 
