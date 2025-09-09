@@ -29,9 +29,14 @@ export default function UserProfile() {
 
   // Charger le profil utilisateur et ses posts
   useEffect(() => {
+    console.log('UserProfile - Loading profile for username:', username);
     const loadUserProfile = async () => {
-      if (!username) return;
+      if (!username) {
+        console.log('UserProfile - No username provided');
+        return;
+      }
       
+      console.log('UserProfile - Starting to load profile...');
       setIsLoading(true);
       setPostsLoading(true);
       
@@ -45,6 +50,7 @@ export default function UserProfile() {
           
         if (profileError) throw profileError;
         
+        console.log('UserProfile - Profile loaded:', profile);
         setUserProfile(profile);
         setFollowersCount(profile.followers_count || 0);
         setFollowingCount(profile.following_count || 0);
@@ -75,6 +81,7 @@ export default function UserProfile() {
           variant: "destructive"
         });
       } finally {
+        console.log('UserProfile - Finished loading profile');
         setIsLoading(false);
         setPostsLoading(false);
       }
@@ -85,8 +92,10 @@ export default function UserProfile() {
 
   // Vérifier le statut de suivi séparément
   useEffect(() => {
+    console.log('UserProfile - Checking follow status. CurrentUser:', currentUser?.id, 'UserProfile:', userProfile?.id);
     const checkFollowStatus = async () => {
       if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) {
+        console.log('UserProfile - No follow check needed');
         setIsFollowing(false);
         return;
       }
