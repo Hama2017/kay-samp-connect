@@ -131,7 +131,7 @@ export default function Trending() {
     fetchPosts({ sort_by: "popular" });
     fetchSpaces({ sort_by: "popular" });
     fetchTopContributors(selectedPeriod as any);
-  }, [fetchPosts, fetchSpaces, fetchTopContributors, selectedPeriod]);
+  }, [selectedPeriod]);
 
   if (postsLoading || spacesLoading || contributorsLoading) {
     return <LoadingSpinner size="lg" text="Chargement des tendances..." />;
