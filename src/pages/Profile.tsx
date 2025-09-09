@@ -27,7 +27,7 @@ export default function Profile() {
       fetchSpaces({ user_spaces: true });
       fetchBookmarks();
     }
-  }, [user?.id, fetchPosts, fetchSpaces, fetchBookmarks]);
+  }, [user?.id]); // Supprimé les fonctions des dépendances
 
   if (!user) {
     return (
