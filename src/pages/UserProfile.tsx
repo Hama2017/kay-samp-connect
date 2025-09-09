@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus, UserCheck, MoreHorizontal, MessageCircle, ArrowUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,8 @@ export default function UserProfile() {
   const { user: currentUser } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
   
   // Hook de suivi - sera initialisé une fois qu'on a l'ID utilisateur
   const { 
@@ -49,6 +50,43 @@ export default function UserProfile() {
         if (error) throw error;
         
         setUserProfile(profile);
+        
+        // Mettre à jour les compteurs
+        if (profile) {
+          updateCounts(profile.followers_count || 0, profile.following_count || 0);
+        }
+        
+        // Fetch user's posts directement ici
+        if (profile?.id) {
+          setPostsLoading(true);
+          const { data: posts, error: postsError } = await supabase
+            .from('posts')
+            .select(`
+              *,
+              profiles:author_id (*),
+              spaces:space_id (*),
+              post_media (*),
+              _count_votes_up: post_votes!post_id(count),
+              _count_votes_down: post_votes!post_id(count),
+              _count_comments: comments!post_id(count)
+            `)
+            .eq('author_id', profile.id)
+            .order('created_at', { ascending: false });
+            
+          if (postsError) {
+            console.error('Error fetching posts:', postsError);
+          } else {
+            // Process posts data
+            const processedPosts = (posts || []).map(post => ({
+              ...post,
+              votes_up: post._count_votes_up?.[0]?.count || 0,
+              votes_down: post._count_votes_down?.[0]?.count || 0,
+              comments_count: post._count_comments?.[0]?.count || 0,
+            }));
+            setUserPosts(processedPosts);
+          }
+          setPostsLoading(false);
+        }
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
@@ -61,24 +99,8 @@ export default function UserProfile() {
       }
     };
 
-    if (username) {
-      fetchUserProfile();
-    }
-  }, [username]); // Seulement dépendant du username
-
-  // Separate useEffect to update counts when userProfile changes
-  useEffect(() => {
-    if (userProfile) {
-      updateCounts(userProfile.followers_count || 0, userProfile.following_count || 0);
-    }
-  }, [userProfile?.id, userProfile?.followers_count, userProfile?.following_count]);
-
-  // Separate useEffect to fetch posts when userProfile changes  
-  useEffect(() => {
-    if (userProfile?.id) {
-      fetchPosts({ author_id: userProfile.id });
-    }
-  }, [userProfile?.id]);
+    fetchUserProfile();
+  }, [username]); // Seulement username comme dépendance
   
   // Vérifier si c'est le profil de l'utilisateur connecté
   const isOwnProfile = currentUser?.profile?.username === username;
@@ -113,7 +135,7 @@ export default function UserProfile() {
     );
   }
 
-  const userPosts = posts.filter(post => post.author_id === userProfile.id);
+  const userPostsFiltered = userPosts.filter(post => post.author_id === userProfile?.id);
 
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl overflow-hidden">
@@ -160,10 +182,10 @@ export default function UserProfile() {
                   <span className="font-semibold text-foreground">{followingCount}</span>
                   <span className="text-muted-foreground">abonnements</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-primary">{userPosts.length}</span>
-                  <span className="text-muted-foreground">posts</span>
-                </div>
+                 <div className="flex items-center gap-1">
+                   <span className="font-semibold text-primary">{userPostsFiltered.length}</span>
+                   <span className="text-muted-foreground">posts</span>
+                 </div>
               </div>
               
               {!isOwnProfile && canFollow && (
@@ -223,16 +245,16 @@ export default function UserProfile() {
       {/* Posts */}
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-1 mb-6">
-          <TabsTrigger value="posts">
-            Posts ({userPosts.length})
-          </TabsTrigger>
+           <TabsTrigger value="posts">
+             Posts ({userPostsFiltered.length})
+           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
           {postsLoading ? (
             <LoadingSpinner size="sm" text="Chargement des posts..." />
-          ) : userPosts.length > 0 ? (
-            userPosts.map((post) => (
+           ) : userPostsFiltered.length > 0 ? (
+             userPostsFiltered.map((post) => (
               <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
                     onClick={() => navigate(`/post/${post.id}`)}>
                 <CardHeader className="pb-3">
