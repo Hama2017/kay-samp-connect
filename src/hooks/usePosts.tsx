@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ export interface Post {
   hashtags?: string[];
   created_at: string;
   updated_at: string;
+  current_user_vote?: 'up' | 'down' | null;
   // Relations
   profiles: {
     id: string;
@@ -26,12 +27,13 @@ export interface Post {
   spaces?: {
     id: string;
     name: string;
+    category?: string;
   };
   post_media?: Array<{
     id: string;
     media_url: string;
     media_type: string;
-    thumbnail_url?: string;
+    media_order: number;
   }>;
 }
 
@@ -49,15 +51,23 @@ export function usePosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentFilters, setCurrentFilters] = useState<any>({});
 
   const fetchPosts = useCallback(async (filters?: {
     space_id?: string;
     author_id?: string;
     category?: string;
     sort_by?: 'recent' | 'popular' | 'viral' | 'discussed';
-  }) => {
+  }, append = false) => {
+    if (isLoading) return;
+    
     setIsLoading(true);
     setError(null);
+    
+    const page = append ? currentPage + 1 : 1;
+    const limit = 10;
 
     try {
       let query = supabase
@@ -72,15 +82,17 @@ export function usePosts() {
           ),
           spaces (
             id,
-            name
+            name,
+            category
           ),
           post_media (
             id,
             media_url,
             media_type,
-            thumbnail_url
+            media_order
           )
-        `);
+        `)
+        .range((page - 1) * limit, page * limit - 1);
 
       // Apply filters
       if (filters?.space_id) {
@@ -106,19 +118,35 @@ export function usePosts() {
           query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query;
 
       if (error) throw error;
 
-      setPosts(data || []);
-      console.log('usePosts: setPosts called', { postsLength: data?.length || 0 });
+      const newPosts = data as Post[];
+      
+      if (append) {
+        setPosts(prev => [...prev, ...newPosts]);
+        setCurrentPage(page);
+      } else {
+        setPosts(newPosts);
+        setCurrentPage(1);
+      }
+      
+      setHasMore(newPosts.length === limit);
+      setCurrentFilters(filters || {});
+      
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching posts:', err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isLoading, currentPage]);
+
+  const loadMorePosts = useCallback(async () => {
+    if (!hasMore || isLoading) return;
+    await fetchPosts(currentFilters, true);
+  }, [fetchPosts, currentFilters, hasMore, isLoading]);
 
   const createPost = useCallback(async (postData: CreatePostData) => {
     if (!user) throw new Error('User must be authenticated');
@@ -216,7 +244,7 @@ export function usePosts() {
       });
 
       // Refresh posts
-      fetchPosts();
+      fetchPosts(currentFilters);
       return data;
     } catch (err: any) {
       setError(err.message);
@@ -229,13 +257,45 @@ export function usePosts() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, toast, fetchPosts]);
+  }, [user, toast, fetchPosts, currentFilters]);
 
   const votePost = useCallback(async (postId: string, voteType: 'up' | 'down') => {
     if (!user) return;
 
     try {
-      // Check if user already voted
+      // Optimistic update
+      setPosts(prev => prev.map(post => {
+        if (post.id !== postId) return post;
+        
+        const currentVote = post.current_user_vote;
+        let newVotesUp = post.votes_up;
+        let newVotesDown = post.votes_down;
+        let newCurrentVote: 'up' | 'down' | null = voteType;
+
+        // Handle vote logic
+        if (currentVote === voteType) {
+          // Remove vote
+          if (voteType === 'up') newVotesUp--;
+          else newVotesDown--;
+          newCurrentVote = null;
+        } else {
+          // Change or add vote
+          if (currentVote === 'up') newVotesUp--;
+          else if (currentVote === 'down') newVotesDown--;
+          
+          if (voteType === 'up') newVotesUp++;
+          else newVotesDown++;
+        }
+
+        return {
+          ...post,
+          votes_up: newVotesUp,
+          votes_down: newVotesDown,
+          current_user_vote: newCurrentVote
+        };
+      }));
+
+      // Backend update
       const { data: existingVote } = await supabase
         .from('post_votes')
         .select('*')
@@ -245,20 +305,17 @@ export function usePosts() {
 
       if (existingVote) {
         if (existingVote.vote_type === voteType) {
-          // Remove vote if same type
           await supabase
             .from('post_votes')
             .delete()
             .eq('id', existingVote.id);
         } else {
-          // Update vote type
           await supabase
             .from('post_votes')
             .update({ vote_type: voteType })
             .eq('id', existingVote.id);
         }
       } else {
-        // Create new vote
         await supabase
           .from('post_votes')
           .insert({
@@ -268,17 +325,23 @@ export function usePosts() {
           });
       }
 
-      // The trigger will automatically update the vote counts
-      // Refresh posts to get updated counts from server
-      fetchPosts();
     } catch (err) {
+      // Revert optimistic update on error
+      fetchPosts(currentFilters);
       console.error('Error voting on post:', err);
     }
-  }, [user, fetchPosts]);
+  }, [user, fetchPosts, currentFilters]);
 
   const incrementViews = useCallback(async (postId: string) => {
     try {
       await supabase.rpc('increment_post_views', { post_id: postId });
+      
+      // Update local state
+      setPosts(prev => prev.map(post => 
+        post.id === postId 
+          ? { ...post, views_count: post.views_count + 1 }
+          : post
+      ));
     } catch (err) {
       console.error('Error incrementing views:', err);
     }
@@ -288,7 +351,9 @@ export function usePosts() {
     posts,
     isLoading,
     error,
+    hasMore,
     fetchPosts,
+    loadMorePosts,
     createPost,
     votePost,
     incrementViews,

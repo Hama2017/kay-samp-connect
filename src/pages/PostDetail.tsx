@@ -31,6 +31,7 @@ export default function PostDetail() {
     const success = await addComment(newComment);
     if (success) {
       setNewComment('');
+      // Pas besoin de rafraîchir, le hook se charge déjà de mettre à jour les commentaires
     }
     setIsSubmitting(false);
   };

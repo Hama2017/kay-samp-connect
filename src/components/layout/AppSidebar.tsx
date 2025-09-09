@@ -25,13 +25,6 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
   // Filter only subscribed spaces
   const subscribedSpaces = spaces.filter(space => space.is_subscribed);
   
-  console.log('AppSidebar debug:', { 
-    spacesTotal: spaces.length, 
-    subscribedSpaces: subscribedSpaces.length,
-    allSpaces: spaces,
-    filteredSpaces: subscribedSpaces 
-  });
-  
   if (!open) return null;
 
   return (
@@ -69,7 +62,10 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                 <div
                   key={space.id}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 cursor-pointer transition-colors group"
-                  onClick={() => navigate(`/space/${space.id}`)}
+                  onClick={() => {
+                    navigate(`/space/${space.id}`);
+                    onOpenChange(false);
+                  }}
                 >
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
