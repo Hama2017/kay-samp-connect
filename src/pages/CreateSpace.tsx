@@ -80,12 +80,12 @@ export default function CreateSpace() {
       // Check if it's a duplicate name error
       const isDuplicateName = error.code === '23505' || 
                              error.message?.toLowerCase().includes('duplicate') ||
-                             error.message?.toLowerCase().includes('idx_spaces_name_unique');
+                             error.message?.toLowerCase().includes('idx_spaces_name_category_unique');
       
       if (isDuplicateName) {
         toast({
           title: "Nom déjà utilisé",
-          description: `Un espace avec le nom "${formData.name}" existe déjà. Veuillez choisir un autre nom.`,
+          description: `Un espace "${formData.name}" existe déjà dans la catégorie "${formData.category}". Veuillez choisir un autre nom.`,
           variant: "destructive",
         });
       } else {
