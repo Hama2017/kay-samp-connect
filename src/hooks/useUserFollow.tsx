@@ -32,7 +32,7 @@ export function useUserFollow(targetUserId: string) {
           .from('profiles')
           .select('followers_count, following_count')
           .eq('id', targetUserId)
-          .single();
+          .maybeSingle();
 
         if (profileData) {
           setFollowersCount(profileData.followers_count || 0);
@@ -44,7 +44,9 @@ export function useUserFollow(targetUserId: string) {
       }
     };
 
-    loadFollowStatus();
+    if (targetUserId) {
+      loadFollowStatus();
+    }
   }, [user?.id, targetUserId]);
 
   const toggleFollow = async () => {

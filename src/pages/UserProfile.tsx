@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, UserPlus, UserCheck, MoreHorizontal, MessageCircle, ArrowUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,8 @@ export default function UserProfile() {
     const fetchUserProfile = async () => {
       if (!username) return;
       
+      setIsLoading(true);
+      
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -47,16 +49,6 @@ export default function UserProfile() {
         if (error) throw error;
         
         setUserProfile(profile);
-        
-        // Mettre à jour les compteurs dans le hook de suivi
-        if (profile) {
-          updateCounts(profile.followers_count || 0, profile.following_count || 0);
-        }
-        
-        // Fetch user's posts
-        if (profile?.id) {
-          fetchPosts({ author_id: profile.id });
-        }
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
@@ -69,8 +61,24 @@ export default function UserProfile() {
       }
     };
 
-    fetchUserProfile();
-  }, [username]);
+    if (username) {
+      fetchUserProfile();
+    }
+  }, [username]); // Seulement dépendant du username
+
+  // Separate useEffect to update counts when userProfile changes
+  useEffect(() => {
+    if (userProfile) {
+      updateCounts(userProfile.followers_count || 0, userProfile.following_count || 0);
+    }
+  }, [userProfile?.id, userProfile?.followers_count, userProfile?.following_count]);
+
+  // Separate useEffect to fetch posts when userProfile changes  
+  useEffect(() => {
+    if (userProfile?.id) {
+      fetchPosts({ author_id: userProfile.id });
+    }
+  }, [userProfile?.id]);
   
   // Vérifier si c'est le profil de l'utilisateur connecté
   const isOwnProfile = currentUser?.profile?.username === username;
