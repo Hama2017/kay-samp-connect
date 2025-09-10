@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { X, Image, Video, Play, FileImage } from "lucide-react";
+import { X, Image, Video, Play, FileImage, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +27,9 @@ export default function CreatePost() {
     content: "",
     selectedFiles: [] as any[],
   });
+  
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [currentSpace, setCurrentSpace] = useState<any>(null);
@@ -92,6 +95,44 @@ export default function CreatePost() {
     }));
     
     setPreviewUrls(prev => [...prev, gifUrl]);
+  };
+
+  const extractYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleYouTubeAdd = () => {
+    if (!youtubeUrl.trim()) return;
+    
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) {
+      toast({
+        title: "Erreur",
+        description: "Lien YouTube invalide",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const youtubeFile = {
+      name: `youtube-${Date.now()}`,
+      type: 'youtube',
+      size: 0,
+      url: youtubeUrl,
+      videoId: videoId,
+      isYouTubeUrl: true
+    };
+
+    setFormData(prev => ({ 
+      ...prev, 
+      selectedFiles: [...prev.selectedFiles, youtubeFile as any] 
+    }));
+    
+    setPreviewUrls(prev => [...prev, `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`]);
+    setYoutubeUrl("");
+    setShowYoutubeInput(false);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -204,12 +245,23 @@ export default function CreatePost() {
                   {formData.selectedFiles.map((file, index) => (
                     <div key={index} className="relative group">
                       <div className="aspect-square bg-muted rounded-xl overflow-hidden relative">
-                        {file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif') ? (
+                       {file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif') ? (
                           <img 
                             src={previewUrls[index]} 
                             alt={file.name}
                             className="w-full h-full object-cover"
                           />
+                        ) : file.type === 'youtube' ? (
+                          <div className="relative w-full h-full">
+                            <img 
+                              src={previewUrls[index]} 
+                              alt="YouTube video thumbnail"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                              <Youtube className="h-8 w-8 text-red-500" />
+                            </div>
+                          </div>
                         ) : file.type.startsWith('video/') ? (
                           <div className="relative w-full h-full">
                             <video 
@@ -297,7 +349,49 @@ export default function CreatePost() {
               <FileImage className="h-5 w-5" />
               GIF
             </Button>
+            
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={() => setShowYoutubeInput(true)}
+              className="gap-3 hover:bg-red-50 hover:text-red-600 border-2 border-dashed border-red-200 hover:border-red-400 px-6 py-3"
+            >
+              <Youtube className="h-5 w-5" />
+              YouTube
+            </Button>
           </div>
+
+          {/* YouTube URL Input */}
+          {showYoutubeInput && (
+            <div className="mt-4 p-4 bg-muted/50 rounded-lg border">
+              <div className="flex items-center gap-2 mb-3">
+                <Youtube className="h-5 w-5 text-red-600" />
+                <span className="font-medium">Ajouter une vidéo YouTube</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-input rounded-md bg-background"
+                />
+                <Button onClick={handleYouTubeAdd} disabled={!youtubeUrl.trim()}>
+                  Ajouter
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setShowYoutubeInput(false);
+                    setYoutubeUrl("");
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

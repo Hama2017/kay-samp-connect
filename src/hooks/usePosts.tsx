@@ -175,11 +175,19 @@ export function usePosts() {
           const file = postData.media_files[i];
           let mediaUrl = '';
           let mediaType = 'image';
+          let youtubeVideoId = '';
           
           console.log('Traitement fichier:', file);
           
+          // Vérifier si c'est une vidéo YouTube
+          if (file.isYouTubeUrl) {
+            mediaUrl = file.url;
+            mediaType = 'youtube';
+            youtubeVideoId = file.videoId;
+            console.log('YouTube video:', { mediaUrl, mediaType, youtubeVideoId });
+          }
           // Vérifier si c'est un GIF depuis une URL (Giphy)
-          if (file.isGifUrl) {
+          else if (file.isGifUrl) {
             mediaUrl = file.url;
             mediaType = 'image'; // Les GIFs sont traités comme des images
             console.log('GIF depuis URL:', { mediaUrl, mediaType });
@@ -217,17 +225,25 @@ export function usePosts() {
             }
           }
           
-          console.log('Insertion en base:', { postId: data.id, mediaUrl, mediaType, order: i });
+          console.log('Insertion en base:', { postId: data.id, mediaUrl, mediaType, order: i, youtubeVideoId });
+
+          // Prepare media record for database
+          const mediaRecord: any = {
+            post_id: data.id,
+            media_url: mediaUrl,
+            media_type: mediaType,
+            media_order: i
+          };
+
+          // Add YouTube video ID if it's a YouTube video
+          if (mediaType === 'youtube' && youtubeVideoId) {
+            mediaRecord.youtube_video_id = youtubeVideoId;
+          }
 
           // Save media record to database
           const { error: mediaError } = await supabase
             .from('post_media')
-            .insert({
-              post_id: data.id,
-              media_url: mediaUrl,
-              media_type: mediaType,
-              media_order: i
-            });
+            .insert(mediaRecord);
             
           if (mediaError) {
             console.error('Erreur insertion post_media:', mediaError);
