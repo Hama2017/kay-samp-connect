@@ -347,6 +347,7 @@ export type Database = {
           media_url: string
           post_id: string
           thumbnail_url: string | null
+          youtube_video_id: string | null
         }
         Insert: {
           created_at?: string
@@ -356,6 +357,7 @@ export type Database = {
           media_url: string
           post_id: string
           thumbnail_url?: string | null
+          youtube_video_id?: string | null
         }
         Update: {
           created_at?: string
@@ -365,6 +367,7 @@ export type Database = {
           media_url?: string
           post_id?: string
           thumbnail_url?: string | null
+          youtube_video_id?: string | null
         }
         Relationships: [
           {
