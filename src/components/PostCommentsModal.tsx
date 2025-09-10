@@ -57,6 +57,8 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
   const [newComment, setNewComment] = useState("");
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
   const [showGifSelector, setShowGifSelector] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
   const { comments, isLoading, fetchComments, createComment } = useComments();
   const isMobile = useIsMobile();
 
@@ -81,6 +83,22 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
         setShowGifSelector(false);
       } catch (error) {
         console.error("Error creating comment:", error);
+      }
+    }
+  };
+
+  const handleSubmitReply = async () => {
+    if (replyContent.trim() && post?.id && replyingTo) {
+      try {
+        await createComment({
+          postId: post.id,
+          content: replyContent.trim(),
+          parentCommentId: replyingTo
+        });
+        setReplyContent("");
+        setReplyingTo(null);
+      } catch (error) {
+        console.error("Error creating reply:", error);
       }
     }
   };
@@ -199,65 +217,171 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               </div>
             ) : comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3 py-2">
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
-                    <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                      {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-semibold text-sm">@{comment.profiles?.username || "Unknown"}</span>
-                      {comment.profiles?.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary px-1 py-0">
-                          ✓
-                        </Badge>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(comment.created_at)}
-                      </span>
-                    </div>
+                <div key={comment.id} className="space-y-2">
+                  {/* Commentaire principal */}
+                  <div className="flex items-start gap-3 py-2">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
+                      <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                        {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
+                      </AvatarFallback>
+                    </Avatar>
                     
-                    <p className="text-sm text-foreground mb-2 leading-relaxed break-words">
-                      {comment.content}
-                    </p>
-                    
-                    {/* Afficher les médias du commentaire (GIFs) */}
-                    {comment.comment_media && comment.comment_media.length > 0 && (
-                      <div className="mb-2">
-                        {comment.comment_media.map((media) => (
-                          <img
-                            key={media.id}
-                            src={media.media_url}
-                            alt="Comment GIF"
-                            className="max-w-full h-auto rounded-md max-h-32"
-                          />
-                        ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-semibold text-sm">@{comment.profiles?.username || "Unknown"}</span>
+                        {comment.profiles?.is_verified && (
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary px-1 py-0">
+                            ✓
+                          </Badge>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(comment.created_at)}
+                        </span>
                       </div>
-                    )}
-                    
-                    {/* Votes pour commentaires - plus compacts */}
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-7 px-2 text-xs hover:text-green-600 hover:bg-green-50"
-                      >
-                        <ChevronUp className="h-3 w-3 mr-1" />
-                        {comment.votes_up}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-7 px-2 text-xs hover:text-red-600 hover:bg-red-50"
-                      >
-                        <ChevronDown className="h-3 w-3 mr-1" />
-                        {comment.votes_down || 0}
-                      </Button>
+                      
+                      <p className="text-sm text-foreground mb-2 leading-relaxed break-words">
+                        {comment.content}
+                      </p>
+                      
+                      {/* Afficher les médias du commentaire (GIFs) */}
+                      {comment.comment_media && comment.comment_media.length > 0 && (
+                        <div className="mb-2">
+                          {comment.comment_media.map((media) => (
+                            <img
+                              key={media.id}
+                              src={media.media_url}
+                              alt="Comment GIF"
+                              className="max-w-full h-auto rounded-md max-h-32"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Actions du commentaire */}
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:text-green-600 hover:bg-green-50"
+                        >
+                          <ChevronUp className="h-3 w-3 mr-1" />
+                          {comment.votes_up}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:text-red-600 hover:bg-red-50"
+                        >
+                          <ChevronDown className="h-3 w-3 mr-1" />
+                          {comment.votes_down || 0}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                          className="h-7 px-2 text-xs hover:text-primary hover:bg-primary/10"
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Répondre
+                        </Button>
+                      </div>
+                      
+                      {/* Zone de réponse */}
+                      {replyingTo === comment.id && (
+                        <div className="mt-3 p-3 bg-muted/30 rounded-lg border-l-2 border-primary/20">
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <Textarea
+                                placeholder={`Répondre à @${comment.profiles?.username}...`}
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                className="min-h-[32px] max-h-16 resize-none text-sm"
+                                rows={1}
+                              />
+                            </div>
+                            <Button 
+                              onClick={handleSubmitReply}
+                              disabled={!replyContent.trim() || isLoading}
+                              size="sm"
+                              className="h-8 px-3 text-xs"
+                            >
+                              <Send className="h-3 w-3 mr-1" />
+                              Répondre
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
+                  
+                  {/* Affichage des réponses */}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <div className="ml-11 space-y-2 pl-4 border-l-2 border-muted">
+                      {comment.replies.map((reply) => (
+                        <div key={reply.id} className="flex items-start gap-3 py-2">
+                          <Avatar className="h-6 w-6 flex-shrink-0">
+                            <AvatarImage src={reply.profiles?.profile_picture_url || ""} />
+                            <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                              {reply.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-semibold text-xs">@{reply.profiles?.username || "Unknown"}</span>
+                              {reply.profiles?.is_verified && (
+                                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary px-1 py-0">
+                                  ✓
+                                </Badge>
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                {formatDate(reply.created_at)}
+                              </span>
+                            </div>
+                            
+                            <p className="text-xs text-foreground mb-1 leading-relaxed break-words">
+                              {reply.content}
+                            </p>
+                            
+                            {/* Médias de la réponse */}
+                            {reply.comment_media && reply.comment_media.length > 0 && (
+                              <div className="mb-1">
+                                {reply.comment_media.map((media) => (
+                                  <img
+                                    key={media.id}
+                                    src={media.media_url}
+                                    alt="Reply GIF"
+                                    className="max-w-full h-auto rounded-md max-h-24"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Votes pour les réponses */}
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-6 px-1 text-xs hover:text-green-600 hover:bg-green-50"
+                              >
+                                <ChevronUp className="h-3 w-3 mr-1" />
+                                {reply.votes_up}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-6 px-1 text-xs hover:text-red-600 hover:bg-red-50"
+                              >
+                                <ChevronDown className="h-3 w-3 mr-1" />
+                                {reply.votes_down || 0}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
