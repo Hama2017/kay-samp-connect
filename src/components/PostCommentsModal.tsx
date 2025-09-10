@@ -16,6 +16,7 @@ import { useComments, Comment } from "@/hooks/useComments";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { useIsMobile } from "@/hooks/use-mobile";
 import GifSelector from "@/components/GifSelector";
+import { CommentImageUpload } from "@/components/CommentImageUpload";
 
 interface Post {
   id: string;
@@ -56,10 +57,11 @@ interface PostCommentsModalProps {
 export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalProps) {
   const [newComment, setNewComment] = useState("");
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showGifSelector, setShowGifSelector] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
-  const { comments, isLoading, fetchComments, createComment } = useComments();
+  const { comments, isLoading, fetchComments, createComment, voteComment } = useComments();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -71,15 +73,20 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
   if (!post) return null;
 
   const handleSubmitComment = async () => {
-    if ((newComment.trim() || selectedGif) && post?.id) {
+    if ((newComment.trim() || selectedGif || selectedImage) && post?.id) {
       try {
+        // Prepare media URL (prioritize image over GIF)
+        const mediaUrl = selectedImage || selectedGif || undefined;
+        
         await createComment({
           postId: post.id,
           content: newComment.trim() || "",
-          gifUrl: selectedGif || undefined
+          gifUrl: mediaUrl
         });
+        
         setNewComment("");
         setSelectedGif(null);
+        setSelectedImage(null);
         setShowGifSelector(false);
       } catch (error) {
         console.error("Error creating comment:", error);
@@ -105,6 +112,7 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
 
   const handleGifSelect = (gifUrl: string) => {
     setSelectedGif(gifUrl);
+    setSelectedImage(null); // Clear image if GIF is selected
     setShowGifSelector(false);
   };
 
@@ -260,22 +268,24 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                       
                       {/* Actions du commentaire */}
                       <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-7 px-2 text-xs hover:text-green-600 hover:bg-green-50"
-                        >
-                          <ChevronUp className="h-3 w-3 mr-1" />
-                          {comment.votes_up}
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-7 px-2 text-xs hover:text-red-600 hover:bg-red-50"
-                        >
-                          <ChevronDown className="h-3 w-3 mr-1" />
-                          {comment.votes_down || 0}
-                        </Button>
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => voteComment(comment.id, 'up')}
+                           className="h-7 px-2 text-xs hover:text-green-600 hover:bg-green-50"
+                         >
+                           <ChevronUp className="h-3 w-3 mr-1" />
+                           {comment.votes_up}
+                         </Button>
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => voteComment(comment.id, 'down')}
+                           className="h-7 px-2 text-xs hover:text-red-600 hover:bg-red-50"
+                         >
+                           <ChevronDown className="h-3 w-3 mr-1" />
+                           {comment.votes_down || 0}
+                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm"
@@ -360,22 +370,24 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                             
                             {/* Votes pour les réponses */}
                             <div className="flex items-center gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="h-6 px-1 text-xs hover:text-green-600 hover:bg-green-50"
-                              >
-                                <ChevronUp className="h-3 w-3 mr-1" />
-                                {reply.votes_up}
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="h-6 px-1 text-xs hover:text-red-600 hover:bg-red-50"
-                              >
-                                <ChevronDown className="h-3 w-3 mr-1" />
-                                {reply.votes_down || 0}
-                              </Button>
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm"
+                                 onClick={() => voteComment(reply.id, 'up')}
+                                 className="h-6 px-1 text-xs hover:text-green-600 hover:bg-green-50"
+                               >
+                                 <ChevronUp className="h-3 w-3 mr-1" />
+                                 {reply.votes_up}
+                               </Button>
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm"
+                                 onClick={() => voteComment(reply.id, 'down')}
+                                 className="h-6 px-1 text-xs hover:text-red-600 hover:bg-red-50"
+                               >
+                                 <ChevronDown className="h-3 w-3 mr-1" />
+                                 {reply.votes_down || 0}
+                               </Button>
                             </div>
                           </div>
                         </div>
@@ -396,23 +408,28 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
 
         {/* Zone d'ajout de commentaire - fixe en bas et optimisée mobile */}
         <div className="flex-shrink-0 p-3 pt-2 border-t bg-background/98 backdrop-blur-sm">
-          {/* Prévisualisation du GIF sélectionné */}
-          {selectedGif && (
+          {/* Prévisualisation du GIF ou de l'image sélectionnée */}
+          {(selectedGif || selectedImage) && (
             <div className="mb-2 p-2 border rounded-lg bg-muted/50">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">GIF sélectionné</span>
+                <span className="text-xs text-muted-foreground">
+                  {selectedImage ? 'Image sélectionnée' : 'GIF sélectionné'}
+                </span>
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => setSelectedGif(null)}
+                  onClick={() => {
+                    setSelectedGif(null);
+                    setSelectedImage(null);
+                  }}
                   className="h-5 w-5 p-0"
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
               <img
-                src={selectedGif}
-                alt="GIF sélectionné"
+                src={selectedImage || selectedGif}
+                alt={selectedImage ? "Image sélectionnée" : "GIF sélectionné"}
                 className="max-w-full h-auto rounded-md max-h-16"
               />
             </div>
@@ -431,25 +448,36 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               
               {/* Ligne d'actions sous le textarea */}
               <div className="flex items-center justify-between mt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowGifSelector(true)}
-                  className="h-7 px-2 text-xs text-muted-foreground hover:text-primary"
-                >
-                  <Image className="h-3 w-3 mr-1" />
-                  GIF
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGifSelector(true)}
+                    className="h-7 px-2 text-xs text-muted-foreground hover:text-primary"
+                  >
+                    <Image className="h-3 w-3 mr-1" />
+                    GIF
+                  </Button>
+                  
+                  <CommentImageUpload
+                    onImageUploaded={(imageUrl) => {
+                      setSelectedImage(imageUrl);
+                      setSelectedGif(null); // Clear GIF if image is selected
+                    }}
+                    selectedImage={selectedImage}
+                    onRemoveImage={() => setSelectedImage(null)}
+                  />
+                </div>
                 
                 <Button 
                   onClick={handleSubmitComment}
-                  disabled={(!newComment.trim() && !selectedGif) || isLoading}
+                  disabled={(!newComment.trim() && !selectedGif && !selectedImage) || isLoading}
                   size="sm"
                   className="h-7 px-3 bg-gradient-primary hover:opacity-90 text-xs font-medium"
                 >
                   <Send className="h-3 w-3 mr-1" />
-                  Envoyer
+                  Publier
                 </Button>
               </div>
             </div>
