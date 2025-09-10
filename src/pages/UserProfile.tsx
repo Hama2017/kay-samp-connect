@@ -9,7 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePosts } from "@/hooks/usePosts";
 
 export default function UserProfile() {
   const { username } = useParams();
@@ -20,12 +22,11 @@ export default function UserProfile() {
   // États locaux pour éviter les boucles infinies
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [userPosts, setUserPosts] = useState<any[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+  const { posts, isLoading: postsLoading, hasMore: postsHasMore, fetchPosts, loadMorePosts } = usePosts();
 
   // Charger le profil utilisateur et ses posts
   useEffect(() => {
@@ -38,10 +39,9 @@ export default function UserProfile() {
       
       console.log('UserProfile - Starting to load profile...');
       setIsLoading(true);
-      setPostsLoading(true);
       
       try {
-        // 1. Charger le profil utilisateur
+        // Charger le profil utilisateur
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -55,23 +55,8 @@ export default function UserProfile() {
         setFollowersCount(profile.followers_count || 0);
         setFollowingCount(profile.following_count || 0);
         
-        // 2. Charger les posts de l'utilisateur
-        const { data: posts, error: postsError } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            profiles:author_id (*),
-            spaces:space_id (*),
-            post_media (*)
-          `)
-          .eq('author_id', profile.id)
-          .order('created_at', { ascending: false });
-          
-        if (postsError) {
-          console.error('Error fetching posts:', postsError);
-        } else {
-          setUserPosts(posts || []);
-        }
+        // Charger les posts de l'utilisateur avec le hook usePosts
+        fetchPosts({ author_id: profile.id });
         
       } catch (error) {
         console.error('Error loading user profile:', error);
@@ -83,12 +68,11 @@ export default function UserProfile() {
       } finally {
         console.log('UserProfile - Finished loading profile');
         setIsLoading(false);
-        setPostsLoading(false);
       }
     };
 
     loadUserProfile();
-  }, [username]);
+  }, [username, fetchPosts]);
 
   // Vérifier le statut de suivi séparément
   useEffect(() => {
@@ -261,7 +245,7 @@ export default function UserProfile() {
                   <span className="text-muted-foreground">abonnements</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-primary">{userPosts.length}</span>
+                  <span className="font-semibold text-primary">{posts.filter(p => p.author_id === userProfile.id).length}</span>
                   <span className="text-muted-foreground">posts</span>
                 </div>
               </div>
@@ -324,15 +308,18 @@ export default function UserProfile() {
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-1 mb-6">
           <TabsTrigger value="posts">
-            Posts ({userPosts.length})
+            Posts ({posts.filter(p => p.author_id === userProfile.id).length})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
-          {postsLoading ? (
-            <LoadingSpinner size="sm" text="Chargement des posts..." />
-          ) : userPosts.length > 0 ? (
-            userPosts.map((post) => (
+          <InfiniteScrollLoader
+            hasMore={postsHasMore}
+            isLoading={postsLoading}
+            onLoadMore={() => loadMorePosts()}
+          >
+            {posts.filter(p => p.author_id === userProfile.id).length > 0 ? (
+              posts.filter(p => p.author_id === userProfile.id).map((post) => (
               <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
                     onClick={() => navigate(`/post/${post.id}`)}>
                 <CardHeader className="pb-3">
@@ -407,6 +394,7 @@ export default function UserProfile() {
               </p>
             </div>
           )}
+        </InfiniteScrollLoader>
         </TabsContent>
       </Tabs>
     </div>

@@ -36,10 +36,16 @@ export function useComments() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const COMMENTS_PER_PAGE = 20;
 
-  const fetchComments = useCallback(async (postId: string) => {
+  const fetchComments = useCallback(async (postId: string, page = 1, append = false) => {
     setIsLoading(true);
     setError(null);
+
+    const limit = COMMENTS_PER_PAGE;
+    const offset = (page - 1) * limit;
 
     try {
       const { data, error } = await supabase
@@ -60,20 +66,58 @@ export function useComments() {
           )
         `)
         .eq('post_id', postId)
-        .order('created_at', { ascending: true });
+        .is('parent_comment_id', null)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (error) throw error;
 
-      // Organize comments into threads (parent comments with their replies)
-      const parentComments = (data as any)?.filter((comment: any) => !comment.parent_comment_id) || [];
-      const childComments = (data as any)?.filter((comment: any) => comment.parent_comment_id) || [];
+      // Fetch replies for each parent comment
+      let organizedComments: Comment[] = [];
+      if (data && data.length > 0) {
+        for (const parent of data as any[]) {
+          const { data: replies } = await supabase
+            .from('comments')
+            .select(`
+              *,
+              profiles (
+                id,
+                username,
+                profile_picture_url,
+                is_verified
+              ),
+              comment_media (
+                id,
+                media_url,
+                media_type,
+                media_order
+              )
+            `)
+            .eq('parent_comment_id', parent.id)
+            .order('created_at', { ascending: true });
 
-      const organizedComments: Comment[] = parentComments.map((parent: any) => ({
-        ...parent,
-        replies: childComments.filter((child: any) => child.parent_comment_id === parent.id)
-      }));
+          organizedComments.push({
+            ...parent,
+            replies: replies || []
+          });
+        }
+      }
 
-      setComments(organizedComments);
+      const hasMoreComments = (data as any[])?.length === limit;
+      
+      if (append && page > 1) {
+        setComments(prevComments => {
+          const existingIds = new Set(prevComments.map(c => c.id));
+          const newComments = organizedComments.filter(c => !existingIds.has(c.id));
+          return [...prevComments, ...newComments];
+        });
+        setCurrentPage(page);
+      } else {
+        setComments(organizedComments);
+        setCurrentPage(page);
+      }
+      
+      setHasMore(hasMoreComments);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching comments:', err);
@@ -130,8 +174,10 @@ export function useComments() {
         description: "Votre commentaire a été publié",
       });
 
-      // Refresh comments
-      fetchComments(data.postId);
+      // Refresh comments from the beginning
+      setCurrentPage(1);
+      setHasMore(true);
+      fetchComments(data.postId, 1, false);
       return newComment;
     } catch (err: any) {
       setError(err.message);
@@ -184,7 +230,9 @@ export function useComments() {
       // Find the comment's post_id to refresh comments
       const comment = comments.find(c => c.id === commentId);
       if (comment) {
-        fetchComments(comment.post_id);
+        setCurrentPage(1);
+        setHasMore(true);
+        fetchComments(comment.post_id, 1, false);
       }
     } catch (err) {
       console.error('Error voting on comment:', err);
@@ -215,7 +263,9 @@ export function useComments() {
       // Find the comment's post_id to refresh comments
       const comment = comments.find(c => c.id === commentId);
       if (comment) {
-        fetchComments(comment.post_id);
+        setCurrentPage(1);
+        setHasMore(true);
+        fetchComments(comment.post_id, 1, false);
       }
     } catch (err: any) {
       console.error('Error updating comment:', err);
@@ -247,7 +297,9 @@ export function useComments() {
       // Find the comment's post_id to refresh comments
       const comment = comments.find(c => c.id === commentId);
       if (comment) {
-        fetchComments(comment.post_id);
+        setCurrentPage(1);
+        setHasMore(true);
+        fetchComments(comment.post_id, 1, false);
       }
     } catch (err: any) {
       console.error('Error deleting comment:', err);
@@ -259,11 +311,20 @@ export function useComments() {
     }
   }, [user, comments, fetchComments, toast]);
 
+  const loadMoreComments = useCallback((postId: string) => {
+    if (hasMore && !isLoading) {
+      const nextPage = currentPage + 1;
+      fetchComments(postId, nextPage, true);
+    }
+  }, [hasMore, isLoading, fetchComments, currentPage]);
+
   return {
     comments,
     isLoading,
     error,
+    hasMore,
     fetchComments,
+    loadMoreComments,
     createComment,
     voteComment,
     updateComment,

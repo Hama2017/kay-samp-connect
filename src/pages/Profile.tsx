@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
-import { useSpaces } from "@/hooks/useSpaces";
-import { useRealBookmarks } from "@/hooks/useRealBookmarks";
+import { useSpacesPaginated } from "@/hooks/useSpacesPaginated";
+import { useBookmarksPaginated } from "@/hooks/useBookmarksPaginated";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { CoverImageUpload } from "@/components/CoverImageUpload";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,15 +21,15 @@ export default function Profile() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("posts");
   const [coverImageUrl, setCoverImageUrl] = useState<string>("");
-  const { posts, isLoading: postsLoading, fetchPosts, votePost } = usePosts();
-  const { spaces, isLoading: spacesLoading, fetchSpaces } = useSpaces();
-  const { bookmarks, isLoading: bookmarksLoading, fetchBookmarks } = useRealBookmarks();
+  const { posts, isLoading: postsLoading, hasMore: postsHasMore, fetchPosts, loadMorePosts, votePost } = usePosts();
+  const { spaces, isLoading: spacesLoading, hasMore: spacesHasMore, fetchSpaces, loadMoreSpaces } = useSpacesPaginated();
+  const { bookmarks, isLoading: bookmarksLoading, hasMore: bookmarksHasMore, fetchBookmarks, loadMoreBookmarks } = useBookmarksPaginated();
 
   useEffect(() => {
     if (user?.id) {
       fetchPosts({ author_id: user.id });
       fetchSpaces({ user_spaces: true });
-      fetchBookmarks();
+      fetchBookmarks({ item_type: 'post' });
       
       // Charger la photo de couverture
       const loadCoverImage = async () => {
@@ -55,12 +56,15 @@ export default function Profile() {
     );
   }
 
-  if (postsLoading || spacesLoading || bookmarksLoading) {
-    return <LoadingSpinner size="lg" text="Chargement du profil..." />;
-  }
-
   const userPosts = posts.filter(post => post.author_id === user.id);
   const userSpaces = spaces.filter(space => space.creator_id === user.id);
+
+  const initialLoading = (postsLoading || spacesLoading || bookmarksLoading) && 
+    (posts.length === 0 && spaces.length === 0 && bookmarks.length === 0);
+
+  if (initialLoading) {
+    return <LoadingSpinner size="lg" text="Chargement du profil..." />;
+  }
 
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden">
@@ -164,119 +168,16 @@ export default function Profile() {
           
           {/* Posts Tab */}
           <TabsContent value="posts" className="space-y-4 mt-6">
-            {userPosts.length > 0 ? (
-            userPosts.map((post) => (
-                <Card key={post.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer"
-                      onClick={() => navigate(`/post/${post.id}`)}>
-                  <CardContent className="pt-6">
-                    <p className="text-foreground mb-3 leading-relaxed">
-                      {post.content}
-                    </p>
-                    
-                    {post.hashtags && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {post.hashtags.map((tag) => (
-                          <span key={tag} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <ChevronUp className="h-4 w-4" />
-                          <span>{post.votes_up}</span>
-                          <ChevronDown className="h-4 w-4 ml-1" />
-                          <span>{post.votes_down}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />
-                          <span>{post.comments_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{post.views_count}</span>
-                        </div>
-                      </div>
-                      <div className="text-xs">
-                        {new Date(post.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun post encore</h3>
-                <p className="text-muted-foreground">
-                  Vous n'avez pas encore publié de posts
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          {/* Spaces Tab */}
-          <TabsContent value="spaces" className="space-y-4 mt-6">
-            {userSpaces.length > 0 ? (
-              userSpaces.map((space) => (
-                <Card key={space.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer" 
-                      onClick={() => navigate(`/space/${space.id}`)}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-2">{space.name}</h3>
-                        <p className="text-muted-foreground text-sm mb-3">{space.description}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{space.subscribers_count} membres</span>
-                          <Badge variant="outline">{space.category}</Badge>
-                          {space.is_public && <Badge variant="secondary">Public</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
-                <p className="text-muted-foreground">
-                  Vous n'avez pas encore créé d'espaces
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          {/* Bookmarks Tab */}
-          <TabsContent value="bookmarks" className="space-y-4 mt-6">
-            {bookmarks.length > 0 ? (
-              bookmarks.filter(bookmark => bookmark.item_type === 'post').map((bookmark) => {
-                const post = posts.find(p => p.id === bookmark.item_id);
-                if (!post) return null;
-                
-                return (
-                  <Card key={bookmark.id} className="hover:shadow-lg transition-all duration-300">
+            <InfiniteScrollLoader
+              hasMore={postsHasMore}
+              isLoading={postsLoading}
+              onLoadMore={() => loadMorePosts()}
+            >
+              {userPosts.length > 0 ? (
+                userPosts.map((post) => (
+                  <Card key={post.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer"
+                        onClick={() => navigate(`/post/${post.id}`)}>
                     <CardContent className="pt-6">
-                      <div className="flex items-start gap-3 mb-3">
-                        <Avatar className="h-10 w-10 flex-shrink-0">
-                          <AvatarImage src={post.profiles?.profile_picture_url} />
-                          <AvatarFallback>
-                            {post.profiles?.username?.substring(0, 2).toUpperCase() || 'A'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">@{post.profiles?.username}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(post.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
                       <p className="text-foreground mb-3 leading-relaxed">
                         {post.content}
                       </p>
@@ -293,24 +194,12 @@ export default function Profile() {
                       
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 hover:text-primary"
-                            onClick={() => votePost(post.id, 'up')}
-                          >
+                          <div className="flex items-center gap-1">
                             <ChevronUp className="h-4 w-4" />
                             <span>{post.votes_up}</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 hover:text-destructive"
-                            onClick={() => votePost(post.id, 'down')}
-                          >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-4 w-4 ml-1" />
                             <span>{post.votes_down}</span>
-                          </Button>
+                          </div>
                           <div className="flex items-center gap-1">
                             <MessageCircle className="h-4 w-4" />
                             <span>{post.comments_count}</span>
@@ -320,20 +209,153 @@ export default function Profile() {
                             <span>{post.views_count}</span>
                           </div>
                         </div>
+                        <div className="text-xs">
+                          {new Date(post.created_at).toLocaleDateString()}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                );
-              }).filter(Boolean)
-            ) : (
-              <div className="text-center py-12">
-                <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun post favori</h3>
-                <p className="text-muted-foreground">
-                  Les posts que vous mettez en favoris apparaîtront ici
-                </p>
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun post encore</h3>
+                  <p className="text-muted-foreground">
+                    Vous n'avez pas encore publié de posts
+                  </p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
+          </TabsContent>
+          
+          {/* Spaces Tab */}
+          <TabsContent value="spaces" className="space-y-4 mt-6">
+            <InfiniteScrollLoader
+              hasMore={spacesHasMore}
+              isLoading={spacesLoading}
+              onLoadMore={() => loadMoreSpaces()}
+            >
+              {userSpaces.length > 0 ? (
+                userSpaces.map((space) => (
+                  <Card key={space.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer" 
+                        onClick={() => navigate(`/space/${space.id}`)}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-2">{space.name}</h3>
+                          <p className="text-muted-foreground text-sm mb-3">{space.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{space.subscribers_count} membres</span>
+                            <Badge variant="outline">{space.category}</Badge>
+                            {space.is_public && <Badge variant="secondary">Public</Badge>}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
+                  <p className="text-muted-foreground">
+                    Vous n'avez pas encore créé d'espaces
+                  </p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
+          </TabsContent>
+          
+          {/* Bookmarks Tab */}
+          <TabsContent value="bookmarks" className="space-y-4 mt-6">
+            <InfiniteScrollLoader
+              hasMore={bookmarksHasMore}
+              isLoading={bookmarksLoading}
+              onLoadMore={() => loadMoreBookmarks({ item_type: 'post' })}
+            >
+              {bookmarks.length > 0 ? (
+                bookmarks.filter(bookmark => bookmark.item_type === 'post').map((bookmark) => {
+                  const post = posts.find(p => p.id === bookmark.item_id);
+                  if (!post) return null;
+                  
+                  return (
+                    <Card key={bookmark.id} className="hover:shadow-lg transition-all duration-300">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-3 mb-3">
+                          <Avatar className="h-10 w-10 flex-shrink-0">
+                            <AvatarImage src={post.profiles?.profile_picture_url} />
+                            <AvatarFallback>
+                              {post.profiles?.username?.substring(0, 2).toUpperCase() || 'A'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">@{post.profiles?.username}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(post.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-foreground mb-3 leading-relaxed">
+                          {post.content}
+                        </p>
+                        
+                        {post.hashtags && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {post.hashtags.map((tag) => (
+                              <span key={tag} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <div className="flex items-center gap-4">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex items-center gap-1 hover:text-primary"
+                              onClick={() => votePost(post.id, 'up')}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                              <span>{post.votes_up}</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex items-center gap-1 hover:text-destructive"
+                              onClick={() => votePost(post.id, 'down')}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                              <span>{post.votes_down}</span>
+                            </Button>
+                            <div className="flex items-center gap-1">
+                              <MessageCircle className="h-4 w-4" />
+                              <span>{post.comments_count}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Eye className="h-4 w-4" />
+                              <span>{post.views_count}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                }).filter(Boolean)
+              ) : (
+                <div className="text-center py-12">
+                  <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun post favori</h3>
+                  <p className="text-muted-foreground">
+                    Les posts que vous mettez en favoris apparaîtront ici
+                  </p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
           </TabsContent>
         </Tabs>
       </div>

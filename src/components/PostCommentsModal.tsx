@@ -17,6 +17,7 @@ import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { useIsMobile } from "@/hooks/use-mobile";
 import GifSelector from "@/components/GifSelector";
 import { CommentImageUpload } from "@/components/CommentImageUpload";
+import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 
 interface Post {
   id: string;
@@ -61,12 +62,12 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
   const [showGifSelector, setShowGifSelector] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
-  const { comments, isLoading, fetchComments, createComment, voteComment } = useComments();
+  const { comments, isLoading, hasMore, fetchComments, loadMoreComments, createComment, voteComment } = useComments();
   const isMobile = useIsMobile();
 
   useEffect(() => {
     if (post?.id && isOpen) {
-      fetchComments(post.id);
+      fetchComments(post.id, 1, false);
     }
   }, [post?.id, isOpen, fetchComments]);
 
@@ -217,15 +218,21 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
 
         {/* Liste des commentaires - scrollable */}
         <ScrollArea className="flex-1 px-4">
-          <div className="py-4 space-y-4">
-            {isLoading ? (
-              <div className="text-center text-muted-foreground py-8">
-                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                Chargement...
-              </div>
-            ) : comments.length > 0 ? (
-              comments.map((comment) => (
-                <div key={comment.id} className="space-y-2">
+          <div className="py-4">
+            <InfiniteScrollLoader
+              hasMore={hasMore}
+              isLoading={isLoading}
+              onLoadMore={() => loadMoreComments(post.id)}
+            >
+              {isLoading && comments.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                  Chargement...
+                </div>
+              ) : comments.length > 0 ? (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="space-y-2">
                   {/* Commentaire principal */}
                   <div className="flex items-start gap-3 py-2">
                     <Avatar className="h-8 w-8 flex-shrink-0">
@@ -394,15 +401,17 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
                       ))}
                     </div>
                   )}
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm">Aucun commentaire</p>
-                <p className="text-xs text-muted-foreground/70">Soyez le premier à commenter !</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-sm">Aucun commentaire</p>
+                  <p className="text-xs text-muted-foreground/70">Soyez le premier à commenter !</p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
           </div>
         </ScrollArea>
 
