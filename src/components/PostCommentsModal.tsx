@@ -223,6 +223,7 @@ export function PostCommentsModal({ post, isOpen, onClose }: PostCommentsModalPr
               hasMore={hasMore}
               isLoading={isLoading}
               onLoadMore={() => loadMoreComments(post.id)}
+              hasAnyItems={comments.length > 0}
             >
               {isLoading && comments.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">

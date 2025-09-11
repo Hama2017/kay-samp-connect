@@ -7,6 +7,7 @@ interface InfiniteScrollLoaderProps {
   onLoadMore: () => void;
   threshold?: number;
   children?: React.ReactNode;
+  hasAnyItems?: boolean; // New prop to indicate if there were any items loaded
 }
 
 export function InfiniteScrollLoader({ 
@@ -14,7 +15,8 @@ export function InfiniteScrollLoader({
   isLoading, 
   onLoadMore, 
   threshold = 100,
-  children 
+  children,
+  hasAnyItems = false
 }: InfiniteScrollLoaderProps) {
   const loadingRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +47,11 @@ export function InfiniteScrollLoader({
       }
     };
   }, [handleIntersection, threshold]);
+
+  // Don't show "you've seen it all" if there were never any items to begin with
+  if (!hasMore && !hasAnyItems) {
+    return null;
+  }
 
   if (!hasMore) {
     return (

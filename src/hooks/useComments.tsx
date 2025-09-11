@@ -69,11 +69,11 @@ export function useComments() {
         .eq('post_id', postId)
         .is('parent_comment_id', null)
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit); // Fetch limit + 1 items
+        .range(offset, offset + limit); // Fetch limit + 1 items (offset to offset + limit inclusive)
 
       if (error) throw error;
 
-      // Check if there are more comments
+      // Check if there are more comments (we fetch limit + 1 to check)
       const hasMoreComments = (data as any[])?.length > limit;
       
       // Only take the first 'limit' items for display
