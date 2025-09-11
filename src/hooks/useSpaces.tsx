@@ -15,6 +15,8 @@ export interface Space {
   subscribers_count: number;
   posts_count: number;
   rules?: string[];
+  badge?: 'kaaysamp' | 'factcheck' | 'evenement';
+  who_can_publish?: string[];
   created_at: string;
   updated_at: string;
   // Relations
@@ -34,6 +36,8 @@ export interface CreateSpaceData {
   cover_image_url?: string;
   is_public?: boolean;
   rules?: string[];
+  badge?: 'kaaysamp' | 'factcheck' | 'evenement';
+  who_can_publish?: string[];
 }
 
 export function useSpaces() {

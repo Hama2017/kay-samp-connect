@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useSpaces } from "@/hooks/useSpaces";
@@ -33,27 +33,14 @@ export default function CreateSpace() {
     name: "",
     description: "",
     category: "",
-    whoCanPublish: [] as string[],
+    badge: "" as "kaaysamp" | "factcheck" | "evenement" | "",
+    whoCanPublish: "subscribers" as string,
   });
-
-  const handlePublishPermissionChange = (permission: string, checked: boolean) => {
-    if (checked) {
-      setFormData(prev => ({
-        ...prev,
-        whoCanPublish: [...prev.whoCanPublish, permission]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        whoCanPublish: prev.whoCanPublish.filter(p => p !== permission)
-      }));
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || !formData.category || formData.whoCanPublish.length === 0) {
+    if (!formData.name || !formData.description || !formData.category) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
@@ -68,6 +55,8 @@ export default function CreateSpace() {
         name: formData.name,
         description: formData.description,
         category: formData.category,
+        badge: formData.badge || undefined,
+        who_can_publish: [formData.whoCanPublish],
       });
       
       toast({
@@ -176,46 +165,61 @@ export default function CreateSpace() {
               </Select>
             </div>
 
+            {/* Badge */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Badge spécial (optionnel)
+              </Label>
+              <Select 
+                value={formData.badge} 
+                onValueChange={(value) => setFormData(prev => ({ 
+                  ...prev, 
+                  badge: value as "kaaysamp" | "factcheck" | "evenement" | ""
+                }))}
+              >
+                <SelectTrigger className="border-primary/20 focus:border-primary/40">
+                  <SelectValue placeholder="Choisir un badge (optionnel)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Aucun badge</SelectItem>
+                  <SelectItem value="kaaysamp">🏆 KaaySamp</SelectItem>
+                  <SelectItem value="factcheck">✅ Fact Check</SelectItem>
+                  <SelectItem value="evenement">📅 Événement</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Publishing permissions */}
             <div className="space-y-4">
               <Label className="text-sm font-medium">
                 Qui peut publier ? <span className="text-destructive">*</span>
               </Label>
               
-              <div className="space-y-3">
+              <RadioGroup 
+                value={formData.whoCanPublish} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, whoCanPublish: value }))}
+              >
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="creator-only"
-                    checked={formData.whoCanPublish.includes("creator_only")}
-                    onCheckedChange={(checked) => handlePublishPermissionChange("creator_only", checked as boolean)}
-                  />
+                  <RadioGroupItem value="creator_only" id="creator-only" />
                   <Label htmlFor="creator-only" className="text-sm">
                     Moi seulement
                   </Label>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="all-subscribers"
-                    checked={formData.whoCanPublish.includes("all_subscribers")}
-                    onCheckedChange={(checked) => handlePublishPermissionChange("all_subscribers", checked as boolean)}
-                  />
+                  <RadioGroupItem value="subscribers" id="all-subscribers" />
                   <Label htmlFor="all-subscribers" className="text-sm">
                     Tous les abonnés
                   </Label>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="verified-users"
-                    checked={formData.whoCanPublish.includes("verified_users")}
-                    onCheckedChange={(checked) => handlePublishPermissionChange("verified_users", checked as boolean)}
-                  />
+                  <RadioGroupItem value="verified_only" id="verified-users" />
                   <Label htmlFor="verified-users" className="text-sm">
                     Utilisateurs vérifiés seulement
                   </Label>
                 </div>
-              </div>
+              </RadioGroup>
             </div>
 
             {/* Submit button */}

@@ -10,6 +10,9 @@ import { usePosts } from "@/hooks/usePosts";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostActions } from "@/components/PostActions";
 import { PostModal } from "@/components/PostModal";
+import { SpaceBadge } from '@/components/SpaceBadge';
+import { canUserPostInSpace } from '@/utils/spacePermissions';
+import { useAuth } from '@/contexts/AuthContext';
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock },
@@ -21,6 +24,7 @@ const sortFilters = [
 export default function SpaceDetail() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
@@ -161,6 +165,9 @@ export default function SpaceDetail() {
                     ✓ Certifié
                   </Badge>
                 )}
+                {space.badge && (
+                  <SpaceBadge badge={space.badge} />
+                )}
               </div>
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -186,14 +193,22 @@ export default function SpaceDetail() {
               {space.is_subscribed ? "Abonné" : "S'abonner"}
             </Button>
             
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/create/${spaceId}`)}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Créer un post
-            </Button>
+            {(() => {
+              const { canPost, message } = canUserPostInSpace(space, user?.id, false);
+              
+              return (
+                <Button 
+                  variant="outline" 
+                  onClick={() => canPost && navigate(`/create/${spaceId}`)}
+                  className="gap-2"
+                  disabled={!canPost}
+                  title={message}
+                >
+                  <Plus className="h-4 w-4" />
+                  {canPost ? "Créer un post" : message}
+                </Button>
+              );
+            })()}
           </div>
         </CardContent>
       </Card>

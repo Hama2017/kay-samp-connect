@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SpaceBadge } from '@/components/SpaceBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSpaces } from "@/hooks/useSpaces";
 import { usePageTracking } from "@/hooks/usePageTracking";
@@ -197,6 +198,9 @@ export default function Discover() {
                           <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
                             ✓
                           </Badge>
+                        )}
+                        {space.badge && (
+                          <SpaceBadge badge={space.badge} className="text-xs flex-shrink-0" />
                         )}
                       </div>
                       

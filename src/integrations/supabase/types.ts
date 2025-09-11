@@ -622,6 +622,7 @@ export type Database = {
       }
       spaces: {
         Row: {
+          badge: Database["public"]["Enums"]["space_badge"] | null
           category: string
           cover_image_url: string | null
           created_at: string
@@ -635,8 +636,10 @@ export type Database = {
           rules: string[] | null
           subscribers_count: number
           updated_at: string
+          who_can_publish: string[] | null
         }
         Insert: {
+          badge?: Database["public"]["Enums"]["space_badge"] | null
           category: string
           cover_image_url?: string | null
           created_at?: string
@@ -650,8 +653,10 @@ export type Database = {
           rules?: string[] | null
           subscribers_count?: number
           updated_at?: string
+          who_can_publish?: string[] | null
         }
         Update: {
+          badge?: Database["public"]["Enums"]["space_badge"] | null
           category?: string
           cover_image_url?: string | null
           created_at?: string
@@ -665,6 +670,7 @@ export type Database = {
           rules?: string[] | null
           subscribers_count?: number
           updated_at?: string
+          who_can_publish?: string[] | null
         }
         Relationships: [
           {
@@ -783,7 +789,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      space_badge: "kaaysamp" | "factcheck" | "evenement"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -910,6 +916,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      space_badge: ["kaaysamp", "factcheck", "evenement"],
+    },
   },
 } as const
