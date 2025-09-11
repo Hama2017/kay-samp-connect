@@ -48,6 +48,7 @@ export function useComments() {
     const offset = (page - 1) * limit;
 
     try {
+      // Fetch one extra item to check if there are more comments
       const { data, error } = await supabase
         .from('comments')
         .select(`
@@ -68,14 +69,20 @@ export function useComments() {
         .eq('post_id', postId)
         .is('parent_comment_id', null)
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .range(offset, offset + limit); // Fetch limit + 1 items
 
       if (error) throw error;
 
+      // Check if there are more comments
+      const hasMoreComments = (data as any[])?.length > limit;
+      
+      // Only take the first 'limit' items for display
+      const commentsToProcess = hasMoreComments ? (data as any[]).slice(0, limit) : (data as any[]);
+
       // Fetch replies for each parent comment
       let organizedComments: Comment[] = [];
-      if (data && data.length > 0) {
-        for (const parent of data as any[]) {
+      if (commentsToProcess && commentsToProcess.length > 0) {
+        for (const parent of commentsToProcess) {
           const { data: replies } = await supabase
             .from('comments')
             .select(`
@@ -102,8 +109,6 @@ export function useComments() {
           });
         }
       }
-
-      const hasMoreComments = (data as any[])?.length === limit;
       
       if (append && page > 1) {
         setComments(prevComments => {
