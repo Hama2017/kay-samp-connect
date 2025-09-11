@@ -33,27 +33,22 @@ export function PWAPrompt() {
     setTimeout(() => setDismissed(false), 24 * 60 * 60 * 1000);
   };
 
-  // Status indicator pour la connexion
-  const ConnectionStatus = () => (
-    <div className="fixed bottom-4 left-4 z-40 sm:top-20 sm:right-4 sm:left-auto sm:bottom-auto">
-      <Badge 
-        variant={isOnline ? "default" : "destructive"}
-        className="flex items-center gap-2 px-3 py-1 shadow-lg"
-      >
-        {isOnline ? (
-          <>
-            <Wifi className="h-3 w-3" />
-            En ligne
-          </>
-        ) : (
-          <>
-            <WifiOff className="h-3 w-3" />
-            Hors ligne
-          </>
-        )}
-      </Badge>
-    </div>
-  );
+  // Status indicator pour la connexion - seulement quand hors ligne
+  const ConnectionStatus = () => {
+    if (isOnline) return null;
+    
+    return (
+      <div className="fixed bottom-4 left-4 z-40 sm:top-20 sm:right-4 sm:left-auto sm:bottom-auto">
+        <Badge 
+          variant="destructive"
+          className="flex items-center gap-2 px-3 py-1 shadow-lg"
+        >
+          <WifiOff className="h-3 w-3" />
+          Hors ligne
+        </Badge>
+      </div>
+    );
+  };
 
   return (
     <>
