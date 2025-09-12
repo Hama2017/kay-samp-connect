@@ -311,6 +311,30 @@ export type Database = {
           },
         ]
       }
+      otp_rate_limits: {
+        Row: {
+          created_at: string | null
+          id: string
+          phone: string
+          request_count: number | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          phone: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          phone?: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       phone_otp: {
         Row: {
           created_at: string
@@ -782,6 +806,26 @@ export type Database = {
       check_email_exists: {
         Args: { email_input: string }
         Returns: boolean
+      }
+      cleanup_expired_otp: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_public_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          bio: string
+          cover_image_url: string
+          created_at: string
+          followers_count: number
+          following_count: number
+          id: string
+          is_verified: boolean
+          profile_picture_url: string
+          profile_visible: boolean
+          updated_at: string
+          username: string
+        }[]
       }
       increment_post_views: {
         Args: { post_id: string }

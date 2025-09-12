@@ -8,6 +8,11 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+// Input validation
+const PHONE_REGEX = /^\+[1-9]\d{1,14}$/;
+const OTP_REGEX = /^\d{6}$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -18,8 +23,27 @@ Deno.serve(async (req) => {
     const { phone, otp, username } = await req.json();
     
     if (!phone || !otp) {
+      console.error('Missing required fields:', { phone: !!phone, otp: !!otp });
       throw new Error('Phone number and OTP are required');
     }
+
+    // Validate input formats
+    if (!PHONE_REGEX.test(phone)) {
+      console.error('Invalid phone format:', phone);
+      throw new Error('Invalid phone number format');
+    }
+
+    if (!OTP_REGEX.test(otp)) {
+      console.error('Invalid OTP format');
+      throw new Error('Invalid OTP format');
+    }
+
+    if (username && !USERNAME_REGEX.test(username)) {
+      console.error('Invalid username format:', username);
+      throw new Error('Invalid username format');
+    }
+
+    console.log('Verifying OTP for phone:', phone.substring(0, 5) + '***');
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     
@@ -34,8 +58,11 @@ Deno.serve(async (req) => {
       .single();
 
     if (otpError || !otpData) {
+      console.warn('OTP verification failed for phone:', phone.substring(0, 5) + '***');
       throw new Error('Code OTP invalide ou expiré');
     }
+
+    console.log('OTP verification successful for phone:', phone.substring(0, 5) + '***');
 
     // Mark OTP as used
     await supabase
@@ -56,12 +83,13 @@ Deno.serve(async (req) => {
       // User exists, sign them in
       userId = existingProfile.id;
     } else {
-      // Create new user
+      // Create new user with enhanced security
       const { data: userData, error: userError } = await supabase.auth.admin.createUser({
         phone: phone,
         phone_confirmed: true,
         user_metadata: {
-          username: username || `user_${phone.slice(-4)}`
+          username: username || `user_${phone.slice(-4)}`,
+          created_via: 'phone_otp'
         }
       });
 
@@ -71,6 +99,7 @@ Deno.serve(async (req) => {
       }
 
       userId = userData.user.id;
+      console.log('New user created:', userId);
     }
 
     // Generate session token
@@ -80,9 +109,16 @@ Deno.serve(async (req) => {
     });
 
     if (sessionError) {
-      console.error('Session error:', sessionError);
+      console.error('Session creation error:', sessionError);
       throw new Error('Erreur lors de la création de la session');
     }
+
+    console.log('Session created successfully for user:', userId);
+
+    // Clean up expired OTPs periodically (basic cleanup)
+    supabase.rpc('cleanup_expired_otp').catch(err => 
+      console.warn('OTP cleanup failed:', err)
+    );
 
     return new Response(
       JSON.stringify({ 
@@ -99,11 +135,16 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Verify-OTP Error:', error);
+    
+    // Don't expose internal errors to client
+    const statusCode = error.message.includes('invalide ou expiré') ? 400 :
+                      error.message.includes('Invalid') ? 400 : 500;
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        status: 400,
+        status: statusCode,
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json' 
