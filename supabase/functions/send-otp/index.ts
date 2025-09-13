@@ -10,6 +10,13 @@ const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+// Security constants
+const MAX_REQUESTS_PER_HOUR = 5;
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Phone number validation regex (basic international format)
+const PHONE_REGEX = /^\+[1-9]\d{1,14}$/;
+
 // Rate limiting constants
 const MAX_REQUESTS_PER_HOUR = 5;
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -104,7 +111,7 @@ Deno.serve(async (req) => {
     const twilioAuth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
     
     const formData = new URLSearchParams();
-    formData.append('To', phone);
+    formData.append('To', sanitizedPhone);
     formData.append('From', '+12345678900'); // You'll need to set your Twilio phone number
     formData.append('Body', `Votre code de vérification KaaySamp: ${otp}`);
 

@@ -51,8 +51,8 @@ Deno.serve(async (req) => {
     const { data: otpData, error: otpError } = await supabase
       .from('phone_otp')
       .select('*')
-      .eq('phone', phone)
-      .eq('otp_code', otp)
+      .eq('phone', sanitizedPhone)
+      .eq('otp_code', sanitizedOtp)
       .eq('used', false)
       .gt('expires_at', new Date().toISOString())
       .single();
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     let { data: existingProfile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('phone', phone)
+      .eq('phone', sanitizedPhone)
       .single();
 
     let userId;
@@ -105,8 +105,10 @@ Deno.serve(async (req) => {
     // Generate session token
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
-      phone: phone,
+      phone: sanitizedPhone,
     });
+
+    console.log(`Successful OTP verification for phone: ${sanitizedPhone.substring(0, 5)}****`);
 
     if (sessionError) {
       console.error('Session creation error:', sessionError);
