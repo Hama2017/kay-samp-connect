@@ -827,6 +827,22 @@ export type Database = {
           username: string
         }[]
       }
+      get_safe_public_profile: {
+        Args: { profile_user_id: string }
+        Returns: {
+          bio: string
+          cover_image_url: string
+          created_at: string
+          followers_count: number
+          following_count: number
+          id: string
+          is_verified: boolean
+          profile_picture_url: string
+          profile_visible: boolean
+          updated_at: string
+          username: string
+        }[]
+      }
       increment_post_views: {
         Args: { post_id: string }
         Returns: undefined
