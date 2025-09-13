@@ -26,5 +26,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Check if user needs onboarding (skip for onboarding page itself)
+  if (location.pathname !== '/onboarding') {
+    const userOnboardingKey = `onboarding_completed_${user.id}`;
+    const hasCompletedOnboarding = localStorage.getItem(userOnboardingKey) === 'true' || 
+                                 localStorage.getItem('onboarding_completed') === 'true';
+    
+    if (!hasCompletedOnboarding) {
+      return <Navigate to="/onboarding" replace />;
+    }
+  }
+
   return <>{children}</>;
 }

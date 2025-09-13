@@ -22,6 +22,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import PhoneLogin from "@/pages/PhoneLogin";
 import VerifyOTP from "@/pages/VerifyOTP";
+import Onboarding from "@/pages/Onboarding";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Bookmarks from "./pages/Bookmarks";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/phone-login" element={<PhoneLogin />} />
           <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/onboarding" element={<Onboarding />} />
             
             {/* Protected routes with layout */}
             <Route path="/" element={
