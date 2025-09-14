@@ -14,8 +14,8 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t">
-      <div className="flex items-center justify-around h-16 px-2">
+    <nav className="w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t">
+      <div className="flex items-center justify-around h-16 px-2 max-w-screen-sm mx-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           
@@ -26,7 +26,7 @@ export function BottomNavigation() {
                   <Button
                     variant="senegal"
                     size="fab"
-                    className="shadow-primary"
+                    className="btn-mobile shadow-primary relative z-10"
                   >
                     <Icon className="h-6 w-6" />
                   </Button>
@@ -48,14 +48,14 @@ export function BottomNavigation() {
               </DropdownMenu>
             );
           }
-          
+
           return (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[60px]",
+                  "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[60px] btn-mobile",
                   isActive
                     ? "text-primary bg-primary/5"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -65,7 +65,9 @@ export function BottomNavigation() {
               {({ isActive }) => (
                 <>
                   <Icon className={cn("h-5 w-5", isActive && "animate-gentle-bounce")} />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <span className="text-xs font-medium leading-tight">
+                    {item.label}
+                  </span>
                 </>
               )}
             </NavLink>

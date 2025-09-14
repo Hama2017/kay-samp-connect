@@ -2,13 +2,13 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#22c55e" />
     <meta name="background-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="KaaySamp" />
     <meta name="mobile-web-app-capable" content="yes" />
     
@@ -43,6 +43,45 @@
     <meta name="twitter:title" content="KaaySamp - Réseau Social Sénégalais" />
     <meta name="twitter:description" content="Connectez-vous avec la communauté sénégalaise du monde entier" />
     <meta name="twitter:image" content="/icons/icon-512x512.png" />
+
+    <style>
+      /* 🚀 CSS MOBILE CRITIQUE - À ajouter AVANT le chargement de l'app */
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+        position: fixed; /* Empêche le bounce sur iOS */
+      }
+
+      #root {
+        width: 100vw;
+        height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+      }
+
+      /* Empêcher le zoom sur les inputs iOS */
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+
+      /* Cacher les barres de défilement sur mobile */
+      ::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Support pour les encoches iPhone */
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+    </style>
   </head>
 
   <body>

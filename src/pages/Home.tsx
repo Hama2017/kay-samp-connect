@@ -13,10 +13,10 @@ import { PostCommentsModal } from "@/components/PostCommentsModal";
 const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
 
 const sortFilters = [
-  { id: "recent", label: "Plus récents", icon: Clock },
-  { id: "viral", label: "Plus viraux", icon: TrendingUp },
-  { id: "popular", label: "Plus populaires", icon: Flame },
-  { id: "discussed", label: "Plus discutés", icon: MessageCircle },
+  { id: "recent", label: "Plus récents", icon: Clock, short: "Récents" },
+  { id: "viral", label: "Plus viraux", icon: TrendingUp, short: "Viraux" },
+  { id: "popular", label: "Plus populaires", icon: Flame, short: "Populaires" },
+  { id: "discussed", label: "Plus discutés", icon: MessageCircle, short: "Discutés" },
 ];
 
 export default function Home() {
@@ -56,78 +56,97 @@ export default function Home() {
   }, [posts, selectedCategory]);
 
   return (
-    <div className="min-h-screen w-full mx-auto px-4 py-2 sm:py-6 max-w-full overflow-hidden">
-      {/* Welcome section */}
-      <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
-        <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Bienvenue sur KaaySamp
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground px-2">
-          Viens t'asseoir et découvre ta communauté sénégalaise
-        </p>
-      </div>
-
-      {/* Category filter */}
-      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-3 sm:mb-4 scrollbar-hide">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={selectedCategory === category ? "senegal" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(category)}
-            className="whitespace-nowrap text-xs sm:text-sm flex-shrink-0"
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-
-      {/* Sort filters */}
-      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 sm:mb-6 scrollbar-hide">
-        {sortFilters.map((filter) => {
-          const Icon = filter.icon;
-          return (
-            <Button
-              key={filter.id}
-              variant={selectedFilter === filter.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedFilter(filter.id)}
-              className="whitespace-nowrap gap-1.5 sm:gap-2 text-xs sm:text-sm flex-shrink-0"
-            >
-              <Icon className="h-3 w-3" />
-              <span className="hidden xs:inline">{filter.label}</span>
-              <span className="xs:hidden">{filter.label.split(" ")[1] || filter.label}</span>
-            </Button>
-          );
-        })}
-      </div>
-
-      {/* Posts feed */}
-      {isLoading && posts.length === 0 ? (
-        <div className="text-center py-12">
-          <LoadingSpinner size="lg" text="Chargement des posts..." />
-        </div>
-      ) : filteredAndSortedPosts.length === 0 ? (
-        <div className="text-center py-12">
-          <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold text-foreground mb-2">Aucun post trouvé</h3>
-          <p className="text-muted-foreground">
-            Soyez le premier à publier dans cette catégorie !
+    <div className="w-full min-h-full">
+      {/* 🎯 CONTENEUR MOBILE OPTIMISÉ */}
+      <div className="px-3 py-4 sm:px-6 sm:py-6 max-w-screen-sm mx-auto">
+        
+        {/* 👋 SECTION BIENVENUE - MOBILE COMPACT */}
+        <div className="text-center mb-4 animate-fade-in-up">
+          <h1 className="text-lg sm:text-2xl font-bold mb-1 bg-gradient-primary bg-clip-text text-transparent leading-tight">
+            Bienvenue sur KaaySamp
+          </h1>
+          <p className="text-sm text-muted-foreground px-2 leading-relaxed">
+            Découvre ta communauté sénégalaise
           </p>
         </div>
-      ) : (
-        <InfinitePostsList
-          posts={filteredAndSortedPosts}
-          onLoadMore={loadMorePosts}
-          onVote={handleVote}
-          onIncrementViews={incrementViews}
-          onPostClick={handlePostClick}
-          hasMore={hasMore}
-          isLoading={isLoading}
-        />
-      )}
 
-      {/* Modal de commentaires */}
+        {/* 📂 FILTRES CATÉGORIES - BADGES COMPACTS */}
+        <div className="mb-3">
+          <div className="flex gap-1.5 overflow-x-auto pb-2 mobile-scroll">
+            <div className="flex gap-1.5 px-1">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "senegal" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className="whitespace-nowrap text-xs h-8 px-2.5 flex-shrink-0 min-w-fit font-medium"
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 🔄 FILTRES DE TRI - BADGES COMPACTS */}
+        <div className="mb-4">
+          <div className="flex gap-1.5 overflow-x-auto pb-2 mobile-scroll">
+            <div className="flex gap-1.5 px-1">
+              {sortFilters.map((filter) => {
+                const Icon = filter.icon;
+                return (
+                  <Button
+                    key={filter.id}
+                    variant={selectedFilter === filter.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedFilter(filter.id)}
+                    className="whitespace-nowrap gap-1 text-[11px] h-8 px-2 flex-shrink-0 min-w-fit font-medium"
+                  >
+                    <Icon className="h-3 w-3 flex-shrink-0" />
+                    {/* Texte responsive */}
+                    <span className="hidden sm:inline">{filter.label}</span>
+                    <span className="sm:hidden">{filter.short}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* 📱 FEED POSTS - MOBILE OPTIMISÉ */}
+        <div className="mobile-scroll">
+          {isLoading && posts.length === 0 ? (
+            <div className="text-center py-12">
+              <LoadingSpinner size="lg" text="Chargement des posts..." />
+            </div>
+          ) : filteredAndSortedPosts.length === 0 ? (
+            <div className="text-center py-12 px-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="h-8 w-8 text-primary/50" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Aucun post trouvé</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Soyez le premier à publier dans cette catégorie !
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <InfinitePostsList
+                posts={filteredAndSortedPosts}
+                onLoadMore={loadMorePosts}
+                onVote={handleVote}
+                onIncrementViews={incrementViews}
+                onPostClick={handlePostClick}
+                hasMore={hasMore}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 💬 MODAL COMMENTAIRES - MOBILE FRIENDLY */}
       <PostCommentsModal
         post={selectedPost}
         isOpen={!!selectedPost}

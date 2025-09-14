@@ -29,86 +29,94 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
 
   return (
     <>
-      {/* Overlay */}
+      {/* Mobile Overlay */}
       <div 
-        className="fixed inset-0 z-40 bg-black/20 md:hidden" 
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden" 
         onClick={() => onOpenChange(false)}
       />
       
       {/* Sidebar */}
-      <div className="fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] w-96 bg-card border-r shadow-lg animate-slide-in-right md:static md:animate-none">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="fixed left-0 top-0 z-50 h-full w-80 max-w-[85vw] bg-card border-r shadow-xl animate-slide-in-right md:static md:animate-none safe-area-top">
+        {/* Header with safe area */}
+        <div className="flex items-center justify-between p-4 border-b h-16 md:mt-0">
           <h2 className="font-semibold text-foreground">Mes Espaces</h2>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onOpenChange(false)}
-            className="h-8 w-8"
+            className="btn-mobile"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Spaces List */}
-        <ScrollArea className="h-[calc(100%-4rem)]">
+        {/* Spaces List - Mobile optimized scroll */}
+        <div className="h-[calc(100vh-8rem)] mobile-scroll">
           <div className="p-4 space-y-2">
             {isLoading ? (
               <div className="text-center text-muted-foreground py-8">
-                Chargement des espaces...
+                <div className="animate-pulse">
+                  <div className="h-4 bg-muted rounded w-32 mx-auto mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-24 mx-auto"></div>
+                </div>
               </div>
             ) : subscribedSpaces.length > 0 ? (
               subscribedSpaces.map((space) => (
                 <div
                   key={space.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 cursor-pointer transition-colors group"
+                  className="card-mobile p-3 hover:bg-primary/5 cursor-pointer transition-all duration-200 group active:scale-95"
                   onClick={() => {
                     navigate(`/space/${space.id}`);
                     onOpenChange(false);
                   }}
                 >
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                      <Hash className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm truncate group-hover:text-primary">
-                        {space.name}
-                      </h3>
-                      {space.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓ Certifié
-                        </Badge>
-                      )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-sm">
+                        <Hash className="h-5 w-5 text-primary-foreground" />
+                      </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {space.category}
-                      </span>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          {space.subscribers_count}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                          {space.name}
+                        </h3>
+                        {space.is_verified && (
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary shrink-0">
+                            ✓
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground truncate flex-1">
+                          {space.category}
                         </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Users className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            {space.subscribers_count}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-muted-foreground py-8">
-                <Hash className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium mb-1">Aucun espace abonné</p>
-                <p className="text-sm">Explorez et abonnez-vous à des espaces pour les voir ici</p>
+              <div className="text-center text-muted-foreground py-8 px-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Hash className="h-8 w-8 text-primary/50" />
+                </div>
+                <p className="font-medium mb-2">Aucun espace abonné</p>
+                <p className="text-sm leading-relaxed">
+                  Explorez et abonnez-vous à des espaces pour les voir ici
+                </p>
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </>
   );

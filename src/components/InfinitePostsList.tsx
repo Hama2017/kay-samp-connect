@@ -3,11 +3,13 @@ import { MessageCircle, ArrowUp, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { useNavigate } from "react-router-dom";
 import { PostActions } from "@/components/PostActions";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 
 interface Post {
   id: string;
@@ -60,9 +62,9 @@ export function InfinitePostsList({
 }: InfinitePostsListProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useRealBookmarks();
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  // Infinite scroll handler
   const handleScroll = useCallback(() => {
     if (window.innerHeight + document.documentElement.scrollTop 
         >= document.documentElement.offsetHeight - 1000 && hasMore && !isLoading) {
@@ -118,13 +120,30 @@ export function InfinitePostsList({
     }
   };
 
+  const handleBookmarkToggle = (post: Post) => {
+    toggleBookmark({
+      item_type: "post",
+      item_id: post.id,
+      title: post.title || post.content.slice(0, 100),
+      description: post.content,
+      metadata: {
+        author: post.profiles.username,
+        likes: post.votes_up,
+        comments: post.comments_count,
+        category: "post",
+      },
+    });
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4">
-      {posts.map((post) => (
+      {posts.map((post) => {
+        const bookmarked = isBookmarked(post.id, "post");
+
+        return (
         <Card 
           key={post.id} 
-          className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer max-w-full overflow-hidden"
-          onClick={() => handlePostClick(post)}
+          className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden"
         >
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
             <div className="flex items-start justify-between gap-2">
@@ -172,10 +191,23 @@ export function InfinitePostsList({
                   </p>
                 </div>
               </div>
-              
-              <Badge variant="outline" className="text-xs flex-shrink-0 hidden sm:block">
-                {post.spaces?.name || "Général"}
-              </Badge>
+
+              {/* Bouton favoris */}
+              <Button
+                variant={bookmarked ? "default" : "outline"}
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBookmarkToggle(post);
+                }}
+                className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full ${
+                  bookmarked
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground border-primary"
+                    : "hover:bg-muted border-muted-foreground/20"
+                }`}
+              >
+                {bookmarked ? "Sampna" : "DemaySamp"}
+              </Button>
             </div>
           </CardHeader>
           
@@ -201,7 +233,7 @@ export function InfinitePostsList({
             
             <PostMediaDisplay 
               media={post.post_media || []} 
-              showControls={false}
+             maxHeight="max-h-[70vh]"
             />
             
             {post.hashtags && post.hashtags.length > 0 && (
@@ -221,7 +253,7 @@ export function InfinitePostsList({
             />
           </CardContent>
         </Card>
-      ))}
+      )})}
       
       {isLoading && (
         <div className="flex justify-center py-6">
