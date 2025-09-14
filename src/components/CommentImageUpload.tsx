@@ -91,7 +91,7 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
     fileInputRef.current?.click();
   };
 
-  if (selectedImage) {
+/*   if (selectedImage) {
     return (
       <div className="relative inline-block">
         <img 
@@ -110,7 +110,7 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
         </Button>
       </div>
     );
-  }
+  } */
 
   return (
     <>
