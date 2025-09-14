@@ -66,14 +66,6 @@ export default function PostMediaDisplay({
     setControlsTimeout(prev => ({ ...prev, [mediaId]: timeout }));
   };
 
-  // Fonction pour masquer les contrôles immédiatement
-  const hideControls = (mediaId: string) => {
-    setShowControlsState(prev => ({ ...prev, [mediaId]: false }));
-    if (controlsTimeout[mediaId]) {
-      clearTimeout(controlsTimeout[mediaId]);
-    }
-  };
-
   const extractVideoFrame = (videoUrl: string, mediaId: string) => {
     const video = document.createElement('video');
     video.crossOrigin = 'anonymous';
@@ -273,7 +265,7 @@ export default function PostMediaDisplay({
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleVideoClick(id); }}
-                    className="w-20 h-20 bg-black/70 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+                    className="w-20 h-20 bg-[#1f9463]/80 hover:bg-[#43ca92]/90 rounded-full flex items-center justify-center transition-colors shadow-lg border-2 border-white/20"
                   >
                     <Play className="w-8 h-8 text-white ml-1" />
                   </button>
@@ -299,64 +291,67 @@ export default function PostMediaDisplay({
             {/* Icône play au centre quand en pause */}
             {!isPlaying && !showBig && (
               <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                <div className="w-16 h-16 bg-black/70 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-[#1f9463]/90 rounded-full flex items-center justify-center shadow-lg border-2 border-white/30">
                   <Play className="w-8 h-8 text-white ml-1" />
                 </div>
               </div>
             )}
 
-            {/* Contrôles avec système temporaire comme YouTube */}
+            {/* Contrôles toujours visibles avec fond pour contraste */}
             {!showBig && showControls && (showControlsState[id] || !isPlaying) && (
               <>
-                <div className="absolute bottom-2 left-2 flex gap-2">
+                {/* Overlay gradient pour assurer la visibilité */}
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
+                
+                <div className="absolute bottom-2 left-2 flex gap-2 z-30">
                   <button 
                     onClick={() => skipBackward(id)} 
-                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
                     title="Reculer 10s"
                   >
                     <RotateCcw className="w-4 h-4 text-white" />
                   </button>
                   <button 
                     onClick={() => handleVideoClick(id)} 
-                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
                   >
                     {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
                   </button>
                   <button 
                     onClick={() => skipForward(id)} 
-                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
                     title="Avancer 10s"
                   >
                     <RotateCw className="w-4 h-4 text-white" />
                   </button>
                   <button 
                     onClick={() => toggleMute(id)} 
-                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
                   >
                     {isMuted ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-white" />}
                   </button>
                 </div>
 
-                {/* Temps et barre de progression */}
-                <div className="absolute bottom-2 right-2 flex items-center gap-2">
-                  <span className="text-white text-xs bg-black/50 px-2 py-1 rounded">
+                {/* Temps avec fond contrasté */}
+                <div className="absolute bottom-2 right-2 flex items-center gap-2 z-30">
+                  <span className="text-white text-xs bg-[#1f9463]/90 px-2 py-1 rounded shadow-lg border border-white/20 backdrop-blur-sm">
                     {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
                   </span>
                 </div>
 
-                {/* Barre de progression */}
-                <div className="absolute bottom-12 left-2 right-2">
+                {/* Barre de progression avec fond contrasté */}
+                <div className="absolute bottom-12 left-2 right-2 z-30">
                   <div 
-                    className="w-full h-3 md:h-1 bg-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center"
+                    className="w-full h-3 md:h-1 bg-black/40 border border-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center shadow-lg backdrop-blur-sm"
                     onClick={(e) => handleProgressClick(e, id)}
                     onMouseMove={() => showControlsTemporary(id)}
                   >
                     <div 
-                      className="h-full bg-white rounded-full transition-all duration-100 relative"
+                      className="h-full bg-[#1f9463] hover:bg-[#43ca92] rounded-full transition-all duration-100 relative shadow-sm"
                       style={{ width: `${videoProgress}%` }}
                     >
-                      {/* Indicateur circulaire pour mobile */}
-                      <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-white rounded-full shadow-lg md:opacity-0 md:hover:opacity-100 transition-opacity" />
+                      {/* Indicateur circulaire avec meilleur contraste */}
+                      <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-[#1f9463] border-2 border-white rounded-full shadow-lg md:opacity-0 md:hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 </div>
@@ -424,7 +419,7 @@ export default function PostMediaDisplay({
               onClick={() => setCurrentIndex(index)}
               className={cn(
                 "flex-shrink-0 w-20 h-16 rounded-lg border-2 relative overflow-hidden",
-                index === currentIndex ? 'border-blue-500' : 'border-transparent hover:border-gray-300'
+                index === currentIndex ? 'border-[#1f9463]' : 'border-transparent hover:border-[#43ca92]'
               )}
             >
               {renderThumbnail(item)}
