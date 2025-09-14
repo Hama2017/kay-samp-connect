@@ -1,14 +1,10 @@
-import { useState } from "react";
-import { Play, Youtube, Pause, Volume2, VolumeX } from "lucide-react";
-import { cn } from "@/lib/utils";
-import LiteYouTubeEmbed from 'react-lite-youtube-embed';
-import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
+import { useState, useRef, useEffect } from "react";
+import { Play, Pause, Volume2, VolumeX, Youtube, RotateCcw, RotateCw } from "lucide-react";
 
 interface PostMedia {
   id: string;
   media_url: string;
   media_type: string;
-  thumbnail_url?: string;
   youtube_video_id?: string;
 }
 
@@ -19,6 +15,10 @@ interface PostMediaDisplayProps {
   showControls?: boolean;
 }
 
+const cn = (...classes: (string | undefined)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
+
 export default function PostMediaDisplay({
   media,
   className,
@@ -26,16 +26,136 @@ export default function PostMediaDisplay({
   showControls = true
 }: PostMediaDisplayProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [videoPreviews, setVideoPreviews] = useState<{[key: string]: string}>({});
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+  const [videoThumbnails, setVideoThumbnails] = useState<{[key: string]: string}>({});
+  const [mutedState, setMutedState] = useState<{[key: string]: boolean}>({});
+  const [playingState, setPlayingState] = useState<{[key: string]: boolean}>({});
   const [showBigControls, setShowBigControls] = useState<{[key: string]: boolean}>({});
+  const [currentTime, setCurrentTime] = useState<{[key: string]: number}>({});
+  const [duration, setDuration] = useState<{[key: string]: number}>({});
+  const [progress, setProgress] = useState<{[key: string]: number}>({});
+  const [showControlsState, setShowControlsState] = useState<{[key: string]: boolean}>({});
+  const [controlsTimeout, setControlsTimeout] = useState<{[key: string]: NodeJS.Timeout}>({});
 
   if (!media || media.length === 0) return null;
-
-  console.log('PostMediaDisplay rendering media:', media);
-
   const currentMedia = media[currentIndex];
+
+  // Formater le temps en mm:ss
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Fonction pour montrer les contrôles temporairement
+  const showControlsTemporary = (mediaId: string) => {
+    // Afficher les contrôles
+    setShowControlsState(prev => ({ ...prev, [mediaId]: true }));
+    
+    // Annuler le timeout précédent s'il existe
+    if (controlsTimeout[mediaId]) {
+      clearTimeout(controlsTimeout[mediaId]);
+    }
+    
+    // Programmer la disparition après 3 secondes
+    const timeout = setTimeout(() => {
+      setShowControlsState(prev => ({ ...prev, [mediaId]: false }));
+    }, 3000);
+    
+    setControlsTimeout(prev => ({ ...prev, [mediaId]: timeout }));
+  };
+
+  // Fonction pour masquer les contrôles immédiatement
+  const hideControls = (mediaId: string) => {
+    setShowControlsState(prev => ({ ...prev, [mediaId]: false }));
+    if (controlsTimeout[mediaId]) {
+      clearTimeout(controlsTimeout[mediaId]);
+    }
+  };
+
+  const extractVideoFrame = (videoUrl: string, mediaId: string) => {
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.src = videoUrl;
+    video.currentTime = 1;
+    video.onloadeddata = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+      setVideoThumbnails(prev => ({ ...prev, [mediaId]: thumbnail }));
+    };
+  };
+
+  // Mise à jour du temps et de la progression
+  const updateVideoProgress = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video) return;
+
+    setCurrentTime(prev => ({ ...prev, [mediaId]: video.currentTime }));
+    setDuration(prev => ({ ...prev, [mediaId]: video.duration }));
+    
+    if (video.duration) {
+      const progressPercent = (video.currentTime / video.duration) * 100;
+      setProgress(prev => ({ ...prev, [mediaId]: progressPercent }));
+    }
+  };
+
+  // Gérer le clic sur la barre de progression
+  const handleProgressClick = (event: React.MouseEvent, mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video || !video.duration) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const progressPercent = (clickX / rect.width) * 100;
+    const newTime = (progressPercent / 100) * video.duration;
+    
+    video.currentTime = newTime;
+    setProgress(prev => ({ ...prev, [mediaId]: progressPercent }));
+  };
+
+  useEffect(() => {
+    media.forEach(item => {
+      if (item.media_type === 'video' && !videoThumbnails[item.id]) {
+        extractVideoFrame(item.media_url, item.id);
+      }
+    });
+  }, [media]);
+
+  // Ajouter les event listeners pour la progression
+  useEffect(() => {
+    const intervals: { [key: string]: NodeJS.Timeout } = {};
+
+    media.forEach(item => {
+      if (item.media_type === 'video') {
+        const video = videoRefs.current[item.id];
+        if (video) {
+          // Listener pour la durée
+          const handleLoadedMetadata = () => {
+            setDuration(prev => ({ ...prev, [item.id]: video.duration }));
+          };
+
+          video.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+          // Interval pour mettre à jour le temps
+          intervals[item.id] = setInterval(() => {
+            if (playingState[item.id]) {
+              updateVideoProgress(item.id);
+            }
+          }, 100);
+        }
+      }
+    });
+
+    return () => {
+      Object.values(intervals).forEach(interval => clearInterval(interval));
+    };
+  }, [media, playingState]);
 
   const extractYouTubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -43,246 +163,271 @@ export default function PostMediaDisplay({
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  const generateVideoPreview = (videoElement: HTMLVideoElement, mediaId: string) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) return;
+  const handleVideoClick = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video) return;
 
-    videoElement.currentTime = 1; // Aller à 1 seconde pour éviter le noir
-    
-    videoElement.onloadeddata = () => {
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      ctx.drawImage(videoElement, 0, 0);
-      
-      const previewUrl = canvas.toDataURL('image/jpeg', 0.8);
-      setVideoPreviews(prev => ({ ...prev, [mediaId]: previewUrl }));
-      videoElement.currentTime = 0; // Remettre au début
-    };
-  };
-
-  const handleVideoClick = (videoElement: HTMLVideoElement, mediaId: string) => {
-    if (isPlaying) {
-      videoElement.pause();
-      setIsPlaying(false);
-    } else {
-      videoElement.play();
-      setIsPlaying(true);
-      // Faire disparaître les gros contrôles au premier play
+    if (video.paused) {
+      video.play();
+      setPlayingState(prev => ({ ...prev, [mediaId]: true }));
+      video.muted = false;
+      setMutedState(prev => ({ ...prev, [mediaId]: false }));
       setShowBigControls(prev => ({ ...prev, [mediaId]: false }));
+      // Afficher les contrôles pendant 3 secondes au début de la lecture
+      showControlsTemporary(mediaId);
+    } else {
+      video.pause();
+      setPlayingState(prev => ({ ...prev, [mediaId]: false }));
+      // Afficher les contrôles immédiatement quand on met en pause
+      setShowControlsState(prev => ({ ...prev, [mediaId]: true }));
+      // Annuler le timeout auto-hide
+      if (controlsTimeout[mediaId]) {
+        clearTimeout(controlsTimeout[mediaId]);
+      }
     }
   };
 
-  const toggleMute = (videoElement: HTMLVideoElement) => {
-    videoElement.muted = !videoElement.muted;
-    setIsMuted(videoElement.muted);
+  // Fonction pour gérer le clic/mouvement sur la vidéo (afficher les contrôles)
+  const handleVideoInteraction = (mediaId: string) => {
+    const isPlaying = playingState[mediaId];
+    if (isPlaying) {
+      showControlsTemporary(mediaId);
+    }
+  };
+
+  const toggleMute = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video) return;
+    video.muted = !video.muted;
+    setMutedState(prev => ({ ...prev, [mediaId]: video.muted }));
+  };
+
+  // Fonction pour reculer de 10 secondes
+  const skipBackward = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video) return;
+    video.currentTime = Math.max(0, video.currentTime - 10);
+    updateVideoProgress(mediaId);
+  };
+
+  // Fonction pour avancer de 10 secondes
+  const skipForward = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    if (!video) return;
+    video.currentTime = Math.min(video.duration, video.currentTime + 10);
+    updateVideoProgress(mediaId);
   };
 
   const renderMedia = (mediaItem: PostMedia) => {
-    const { media_url, media_type, youtube_video_id } = mediaItem;
+    const { media_type, media_url, youtube_video_id, id } = mediaItem;
 
     switch (media_type) {
-      case 'gif':
-      case 'image':
+      case "image":
+      case "gif":
         return (
-          <div className="w-full">
-            <img
-              src={media_url}
-              alt="Post media"
-              className={cn("rounded-lg w-full object-contain bg-black", maxHeight, className)}
-              style={{ minHeight: '200px' }}
-              loading="lazy"
-              onError={(e) => {
-                console.error('Media loading error:', media_url);
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
+          <img
+            src={media_url}
+            className={cn("rounded-lg w-full object-contain bg-black", maxHeight, className)}
+            alt="media"
+          />
         );
 
-      case 'youtube':
+      case "youtube":
         const videoId = youtube_video_id || extractYouTubeId(media_url);
-        if (!videoId) {
-          return (
-            <div className={cn("rounded-lg w-full bg-muted flex items-center justify-center min-h-64", className)}>
-              <div className="text-center">
-                <Youtube className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <span className="text-muted-foreground">Vidéo YouTube invalide</span>
+        if (!videoId) return <div>Vidéo YouTube invalide</div>;
+        const youtubeThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        return (
+          <div className="relative">
+            <img
+              src={youtubeThumbnail}
+              className={cn("rounded-lg w-full object-cover bg-black", maxHeight, className)}
+              alt="YouTube thumbnail"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
+                <Play className="w-8 h-8 text-white ml-1" />
               </div>
             </div>
-          );
-        }
-        return (
-          <div className={cn("rounded-lg overflow-hidden w-full", className)} style={{ minHeight: '300px' }}>
-            <LiteYouTubeEmbed
-              id={videoId}
-              title="YouTube video"
-              wrapperClass="yt-lite rounded-lg"
-              playerClass="lty-playbtn"
-            />
           </div>
         );
 
-      case 'video':
-        const hasPreview = videoPreviews[mediaItem.id];
-        const showBig = showBigControls[mediaItem.id] !== false; // Afficher par défaut
-        
+      case "video":
+        const showBig = showBigControls[id] !== false;
+        const thumbnail = videoThumbnails[id];
+        const isMuted = mutedState[id] ?? true;
+        const isPlaying = playingState[id] ?? false;
+        const videoCurrentTime = currentTime[id] || 0;
+        const videoDuration = duration[id] || 0;
+        const videoProgress = progress[id] || 0;
+
         return (
-          <div className="relative w-full group" style={{ minHeight: '300px' }}>
-            <video
-              ref={(el) => {
-                if (el) {
-                  el.onplay = () => setIsPlaying(true);
-                  el.onpause = () => setIsPlaying(false);
-                  el.onvolumechange = () => setIsMuted(el.muted);
-                  
-                  // Générer preview si pas encore fait
-                  if (!videoPreviews[mediaItem.id]) {
-                    generateVideoPreview(el, mediaItem.id);
-                  }
-                }
-              }}
-              src={media_url}
-              poster={hasPreview ? videoPreviews[mediaItem.id] : undefined}
-              className={cn("rounded-lg w-full object-cover", maxHeight, className)}
-              style={{ minHeight: '300px' }}
-              muted={isMuted}
-              loop
-              playsInline
-              preload="metadata"
-              onClick={(e) => handleVideoClick(e.currentTarget, mediaItem.id)}
-              data-video-id={mediaItem.id}
-            />
-            
-            {/* Gros contrôles initiaux - disparaissent après premier clic */}
-            {showBig && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent transition-opacity duration-300 rounded-lg flex items-center justify-center pointer-events-none">
-                <div className="flex items-center gap-4 pointer-events-auto">
+          <div className="relative w-full" style={{ minHeight: '300px' }}>
+            {/* Preview + gros bouton initial */}
+            {thumbnail && showBig && (
+              <div className="absolute inset-0 z-10 transition-opacity duration-300">
+                <img
+                  src={thumbnail}
+                  className={cn("rounded-lg w-full h-full object-cover", className)}
+                  alt="Video preview"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const container = e.currentTarget.closest('.relative');
-                      const video = container?.querySelector('video') as HTMLVideoElement;
-                      if (video) handleVideoClick(video, mediaItem.id);
-                    }}
-                    className="flex items-center justify-center w-16 h-16 bg-black/70 rounded-full hover:bg-black/80 transition-colors backdrop-blur-sm"
+                    onClick={(e) => { e.stopPropagation(); handleVideoClick(id); }}
+                    className="w-20 h-20 bg-black/70 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
                   >
-                    <Play className="w-6 h-6 text-white ml-1" />
-                  </button>
-                  
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const container = e.currentTarget.closest('.relative');
-                      const video = container?.querySelector('video') as HTMLVideoElement;
-                      if (video) {
-                        toggleMute(video);
-                        setShowBigControls(prev => ({ ...prev, [mediaItem.id]: false }));
-                      }
-                    }}
-                    className="flex items-center justify-center w-12 h-12 bg-black/70 rounded-full hover:bg-black/80 transition-colors backdrop-blur-sm"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-5 h-5 text-white" />
-                    ) : (
-                      <Volume2 className="w-5 h-5 text-white" />
-                    )}
+                    <Play className="w-8 h-8 text-white ml-1" />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Contrôles discrets en bas - apparaissent après premier clic */}
-            {!showBig && (
-              <div className="absolute bottom-2 left-2 right-2 bg-black/50 backdrop-blur-sm rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const container = e.currentTarget.closest('.relative');
-                        const video = container?.querySelector('video') as HTMLVideoElement;
-                        if (video) handleVideoClick(video, mediaItem.id);
-                      }}
-                      className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-                    >
-                      {isPlaying ? (
-                        <Pause className="w-4 h-4 text-white" />
-                      ) : (
-                        <Play className="w-4 h-4 text-white ml-0.5" />
-                      )}
-                    </button>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const container = e.currentTarget.closest('.relative');
-                        const video = container?.querySelector('video') as HTMLVideoElement;
-                        if (video) toggleMute(video);
-                      }}
-                      className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-                    >
-                      {isMuted ? (
-                        <VolumeX className="w-4 h-4 text-white" />
-                      ) : (
-                        <Volume2 className="w-4 h-4 text-white" />
-                      )}
-                    </button>
-                  </div>
-                  
-                  <div className="text-white text-xs bg-black/50 px-2 py-1 rounded">
-                    Vidéo
-                  </div>
+            {/* Vidéo réelle */}
+            <video
+              ref={(el) => videoRefs.current[id] = el}
+              src={media_url}
+              className={cn("rounded-lg w-full object-contain bg-black transition-opacity duration-300", maxHeight, className)}
+              playsInline
+              loop
+              preload="metadata"
+              onClick={() => handleVideoClick(id)}
+              onMouseMove={() => handleVideoInteraction(id)}
+              onTouchStart={() => handleVideoInteraction(id)}
+              muted={isMuted}
+              poster={thumbnail}
+            />
+
+            {/* Icône play au centre quand en pause */}
+            {!isPlaying && !showBig && (
+              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div className="w-16 h-16 bg-black/70 rounded-full flex items-center justify-center">
+                  <Play className="w-8 h-8 text-white ml-1" />
                 </div>
               </div>
+            )}
+
+            {/* Contrôles avec système temporaire comme YouTube */}
+            {!showBig && showControls && (showControlsState[id] || !isPlaying) && (
+              <>
+                <div className="absolute bottom-2 left-2 flex gap-2">
+                  <button 
+                    onClick={() => skipBackward(id)} 
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    title="Reculer 10s"
+                  >
+                    <RotateCcw className="w-4 h-4 text-white" />
+                  </button>
+                  <button 
+                    onClick={() => handleVideoClick(id)} 
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                  >
+                    {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
+                  </button>
+                  <button 
+                    onClick={() => skipForward(id)} 
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                    title="Avancer 10s"
+                  >
+                    <RotateCw className="w-4 h-4 text-white" />
+                  </button>
+                  <button 
+                    onClick={() => toggleMute(id)} 
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-white" />}
+                  </button>
+                </div>
+
+                {/* Temps et barre de progression */}
+                <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                  <span className="text-white text-xs bg-black/50 px-2 py-1 rounded">
+                    {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
+                  </span>
+                </div>
+
+                {/* Barre de progression */}
+                <div className="absolute bottom-12 left-2 right-2">
+                  <div 
+                    className="w-full h-3 md:h-1 bg-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center"
+                    onClick={(e) => handleProgressClick(e, id)}
+                    onMouseMove={() => showControlsTemporary(id)}
+                  >
+                    <div 
+                      className="h-full bg-white rounded-full transition-all duration-100 relative"
+                      style={{ width: `${videoProgress}%` }}
+                    >
+                      {/* Indicateur circulaire pour mobile */}
+                      <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-white rounded-full shadow-lg md:opacity-0 md:hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         );
 
       default:
+        return <div>Media non supporté</div>;
+    }
+  };
+
+  const renderThumbnail = (item: PostMedia) => {
+    if (item.media_type === 'image' || item.media_type === 'gif') {
+      return (
+        <img 
+          src={item.media_url} 
+          className="w-full h-full object-cover rounded-md" 
+          alt="" 
+        />
+      );
+    } else if (item.media_type === 'youtube') {
+      const videoId = item.youtube_video_id || extractYouTubeId(item.media_url);
+      const youtubeThumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/default.jpg` : '';
+      return (
+        <div className="relative w-full h-full">
+          <img src={youtubeThumbnail} className="w-full h-full object-cover rounded-md" alt="" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Youtube className="w-4 h-4 text-red-500" />
+          </div>
+        </div>
+      );
+    } else if (item.media_type === 'video') {
+      const thumbnail = videoThumbnails[item.id];
+      if (thumbnail) {
         return (
-          <div className={cn("rounded-lg w-full bg-muted flex items-center justify-center min-h-64", className)}>
-            <span className="text-muted-foreground">Media non supporté</span>
+          <div className="relative w-full h-full">
+            <img src={thumbnail} className="w-full h-full object-cover rounded-md" alt="" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Play className="w-3 h-3 text-white bg-black/50 rounded-full p-0.5" />
+            </div>
           </div>
         );
+      } else {
+        return (
+          <div className="w-full h-full bg-gray-800 flex items-center justify-center rounded-md">
+            <Play className="w-4 h-4 text-white" />
+          </div>
+        );
+      }
     }
+    return null;
   };
 
   return (
     <div className="w-full mb-4">
-      <div className="w-full">
-        {renderMedia(currentMedia)}
-      </div>
-      
-      {/* Navigation pour médias multiples */}
+      {renderMedia(currentMedia)}
+
       {media.length > 1 && (
         <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
           {media.map((item, index) => (
             <button
               key={item.id}
-              onClick={() => {
-                setCurrentIndex(index);
-                setIsPlaying(false);
-              }}
+              onClick={() => setCurrentIndex(index)}
               className={cn(
-                "flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors",
-                index === currentIndex 
-                  ? 'border-primary' 
-                  : 'border-transparent hover:border-muted'
+                "flex-shrink-0 w-20 h-16 rounded-lg border-2 relative overflow-hidden",
+                index === currentIndex ? 'border-blue-500' : 'border-transparent hover:border-gray-300'
               )}
             >
-              {item.media_type === 'image' || item.media_type === 'gif' ? (
-                <img
-                  src={item.media_url}
-                  alt={`Media ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Play className="w-4 h-4 text-muted-foreground" />
-                </div>
-              )}
+              {renderThumbnail(item)}
             </button>
           ))}
         </div>
