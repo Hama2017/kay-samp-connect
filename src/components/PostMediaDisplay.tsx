@@ -40,7 +40,6 @@ export default function PostMediaDisplay({
   if (!media || media.length === 0) return null;
   const currentMedia = media[currentIndex];
 
-  // Formater le temps en mm:ss
   const formatTime = (time: number) => {
     if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
@@ -48,21 +47,14 @@ export default function PostMediaDisplay({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Fonction pour montrer les contrôles temporairement
   const showControlsTemporary = (mediaId: string) => {
-    // Afficher les contrôles
     setShowControlsState(prev => ({ ...prev, [mediaId]: true }));
-    
-    // Annuler le timeout précédent s'il existe
     if (controlsTimeout[mediaId]) {
       clearTimeout(controlsTimeout[mediaId]);
     }
-    
-    // Programmer la disparition après 3 secondes
     const timeout = setTimeout(() => {
       setShowControlsState(prev => ({ ...prev, [mediaId]: false }));
     }, 3000);
-    
     setControlsTimeout(prev => ({ ...prev, [mediaId]: timeout }));
   };
 
@@ -83,30 +75,24 @@ export default function PostMediaDisplay({
     };
   };
 
-  // Mise à jour du temps et de la progression
   const updateVideoProgress = (mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video) return;
-
     setCurrentTime(prev => ({ ...prev, [mediaId]: video.currentTime }));
     setDuration(prev => ({ ...prev, [mediaId]: video.duration }));
-    
     if (video.duration) {
       const progressPercent = (video.currentTime / video.duration) * 100;
       setProgress(prev => ({ ...prev, [mediaId]: progressPercent }));
     }
   };
 
-  // Gérer le clic sur la barre de progression
   const handleProgressClick = (event: React.MouseEvent, mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video || !video.duration) return;
-
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const progressPercent = (clickX / rect.width) * 100;
     const newTime = (progressPercent / 100) * video.duration;
-    
     video.currentTime = newTime;
     setProgress(prev => ({ ...prev, [mediaId]: progressPercent }));
   };
@@ -119,22 +105,16 @@ export default function PostMediaDisplay({
     });
   }, [media]);
 
-  // Ajouter les event listeners pour la progression
   useEffect(() => {
     const intervals: { [key: string]: NodeJS.Timeout } = {};
-
     media.forEach(item => {
       if (item.media_type === 'video') {
         const video = videoRefs.current[item.id];
         if (video) {
-          // Listener pour la durée
           const handleLoadedMetadata = () => {
             setDuration(prev => ({ ...prev, [item.id]: video.duration }));
           };
-
           video.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-          // Interval pour mettre à jour le temps
           intervals[item.id] = setInterval(() => {
             if (playingState[item.id]) {
               updateVideoProgress(item.id);
@@ -143,7 +123,6 @@ export default function PostMediaDisplay({
         }
       }
     });
-
     return () => {
       Object.values(intervals).forEach(interval => clearInterval(interval));
     };
@@ -158,28 +137,23 @@ export default function PostMediaDisplay({
   const handleVideoClick = (mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video) return;
-
     if (video.paused) {
       video.play();
       setPlayingState(prev => ({ ...prev, [mediaId]: true }));
       video.muted = false;
       setMutedState(prev => ({ ...prev, [mediaId]: false }));
       setShowBigControls(prev => ({ ...prev, [mediaId]: false }));
-      // Afficher les contrôles pendant 3 secondes au début de la lecture
       showControlsTemporary(mediaId);
     } else {
       video.pause();
       setPlayingState(prev => ({ ...prev, [mediaId]: false }));
-      // Afficher les contrôles immédiatement quand on met en pause
       setShowControlsState(prev => ({ ...prev, [mediaId]: true }));
-      // Annuler le timeout auto-hide
       if (controlsTimeout[mediaId]) {
         clearTimeout(controlsTimeout[mediaId]);
       }
     }
   };
 
-  // Fonction pour gérer le clic/mouvement sur la vidéo (afficher les contrôles)
   const handleVideoInteraction = (mediaId: string) => {
     const isPlaying = playingState[mediaId];
     if (isPlaying) {
@@ -194,7 +168,6 @@ export default function PostMediaDisplay({
     setMutedState(prev => ({ ...prev, [mediaId]: video.muted }));
   };
 
-  // Fonction pour reculer de 10 secondes
   const skipBackward = (mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video) return;
@@ -202,7 +175,6 @@ export default function PostMediaDisplay({
     updateVideoProgress(mediaId);
   };
 
-  // Fonction pour avancer de 10 secondes
   const skipForward = (mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video) return;
@@ -227,19 +199,16 @@ export default function PostMediaDisplay({
       case "youtube":
         const videoId = youtube_video_id || extractYouTubeId(media_url);
         if (!videoId) return <div>Vidéo YouTube invalide</div>;
-        const youtubeThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
         return (
-          <div className="relative">
-            <img
-              src={youtubeThumbnail}
-              className={cn("rounded-lg w-full object-cover bg-black", maxHeight, className)}
-              alt="YouTube thumbnail"
+          <div className="relative w-full aspect-video">
+            <iframe
+              className={cn("rounded-lg w-full h-full", className)}
+              src={`https://www.youtube.com/embed/${videoId}?rel=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
             />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-                <Play className="w-8 h-8 text-white ml-1" />
-              </div>
-            </div>
           </div>
         );
 
@@ -254,7 +223,6 @@ export default function PostMediaDisplay({
 
         return (
           <div className="relative w-full" style={{ minHeight: '300px' }}>
-            {/* Preview + gros bouton initial */}
             {thumbnail && showBig && (
               <div className="absolute inset-0 z-10 transition-opacity duration-300">
                 <img
@@ -273,7 +241,6 @@ export default function PostMediaDisplay({
               </div>
             )}
 
-            {/* Vidéo réelle */}
             <video
               ref={(el) => videoRefs.current[id] = el}
               src={media_url}
@@ -288,7 +255,6 @@ export default function PostMediaDisplay({
               poster={thumbnail}
             />
 
-            {/* Icône play au centre quand en pause */}
             {!isPlaying && !showBig && (
               <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                 <div className="w-16 h-16 bg-[#1f9463]/90 rounded-full flex items-center justify-center shadow-lg border-2 border-white/30">
@@ -297,17 +263,14 @@ export default function PostMediaDisplay({
               </div>
             )}
 
-            {/* Contrôles toujours visibles avec fond pour contraste */}
             {!showBig && showControls && (showControlsState[id] || !isPlaying) && (
               <>
-                {/* Overlay gradient pour assurer la visibilité */}
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="absolute bottom-2 left-2 flex gap-2 z-30">
                   <button 
                     onClick={() => skipBackward(id)} 
                     className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
-                    title="Reculer 10s"
                   >
                     <RotateCcw className="w-4 h-4 text-white" />
                   </button>
@@ -320,7 +283,6 @@ export default function PostMediaDisplay({
                   <button 
                     onClick={() => skipForward(id)} 
                     className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
-                    title="Avancer 10s"
                   >
                     <RotateCw className="w-4 h-4 text-white" />
                   </button>
@@ -332,14 +294,12 @@ export default function PostMediaDisplay({
                   </button>
                 </div>
 
-                {/* Temps avec fond contrasté */}
                 <div className="absolute bottom-2 right-2 flex items-center gap-2 z-30">
                   <span className="text-white text-xs bg-[#1f9463]/90 px-2 py-1 rounded shadow-lg border border-white/20 backdrop-blur-sm">
                     {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
                   </span>
                 </div>
 
-                {/* Barre de progression avec fond contrasté */}
                 <div className="absolute bottom-12 left-2 right-2 z-30">
                   <div 
                     className="w-full h-3 md:h-1 bg-black/40 border border-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center shadow-lg backdrop-blur-sm"
@@ -350,7 +310,6 @@ export default function PostMediaDisplay({
                       className="h-full bg-[#1f9463] hover:bg-[#43ca92] rounded-full transition-all duration-100 relative shadow-sm"
                       style={{ width: `${videoProgress}%` }}
                     >
-                      {/* Indicateur circulaire avec meilleur contraste */}
                       <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-[#1f9463] border-2 border-white rounded-full shadow-lg md:opacity-0 md:hover:opacity-100 transition-opacity" />
                     </div>
                   </div>

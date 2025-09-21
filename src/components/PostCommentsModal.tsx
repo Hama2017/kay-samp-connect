@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useComments } from "@/hooks/useComments";
@@ -62,6 +61,8 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
   const [replyingToUsername, setReplyingToUsername] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [optimisticVotes, setOptimisticVotes] = useState<Record<string, { up: number; down: number; userVote: 'up' | 'down' | null }>>({});
   
   const { comments, isLoading, hasMore, fetchComments, loadMoreComments, createComment, voteComment } = useComments();
 
@@ -83,8 +84,106 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
       setReplyingToUsername("");
       setIsSubmitting(false);
       setExpandedReplies(new Set());
+      setFullscreenImage(null);
+      setOptimisticVotes({});
     }
   }, [isOpen]);
+
+  // Fonction pour gérer les votes avec mise à jour optimiste
+  const handleVoteComment = useCallback(async (commentId: string, voteType: 'up' | 'down') => {
+    // Trouver le commentaire actuel
+    const findComment = (comments: any[]): any => {
+      for (const comment of comments) {
+        if (comment.id === commentId) return comment;
+        if (comment.replies) {
+          const found = findComment(comment.replies);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const currentComment = findComment(comments);
+    if (!currentComment) return;
+
+    const currentVote = optimisticVotes[commentId]?.userVote || currentComment.current_user_vote;
+    const currentUpVotes = optimisticVotes[commentId]?.up ?? currentComment.votes_up ?? 0;
+    const currentDownVotes = optimisticVotes[commentId]?.down ?? currentComment.votes_down ?? 0;
+
+    let newUpVotes = currentUpVotes;
+    let newDownVotes = currentDownVotes;
+    let newUserVote: 'up' | 'down' | null = voteType;
+
+    // Calculer les nouveaux votes
+    if (currentVote === voteType) {
+      // Annuler le vote
+      if (voteType === 'up') {
+        newUpVotes = Math.max(0, currentUpVotes - 1);
+      } else {
+        newDownVotes = Math.max(0, currentDownVotes - 1);
+      }
+      newUserVote = null;
+    } else if (currentVote === null) {
+      // Nouveau vote
+      if (voteType === 'up') {
+        newUpVotes = currentUpVotes + 1;
+      } else {
+        newDownVotes = currentDownVotes + 1;
+      }
+    } else {
+      // Changer de vote
+      if (voteType === 'up') {
+        newUpVotes = currentUpVotes + 1;
+        newDownVotes = Math.max(0, currentDownVotes - 1);
+      } else {
+        newDownVotes = currentDownVotes + 1;
+        newUpVotes = Math.max(0, currentUpVotes - 1);
+      }
+    }
+
+    // Mise à jour optimiste
+    setOptimisticVotes(prev => ({
+      ...prev,
+      [commentId]: {
+        up: newUpVotes,
+        down: newDownVotes,
+        userVote: newUserVote
+      }
+    }));
+
+    // Appel API
+    try {
+      await voteComment(commentId, voteType);
+    } catch (error) {
+      // En cas d'erreur, revenir à l'état précédent
+      setOptimisticVotes(prev => ({
+        ...prev,
+        [commentId]: {
+          up: currentUpVotes,
+          down: currentDownVotes,
+          userVote: currentVote
+        }
+      }));
+      console.error("Error voting:", error);
+    }
+  }, [comments, optimisticVotes, voteComment]);
+
+  // Fonction pour obtenir les votes d'un commentaire
+  const getCommentVotes = useCallback((comment: any) => {
+    const optimistic = optimisticVotes[comment.id];
+    if (optimistic) {
+      return {
+        votes_up: optimistic.up,
+        votes_down: optimistic.down,
+        current_user_vote: optimistic.userVote
+      };
+    }
+    return {
+      votes_up: comment.votes_up || 0,
+      votes_down: comment.votes_down || 0,
+      current_user_vote: comment.current_user_vote
+    };
+  }, [optimisticVotes]);
 
   // Formatage de la date
   const formatDate = useCallback((dateString: string) => {
@@ -263,8 +362,9 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                   key={media.id}
                                   src={media.media_url}
                                   alt="Comment media"
-                                  className="max-w-full h-auto rounded-lg max-h-40 border border-gray-200"
+                                  className="max-w-full h-auto rounded-lg max-h-40 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
                                   loading="lazy"
+                                  onClick={() => setFullscreenImage(media.media_url)}
                                 />
                               ))}
                             </div>
@@ -273,22 +373,21 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                           {/* Actions - Flèches au lieu du coeur */}
                           <div className="flex items-center gap-6 mt-2">
                             <button 
-                              onClick={() => voteComment(comment.id, 'up')}
+                              onClick={() => handleVoteComment(comment.id, 'up')}
                               className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors"
                               disabled={isSubmitting}
                             >
-                              <ChevronUp className={`h-4 w-4 ${(comment as any).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
-                              <span className="text-sm font-medium">{comment.votes_up || 0}</span>
+                              <ChevronUp className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
+                              <span className="text-sm font-medium">{getCommentVotes(comment).votes_up}</span>
                             </button>
                             
                             <button 
-                              onClick={() => voteComment(comment.id, 'down')}
+                              onClick={() => handleVoteComment(comment.id, 'down')}
                               className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
                               disabled={isSubmitting}
                             >
-                              <ChevronDown className={`h-4 w-4 ${(comment as any).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
-                              <span className="text-sm font-medium">{comment.votes_down || 0}</span>
-
+                              <ChevronDown className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
+                              <span className="text-sm font-medium">{getCommentVotes(comment).votes_down}</span>
                             </button>
                             
                             <button 
@@ -346,25 +445,40 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                 <p className="text-base text-black mb-2 leading-normal break-all">
                                   {reply.content}
                                 </p>
-                                
-                                <div className="flex items-center gap-4">
+
+                                {/* Médias des réponses */}
+                                {reply.comment_media && reply.comment_media.length > 0 && (
+                                  <div className="mb-3">
+                                    {reply.comment_media.map((media: any) => (
+                                      <img
+                                        key={media.id}
+                                        src={media.media_url}
+                                        alt="Comment media"
+                                        className="max-w-full h-auto rounded-lg max-h-40 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                        loading="lazy"
+                                        onClick={() => setFullscreenImage(media.media_url)}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+
+                                <div className="flex items-center gap-4 mt-2">
                                   <button 
-                                    onClick={() => voteComment(reply.id, 'up')}
-                                    className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition-colors"
+                                    onClick={() => handleVoteComment(reply.id, 'up')}
+                                    className="flex items-center gap-1.5 text-gray-600 hover:text-green-500 transition-colors"
                                     disabled={isSubmitting}
                                   >
-                                    <ChevronUp className={`h-3 w-3 ${(reply as any).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
-                                    <span className="text-xs">{reply.votes_up || 0}</span>
+                                    <ChevronUp className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
+                                    <span className="text-xs">{getCommentVotes(reply).votes_up}</span>
                                   </button>
                                   
                                   <button 
-                                    onClick={() => voteComment(reply.id, 'down')}
-                                    className="text-gray-600 hover:text-red-500 transition-colors"
+                                    onClick={() => handleVoteComment(reply.id, 'down')}
+                                    className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors"
                                     disabled={isSubmitting}
                                   >
-                                    <ChevronDown className={`h-3 w-3 ${(reply as any).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
-                                    <span className="text-xs">{reply.votes_down || 0}</span>
-
+                                    <ChevronDown className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
+                                    <span className="text-xs">{getCommentVotes(reply).votes_down}</span>
                                   </button>
                                 </div>
                               </div>
@@ -456,15 +570,14 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
           
           {/* Interface de saisie avec avatar utilisateur */}
           <div className="flex items-start gap-3">
-          <Avatar 
-                    className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
-                  >
-                    <AvatarImage src={post.profiles.profile_picture_url} />
-                    <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
-                      {post.profiles.username.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
+            <Avatar 
+              className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
+            >
+              <AvatarImage src={post.profiles.profile_picture_url} />
+              <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
+                {post.profiles.username.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             
             <div className="flex-1 space-y-3">
               <Textarea
@@ -520,6 +633,27 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
           onClose={() => setShowGifSelector(false)}
           onSelectGif={handleGifSelect}
         />
+
+        {/* Visionneuse plein écran pour les images */}
+        {fullscreenImage && (
+          <div 
+            className="fixed inset-0 bg-black/90 z-[100] rounded-sm border-2 border-black flex items-center justify-center p-14"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-8 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
+            <img
+              src={fullscreenImage}
+              alt="Fullscreen view"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
       </DrawerContent>
     </Drawer>
   );
