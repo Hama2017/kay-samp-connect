@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import kaaysampLogo from "@/assets/kaaysamp-logo.jpg";
+import kaaysampLogo from "@/assets/kaaysamp-logo.png";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
@@ -40,9 +40,9 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             <img 
               src={kaaysampLogo} 
               alt="KaaySamp" 
-              className="h-8 w-12 object-cover rounded-md"
+              className="h-8 w-12 rounded-md"
             />
-            <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent hidden sm:block">
+            <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent  sm:block">
               KaaySamp
             </span>
           </div>
@@ -51,33 +51,23 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         {/* Right side - Mobile Actions */}
         <div className="flex items-center gap-2">
           {/* Desktop Search */}
-          <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              className="w-64 pl-9 border-primary/20 focus:border-primary/40 input-mobile"
-              onFocus={() => navigate('/search')}
-              readOnly
-            />
-          </div>
-          
-          {/* Mobile Search Button */}
-          <Button 
+                <Button 
             variant="ghost" 
             size="icon" 
-            className="sm:hidden btn-mobile hover:bg-primary/5"
+            className="btn-mobile hover:bg-primary/5"
             onClick={() => navigate('/search')}
           >
             <Search className="h-5 w-5" />
           </Button>
           
+          
           {/* Theme Toggle - Hidden on mobile to save space */}
-          <div className="hidden sm:block">
+  {/*         <div className="hidden sm:block">
             <ThemeToggle />
-          </div>
+          </div> */}
           
           {/* User Profile */}
-          <DropdownMenu>
+         {/*  <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative btn-mobile rounded-full hover:bg-primary/5">
                 <Avatar className="h-8 w-8">
@@ -104,7 +94,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 Paramètres
               </DropdownMenuItem>
               {/* Theme toggle in mobile dropdown */}
-              <div className="sm:hidden">
+            {/*   <div className="sm:hidden">
                 <DropdownMenuSeparator />
                 <div className="flex items-center justify-between p-2">
                   <span className="text-sm">Thème</span>
@@ -116,7 +106,9 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 Se déconnecter
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
+
+
         </div>
       </div>
     </header>

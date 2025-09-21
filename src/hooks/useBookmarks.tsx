@@ -156,11 +156,11 @@ export function useBookmarks() {
       return updated;
     });
 
-    toast({
-      title: '⭐ Ajouté aux favoris',
+/*     toast({
+      title: 'Ajouté aux favoris',
       description: `"${item.title}" a été ajouté à vos favoris`,
-      duration: 3000,
-    });
+      duration: 2000,
+    }); */
   }, [saveBookmarks, toast]);
 
   const removeBookmark = useCallback((itemId: string) => {
@@ -173,11 +173,11 @@ export function useBookmarks() {
     });
 
     if (itemToRemove) {
-      toast({
+   /*    toast({
         title: '🗑️ Retiré des favoris',
         description: `"${itemToRemove.title}" a été retiré de vos favoris`,
         duration: 3000,
-      });
+      }); */
     }
   }, [bookmarks, saveBookmarks, toast]);
 
@@ -215,11 +215,11 @@ export function useBookmarks() {
   const clearAllBookmarks = useCallback(() => {
     setBookmarks([]);
     saveBookmarks([]);
-    toast({
+  /*   toast({
       title: '🧹 Favoris supprimés',
       description: 'Tous vos favoris ont été supprimés',
       duration: 3000,
-    });
+    }); */
   }, [saveBookmarks, toast]);
 
   const exportBookmarks = useCallback(() => {
@@ -235,11 +235,11 @@ export function useBookmarks() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    toast({
+  /*   toast({
       title: '📥 Export réussi',
       description: 'Vos favoris ont été exportés avec succès',
       duration: 3000,
-    });
+    }); */
   }, [bookmarks, toast]);
 
   const getStats = useCallback(() => {

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Volume2, VolumeX, Youtube, RotateCcw, RotateCw } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Youtube, RotateCcw, RotateCw, Maximize, Minimize } from "lucide-react";
 
 interface PostMedia {
   id: string;
@@ -27,6 +27,7 @@ export default function PostMediaDisplay({
 }: PostMediaDisplayProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+  const videoContainerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [videoThumbnails, setVideoThumbnails] = useState<{[key: string]: string}>({});
   const [mutedState, setMutedState] = useState<{[key: string]: boolean}>({});
   const [playingState, setPlayingState] = useState<{[key: string]: boolean}>({});
@@ -36,6 +37,8 @@ export default function PostMediaDisplay({
   const [progress, setProgress] = useState<{[key: string]: number}>({});
   const [showControlsState, setShowControlsState] = useState<{[key: string]: boolean}>({});
   const [controlsTimeout, setControlsTimeout] = useState<{[key: string]: NodeJS.Timeout}>({});
+  const [isFullscreen, setIsFullscreen] = useState<{[key: string]: boolean}>({});
+  const [isDragging, setIsDragging] = useState<{[key: string]: boolean}>({});
 
   if (!media || media.length === 0) return null;
   const currentMedia = media[currentIndex];
@@ -86,16 +89,101 @@ export default function PostMediaDisplay({
     }
   };
 
-  const handleProgressClick = (event: React.MouseEvent, mediaId: string) => {
+  const handleProgressClick = (event: React.MouseEvent | React.TouchEvent, mediaId: string) => {
     const video = videoRefs.current[mediaId];
     if (!video || !video.duration) return;
+    
     const rect = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const progressPercent = (clickX / rect.width) * 100;
+    let clickX: number;
+    
+    if ('touches' in event) {
+      clickX = event.touches[0].clientX - rect.left;
+    } else {
+      clickX = event.clientX - rect.left;
+    }
+    
+    const progressPercent = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
     const newTime = (progressPercent / 100) * video.duration;
     video.currentTime = newTime;
     setProgress(prev => ({ ...prev, [mediaId]: progressPercent }));
   };
+
+  const handleProgressStart = (event: React.MouseEvent | React.TouchEvent, mediaId: string) => {
+    setIsDragging(prev => ({ ...prev, [mediaId]: true }));
+    handleProgressClick(event, mediaId);
+  };
+
+  const handleProgressMove = (event: React.MouseEvent | React.TouchEvent, mediaId: string) => {
+    if (!isDragging[mediaId]) return;
+    event.preventDefault();
+    handleProgressClick(event, mediaId);
+  };
+
+  const handleProgressEnd = (mediaId: string) => {
+    setIsDragging(prev => ({ ...prev, [mediaId]: false }));
+  };
+
+  const toggleFullscreen = (mediaId: string) => {
+    const video = videoRefs.current[mediaId];
+    const container = videoContainerRefs.current[mediaId];
+    if (!video || !container) return;
+
+    // Pour mobile, utiliser l'API vidéo native
+    if (video.requestFullscreen) {
+      if (!document.fullscreenElement) {
+        video.requestFullscreen().then(() => {
+          setIsFullscreen(prev => ({ ...prev, [mediaId]: true }));
+        }).catch((err) => {
+          console.error(`Erreur fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen().then(() => {
+          setIsFullscreen(prev => ({ ...prev, [mediaId]: false }));
+        });
+      }
+    } 
+    // iOS Safari
+    else if ((video as any).webkitEnterFullscreen) {
+      (video as any).webkitEnterFullscreen();
+      setIsFullscreen(prev => ({ ...prev, [mediaId]: true }));
+    }
+    // Fallback pour autres navigateurs mobiles
+    else if ((video as any).webkitRequestFullscreen) {
+      (video as any).webkitRequestFullscreen();
+      setIsFullscreen(prev => ({ ...prev, [mediaId]: true }));
+    }
+    else if ((video as any).mozRequestFullScreen) {
+      (video as any).mozRequestFullScreen();
+      setIsFullscreen(prev => ({ ...prev, [mediaId]: true }));
+    }
+    else if ((video as any).msRequestFullscreen) {
+      (video as any).msRequestFullscreen();
+      setIsFullscreen(prev => ({ ...prev, [mediaId]: true }));
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      Object.keys(videoContainerRefs.current).forEach(mediaId => {
+        if (!document.fullscreenElement) {
+          setIsFullscreen(prev => ({ ...prev, [mediaId]: false }));
+        }
+      });
+    };
+
+    // Écouter tous les événements de changement de plein écran
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     media.forEach(item => {
@@ -222,7 +310,11 @@ export default function PostMediaDisplay({
         const videoProgress = progress[id] || 0;
 
         return (
-          <div className="relative w-full" style={{ minHeight: '300px' }}>
+          <div 
+            ref={(el) => videoContainerRefs.current[id] = el}
+            className="relative w-full" 
+            style={{ minHeight: '300px' }}
+          >
             {thumbnail && showBig && (
               <div className="absolute inset-0 z-10 transition-opacity duration-300">
                 <img
@@ -253,6 +345,7 @@ export default function PostMediaDisplay({
               onTouchStart={() => handleVideoInteraction(id)}
               muted={isMuted}
               poster={thumbnail}
+              controls={false}
             />
 
             {!isPlaying && !showBig && (
@@ -295,6 +388,12 @@ export default function PostMediaDisplay({
                 </div>
 
                 <div className="absolute bottom-2 right-2 flex items-center gap-2 z-30">
+                  <button 
+                    onClick={() => toggleFullscreen(id)} 
+                    className="w-8 h-8 bg-[#1f9463]/90 hover:bg-[#43ca92] rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border border-white/20 backdrop-blur-sm"
+                  >
+                    {isFullscreen[id] ? <Minimize className="w-4 h-4 text-white" /> : <Maximize className="w-4 h-4 text-white" />}
+                  </button>
                   <span className="text-white text-xs bg-[#1f9463]/90 px-2 py-1 rounded shadow-lg border border-white/20 backdrop-blur-sm">
                     {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
                   </span>
@@ -302,15 +401,20 @@ export default function PostMediaDisplay({
 
                 <div className="absolute bottom-12 left-2 right-2 z-30">
                   <div 
-                    className="w-full h-3 md:h-1 bg-black/40 border border-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center shadow-lg backdrop-blur-sm"
-                    onClick={(e) => handleProgressClick(e, id)}
-                    onMouseMove={() => showControlsTemporary(id)}
+                    className="w-full h-3 md:h-1 bg-black/40 border border-white/20 rounded-full cursor-pointer md:hover:h-2 transition-all duration-200 flex items-center shadow-lg backdrop-blur-sm touch-none"
+                    onMouseDown={(e) => handleProgressStart(e, id)}
+                    onMouseMove={(e) => handleProgressMove(e, id)}
+                    onMouseUp={() => handleProgressEnd(id)}
+                    onMouseLeave={() => handleProgressEnd(id)}
+                    onTouchStart={(e) => handleProgressStart(e, id)}
+                    onTouchMove={(e) => handleProgressMove(e, id)}
+                    onTouchEnd={() => handleProgressEnd(id)}
                   >
                     <div 
                       className="h-full bg-[#1f9463] hover:bg-[#43ca92] rounded-full transition-all duration-100 relative shadow-sm"
                       style={{ width: `${videoProgress}%` }}
                     >
-                      <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-[#1f9463] border-2 border-white rounded-full shadow-lg md:opacity-0 md:hover:opacity-100 transition-opacity" />
+                      <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-2 md:h-2 bg-[#1f9463] border-2 border-white rounded-full shadow-lg transition-opacity" />
                     </div>
                   </div>
                 </div>

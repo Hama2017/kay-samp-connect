@@ -133,7 +133,7 @@ export function PostActions({ post, onVote, onOpenComments, hideCommentButton = 
         )}
 
         {/* Bookmark button */}
-        <Button 
+       {/*  <Button 
           variant="ghost" 
           size="sm" 
           className="h-8 px-2 text-muted-foreground hover:text-primary"
@@ -144,7 +144,7 @@ export function PostActions({ post, onVote, onOpenComments, hideCommentButton = 
           ) : (
             <Bookmark className="h-4 w-4" />
           )}
-        </Button>
+        </Button> */}
 
         {/* Share button */}
         <Button 

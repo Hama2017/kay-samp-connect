@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { MessageCircle, ArrowUp, Eye } from "lucide-react";
+import { MessageCircle, ArrowUp, Eye, CircleCheck, BadgeCheck } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -162,7 +162,7 @@ export function InfinitePostsList({
           return (
           <Card 
             key={post.id} 
-            className="hover:shadow-lg hover:shadow-[#1f9463]/10 transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden border border-gray-200 hover:border-[#1f9463]/20"
+            className="hover:shadow-lg  transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden border border-gray-200 "
           >
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
               <div className="flex items-start justify-between gap-2">
@@ -197,12 +197,12 @@ export function InfinitePostsList({
                           }
                         }}
                       >
-                        @{post.profiles.username}
+                        @{post.profiles.username} 
                       </span>
                       {post.profiles.is_verified && (
-                        <Badge className="text-xs bg-[#1f9463] text-white flex-shrink-0 px-1.5 py-0">
-                          ✓
-                        </Badge>
+                        <>
+                          <BadgeCheck size={20} color="#329056ff" />
+                        </>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">

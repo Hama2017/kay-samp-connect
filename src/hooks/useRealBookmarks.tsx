@@ -62,20 +62,20 @@ export function useRealBookmarks() {
 
       if (error) throw error;
 
-      toast({
+   /*    toast({
         title: '⭐ Ajouté aux favoris',
         description: `"${item.title}" a été ajouté à vos favoris`,
         duration: 3000,
-      });
+      }); */
 
       fetchBookmarks();
     } catch (err: any) {
       console.error('Error adding bookmark:', err);
-      toast({
+  /*     toast({
         title: 'Erreur',
         description: 'Impossible d\'ajouter aux favoris',
         variant: 'destructive',
-      });
+      }); */
     }
   }, [user, toast, fetchBookmarks]);
 
@@ -94,21 +94,21 @@ export function useRealBookmarks() {
 
       const bookmark = bookmarks.find(b => b.item_id === itemId && b.item_type === itemType);
       if (bookmark) {
-        toast({
+ /*        toast({
           title: '🗑️ Retiré des favoris',
           description: `"${bookmark.title}" a été retiré de vos favoris`,
           duration: 3000,
-        });
+        }); */
       }
 
       fetchBookmarks();
     } catch (err: any) {
       console.error('Error removing bookmark:', err);
-      toast({
+    /*   toast({
         title: 'Erreur',
         description: 'Impossible de retirer des favoris',
         variant: 'destructive',
-      });
+      }); */
     }
   }, [user, bookmarks, toast, fetchBookmarks]);
 
@@ -149,18 +149,18 @@ export function useRealBookmarks() {
       if (error) throw error;
 
       setBookmarks([]);
-      toast({
+   /*    toast({
         title: '🧹 Favoris supprimés',
         description: 'Tous vos favoris ont été supprimés',
         duration: 3000,
-      });
+      }); */
     } catch (err: any) {
       console.error('Error clearing bookmarks:', err);
-      toast({
+  /*     toast({
         title: 'Erreur',
         description: 'Impossible de supprimer les favoris',
         variant: 'destructive',
-      });
+      }); */
     }
   }, [user, toast]);
 

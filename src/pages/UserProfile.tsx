@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, UserCheck, MoreHorizontal, MessageCircle, ArrowUp, Eye } from "lucide-react";
+import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, ChevronUp, ChevronDown, Eye, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -12,6 +12,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
+import { useSpacesPaginated } from "@/hooks/useSpacesPaginated";
 
 export default function UserProfile() {
   const { username } = useParams();
@@ -19,67 +20,57 @@ export default function UserProfile() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
   
-  // États locaux pour éviter les boucles infinies
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
-  const { posts, isLoading: postsLoading, hasMore: postsHasMore, fetchPosts, loadMorePosts } = usePosts();
+  const [coverImageUrl, setCoverImageUrl] = useState<string>("");
+  const { posts, isLoading: postsLoading,fetchPosts, hasMore: postsHasMore, loadMorePosts } = usePosts();
+  const { spaces, isLoading: spacesLoading, hasMore: spacesHasMore, loadMoreSpaces } = useSpacesPaginated();
 
-  // Charger le profil utilisateur et ses posts
-  useEffect(() => {
-    console.log('UserProfile - Loading profile for username:', username);
-    const loadUserProfile = async () => {
-      if (!username) {
-        console.log('UserProfile - No username provided');
-        return;
-      }
+useEffect(() => {
+  const loadUserProfile = async () => {
+    if (!username) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', username)
+        .single();
+        
+      if (profileError) throw profileError;
       
-      console.log('UserProfile - Starting to load profile...');
-      setIsLoading(true);
+      setUserProfile(profile);
+      setFollowersCount(profile.followers_count || 0);
+      setFollowingCount(profile.following_count || 0);
+      setCoverImageUrl(profile.cover_image_url || "");
       
-      try {
-        // Charger le profil utilisateur
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('username', username)
-          .single();
-          
-        if (profileError) throw profileError;
-        
-        console.log('UserProfile - Profile loaded:', profile);
-        setUserProfile(profile);
-        setFollowersCount(profile.followers_count || 0);
-        setFollowingCount(profile.following_count || 0);
-        
-        // Charger les posts de l'utilisateur avec le hook usePosts
-        fetchPosts({ author_id: profile.id });
-        
-      } catch (error) {
-        console.error('Error loading user profile:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger le profil utilisateur",
-          variant: "destructive"
-        });
-      } finally {
-        console.log('UserProfile - Finished loading profile');
-        setIsLoading(false);
-      }
-    };
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadUserProfile();
-  }, [username, fetchPosts]);
+  loadUserProfile();
+}, [username]);
 
-  // Vérifier le statut de suivi séparément
+// NOUVEAU useEffect séparé pour charger les posts
+useEffect(() => {
+  if (userProfile?.id) {
+    fetchPosts({ author_id: userProfile.id });
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [userProfile?.id]); // Se déclenche quand userProfile change
+
   useEffect(() => {
-    console.log('UserProfile - Checking follow status. CurrentUser:', currentUser?.id, 'UserProfile:', userProfile?.id);
     const checkFollowStatus = async () => {
       if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) {
-        console.log('UserProfile - No follow check needed');
         setIsFollowing(false);
         return;
       }
@@ -102,22 +93,13 @@ export default function UserProfile() {
     checkFollowStatus();
   }, [currentUser?.id, userProfile?.id]);
 
-  // Fonction pour gérer le suivi/désabonnement
   const handleFollowToggle = async () => {
-    if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de s'abonner à ce compte",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!currentUser?.id || !userProfile?.id || currentUser.id === userProfile.id) return;
 
     setFollowLoading(true);
 
     try {
       if (isFollowing) {
-        // Se désabonner
         const { error } = await supabase
           .from('user_follows')
           .delete()
@@ -128,13 +110,7 @@ export default function UserProfile() {
 
         setIsFollowing(false);
         setFollowersCount(prev => Math.max(0, prev - 1));
-
-        toast({
-          title: "Désabonné",
-          description: "Vous ne suivez plus cet utilisateur",
-        });
       } else {
-        // S'abonner
         const { error } = await supabase
           .from('user_follows')
           .insert({
@@ -146,42 +122,17 @@ export default function UserProfile() {
 
         setIsFollowing(true);
         setFollowersCount(prev => prev + 1);
-
-        toast({
-          title: "Abonné !",
-          description: "Vous suivez maintenant cet utilisateur",
-        });
       }
-
     } catch (error: any) {
       console.error('Error toggling follow:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur s'est produite",
-        variant: "destructive"
-      });
     } finally {
       setFollowLoading(false);
     }
   };
-  
-  // Vérifier si c'est le profil de l'utilisateur connecté
-  const isOwnProfile = currentUser?.profile?.username === username;
-  const canFollow = currentUser?.id && userProfile?.id && currentUser.id !== userProfile.id;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-    
-    if (diffInMinutes < 60) {
-      return `il y a ${diffInMinutes}min`;
-    } else if (diffInMinutes < 1440) {
-      return `il y a ${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
-    }
-  };
+  const isOwnProfile = currentUser?.profile?.username === username;
+  const userPosts = posts.filter(post => post.author_id === userProfile?.id);
+  const userSpaces = spaces.filter(space => space.creator_id === userProfile?.id);
 
   if (isLoading) {
     return <LoadingSpinner size="lg" text="Chargement du profil..." />;
@@ -189,7 +140,7 @@ export default function UserProfile() {
 
   if (!userProfile) {
     return (
-      <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl text-center overflow-hidden">
+      <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl text-center">
         <h1 className="text-2xl font-bold mb-4">Utilisateur introuvable</h1>
         <Button onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -200,8 +151,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-2xl overflow-hidden">
-      {/* Back button */}
+    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden">
       <Button 
         variant="ghost" 
         size="sm" 
@@ -212,45 +162,30 @@ export default function UserProfile() {
         Retour
       </Button>
 
-      {/* Profile Header */}
-      <Card className="mb-6 animate-fade-in-up">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4 mb-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={userProfile.profile_picture_url} />
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground font-bold text-xl">
-                {userProfile.username?.substring(0, 2).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold text-foreground">
-                  @{userProfile.username}
-                </h1>
-                {userProfile.is_verified && (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    ✓ Certifié
-                  </Badge>
-                )}
-              </div>
+      {coverImageUrl ? (
+        <div className="w-full h-48 rounded-t-lg overflow-hidden mb-0">
+          <img 
+            src={coverImageUrl} 
+            alt="Couverture" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="w-full h-48 bg-gradient-primary rounded-t-lg mb-0" />
+      )}
+
+      <Card className="rounded-t-none border-t-0">
+        <CardHeader className="pb-0">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="flex items-end gap-4 -mt-12">
+              <Avatar className="h-24 w-24 border-4 border-background">
+                <AvatarImage src={userProfile.profile_picture_url} />
+                <AvatarFallback className="bg-gradient-primary text-primary-foreground font-bold text-2xl">
+                  {userProfile.username?.substring(0, 2).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
               
-              <div className="flex items-center gap-4 text-sm mb-4">
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{followersCount}</span>
-                  <span className="text-muted-foreground">abonnés</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground">{followingCount}</span>
-                  <span className="text-muted-foreground">abonnements</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-primary">{posts.filter(p => p.author_id === userProfile.id).length}</span>
-                  <span className="text-muted-foreground">posts</span>
-                </div>
-              </div>
-              
-              {!isOwnProfile && canFollow && (
+              {!isOwnProfile ? (
                 <div className="flex items-center gap-2">
                   {!isFollowing ? (
                     <Button
@@ -258,13 +193,13 @@ export default function UserProfile() {
                       size="sm"
                       onClick={handleFollowToggle}
                       disabled={followLoading}
-                      className="flex-1 bg-gradient-primary hover:opacity-90"
+                      className="bg-gradient-primary hover:opacity-90 gap-2"
                     >
                       {followLoading ? (
-                        <LoadingSpinner size="sm" className="mr-2" />
+                        <LoadingSpinner size="sm" />
                       ) : (
                         <>
-                          <UserPlus className="h-4 w-4 mr-2" />
+                          <UserPlus className="h-4 w-4" />
                           S'abonner
                         </>
                       )}
@@ -275,128 +210,186 @@ export default function UserProfile() {
                       size="sm"
                       onClick={handleFollowToggle}
                       disabled={followLoading}
-                      className="flex-1 text-muted-foreground hover:text-destructive hover:border-destructive"
+                      className="gap-2"
                     >
                       {followLoading ? (
-                        <LoadingSpinner size="sm" className="mr-2" />
+                        <LoadingSpinner size="sm" />
                       ) : (
                         <>
-                          <UserCheck className="h-4 w-4 mr-2" />
+                          <UserCheck className="h-4 w-4" />
                           Se désabonner
                         </>
                       )}
                     </Button>
                   )}
-                  
-                  <Button variant="outline" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
                 </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => navigate("/settings")}
+                >
+                  <Settings className="h-4 w-4" />
+                  Modifier le profil
+                </Button>
               )}
             </div>
           </div>
           
-          {userProfile.bio && (
-            <p className="text-foreground text-sm leading-relaxed bg-muted/50 p-3 rounded-lg">
-              {userProfile.bio}
-            </p>
-          )}
-        </CardContent>
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-2xl font-bold">@{userProfile.username}</h1>
+                {userProfile.is_verified && (
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    ✓ Certifié
+                  </Badge>
+                )}
+              </div>
+              
+              {userProfile.bio && (
+                <p className="text-muted-foreground mb-3">{userProfile.bio}</p>
+              )}
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-xs text-muted-foreground">
+                    Rejoint le {new Date(userProfile.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-6">
+              <div className="text-center">
+                <p className="text-xl font-bold">{followersCount}</p>
+                <p className="text-sm text-muted-foreground">Abonnés</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold">{followingCount}</p>
+                <p className="text-sm text-muted-foreground">Abonnements</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold">{userPosts.length}</p>
+                <p className="text-sm text-muted-foreground">Posts</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold">{userSpaces.length}</p>
+                <p className="text-sm text-muted-foreground">Espaces</p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
       </Card>
 
-      {/* Posts */}
-      <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-1 mb-6">
-          <TabsTrigger value="posts">
-            Posts ({posts.filter(p => p.author_id === userProfile.id).length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="posts" className="space-y-4">
-          <InfiniteScrollLoader
-            hasMore={postsHasMore}
-            isLoading={postsLoading}
-            onLoadMore={() => loadMorePosts()}
-          >
-            {posts.filter(p => p.author_id === userProfile.id).length > 0 ? (
-              posts.filter(p => p.author_id === userProfile.id).map((post) => (
-              <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                    onClick={() => navigate(`/post/${post.id}`)}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={userProfile.profile_picture_url} />
-                      <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                        {userProfile.username?.substring(0, 2).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-sm">@{userProfile.username}</span>
-                        {userProfile.is_verified && (
-                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                            ✓
-                          </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {post.spaces?.name && `dans ${post.spaces.name}`}
-                        </span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(post.created_at)}
-                        </span>
-                      </div>
-                      
-                      <p className="text-foreground leading-relaxed mb-3">
+      <div className="mt-6">
+        <Tabs defaultValue="posts">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="spaces">Espaces</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="posts" className="space-y-4 mt-6">
+            <InfiniteScrollLoader
+              hasMore={postsHasMore}
+              isLoading={postsLoading}
+              onLoadMore={() => loadMorePosts()}
+            >
+              {userPosts.length > 0 ? (
+                userPosts.map((post) => (
+                  <Card key={post.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer"
+                        onClick={() => navigate(`/post/${post.id}`)}>
+                    <CardContent className="pt-6">
+                      <p className="text-foreground mb-3 leading-relaxed">
                         {post.content}
                       </p>
                       
-                      {post.hashtags && post.hashtags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-3">
+                      {post.hashtags && (
+                        <div className="flex flex-wrap gap-1 mb-4">
                           {post.hashtags.map((tag: string) => (
-                            <span key={tag} className="text-sm text-primary">
+                            <span key={tag} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
                               {tag}
                             </span>
                           ))}
                         </div>
                       )}
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1 text-green-600">
-                        <ArrowUp className="h-4 w-4" />
-                        {post.votes_up}
-                      </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <MessageCircle className="h-4 w-4" />
-                        {post.comments_count}
-                      </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Eye className="h-4 w-4" />
-                        {post.views_count}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Aucun post encore</h3>
-              <p className="text-muted-foreground">
-                @{userProfile.username} n'a pas encore publié de posts
-              </p>
-            </div>
-          )}
-        </InfiniteScrollLoader>
-        </TabsContent>
-      </Tabs>
+                      
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <ChevronUp className="h-4 w-4" />
+                            <span>{post.votes_up}</span>
+                            <ChevronDown className="h-4 w-4 ml-1" />
+                            <span>{post.votes_down}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{post.comments_count}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
+                            <span>{post.views_count}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs">
+                          {new Date(post.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun post encore</h3>
+                  <p className="text-muted-foreground">
+                    @{userProfile.username} n'a pas encore publié de posts
+                  </p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
+          </TabsContent>
+
+          <TabsContent value="spaces" className="space-y-4 mt-6">
+            <InfiniteScrollLoader
+              hasMore={spacesHasMore}
+              isLoading={spacesLoading}
+              onLoadMore={() => loadMoreSpaces()}
+            >
+              {userSpaces.length > 0 ? (
+                userSpaces.map((space) => (
+                  <Card key={space.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer" 
+                        onClick={() => navigate(`/space/${space.id}`)}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-2">{space.name}</h3>
+                          <p className="text-muted-foreground text-sm mb-3">{space.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{space.subscribers_count} membres</span>
+                            <Badge variant="outline">{space.category}</Badge>
+                            {space.is_public && <Badge variant="secondary">Public</Badge>}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
+                  <p className="text-muted-foreground">
+                    @{userProfile.username} n'a pas encore créé d'espaces
+                  </p>
+                </div>
+              )}
+            </InfiniteScrollLoader>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -66,7 +66,7 @@ export default function Home() {
             Bienvenue sur KaaySamp
           </h1>
           <p className="text-sm text-muted-foreground px-2 leading-relaxed">
-            Découvre ta communauté sénégalaise
+           L’actualité n’a jamais été aussi proche de toi.
           </p>
         </div>
 
@@ -148,6 +148,7 @@ export default function Home() {
 
       {/* 💬 MODAL COMMENTAIRES - MOBILE FRIENDLY */}
       <PostCommentsModal
+        onVote={handleVote}
         post={selectedPost}
         isOpen={!!selectedPost}
         onClose={() => setSelectedPost(null)}
