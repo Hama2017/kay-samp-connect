@@ -33,7 +33,7 @@ export default function CreateSpace() {
     name: "",
     description: "",
     category: "",
-    badge: "" as "kaaysamp" | "factcheck" | "evenement" | "",
+    badge: "" as "kaaysamp" | "factcheck" | "evenement" | "none" | "",
     whoCanPublish: "subscribers" as string,
   });
 
@@ -55,7 +55,7 @@ export default function CreateSpace() {
         name: formData.name,
         description: formData.description,
         category: formData.category,
-        badge: formData.badge || undefined,
+        badge: formData.badge === "none" ? undefined : formData.badge || undefined,
         who_can_publish: [formData.whoCanPublish],
       });
       
@@ -170,18 +170,18 @@ export default function CreateSpace() {
               <Label className="text-sm font-medium">
                 Badge spécial (optionnel)
               </Label>
-              <Select 
+               <Select 
                 value={formData.badge} 
                 onValueChange={(value) => setFormData(prev => ({ 
                   ...prev, 
-                  badge: value as "kaaysamp" | "factcheck" | "evenement" | ""
+                  badge: value as "kaaysamp" | "factcheck" | "evenement" | "none" | ""
                 }))}
               >
                 <SelectTrigger className="border-primary/20 focus:border-primary/40">
                   <SelectValue placeholder="Choisir un badge (optionnel)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun badge</SelectItem>
+                  <SelectItem value="none">Aucun badge</SelectItem>
                   <SelectItem value="kaaysamp">🏆 KaaySamp</SelectItem>
                   <SelectItem value="factcheck">✅ Fact Check</SelectItem>
                   <SelectItem value="evenement">📅 Événement</SelectItem>
