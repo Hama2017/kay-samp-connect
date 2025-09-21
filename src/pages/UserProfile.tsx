@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, ChevronUp, ChevronDown, Eye, Hash } from "lucide-react";
+import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, Hash, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
+import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpacesPaginated } from "@/hooks/useSpacesPaginated";
@@ -27,8 +27,8 @@ export default function UserProfile() {
   const [followingCount, setFollowingCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState<string>("");
-  const { posts, isLoading: postsLoading,fetchPosts, hasMore: postsHasMore, loadMorePosts } = usePosts();
-  const { spaces, isLoading: spacesLoading, hasMore: spacesHasMore, loadMoreSpaces } = useSpacesPaginated();
+  const { posts, isLoading: postsLoading, fetchPosts, hasMore: postsHasMore, loadMorePosts, votePost, incrementViews } = usePosts();
+  const { spaces, isLoading: spacesLoading, hasMore: spacesHasMore, loadMoreSpaces, fetchSpaces } = useSpacesPaginated();
 
 useEffect(() => {
   const loadUserProfile = async () => {
@@ -60,10 +60,11 @@ useEffect(() => {
   loadUserProfile();
 }, [username]);
 
-// NOUVEAU useEffect séparé pour charger les posts
+// useEffect séparé pour charger les posts et espaces de l'utilisateur
 useEffect(() => {
   if (userProfile?.id) {
     fetchPosts({ author_id: userProfile.id });
+    fetchSpaces({ user_spaces: true });
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [userProfile?.id]); // Se déclenche quand userProfile change
@@ -131,8 +132,9 @@ useEffect(() => {
   };
 
   const isOwnProfile = currentUser?.profile?.username === username;
-  const userPosts = posts.filter(post => post.author_id === userProfile?.id);
-  const userSpaces = spaces.filter(space => space.creator_id === userProfile?.id);
+  // Les posts et espaces sont déjà filtrés par les hooks
+  const userPosts = posts;
+  const userSpaces = spaces;
 
   if (isLoading) {
     return <LoadingSpinner size="lg" text="Chargement du profil..." />;
@@ -292,101 +294,116 @@ useEffect(() => {
           </TabsList>
           
           <TabsContent value="posts" className="space-y-4 mt-6">
-            <InfiniteScrollLoader
-              hasMore={postsHasMore}
-              isLoading={postsLoading}
-              onLoadMore={() => loadMorePosts()}
-            >
-              {userPosts.length > 0 ? (
-                userPosts.map((post) => (
-                  <Card key={post.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer"
-                        onClick={() => navigate(`/post/${post.id}`)}>
-                    <CardContent className="pt-6">
-                      <p className="text-foreground mb-3 leading-relaxed">
-                        {post.content}
-                      </p>
-                      
-                      {post.hashtags && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {post.hashtags.map((tag: string) => (
-                            <span key={tag} className="text-xs text-primary hover:text-primary/80 cursor-pointer">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <ChevronUp className="h-4 w-4" />
-                            <span>{post.votes_up}</span>
-                            <ChevronDown className="h-4 w-4 ml-1" />
-                            <span>{post.votes_down}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageCircle className="h-4 w-4" />
-                            <span>{post.comments_count}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
-                            <span>{post.views_count}</span>
-                          </div>
-                        </div>
-                        <div className="text-xs">
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Aucun post encore</h3>
-                  <p className="text-muted-foreground">
-                    @{userProfile.username} n'a pas encore publié de posts
-                  </p>
-                </div>
-              )}
-            </InfiniteScrollLoader>
+            {userPosts.length > 0 ? (
+              <InfinitePostsList
+                posts={userPosts}
+                onLoadMore={loadMorePosts}
+                onVote={votePost}
+                onIncrementViews={incrementViews}
+                onPostClick={(post) => navigate(`/post/${post.id}`)}
+                hasMore={postsHasMore}
+                isLoading={postsLoading}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Aucun post encore</h3>
+                <p className="text-muted-foreground">
+                  @{userProfile.username} n'a pas encore publié de posts
+                </p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="spaces" className="space-y-4 mt-6">
-            <InfiniteScrollLoader
-              hasMore={spacesHasMore}
-              isLoading={spacesLoading}
-              onLoadMore={() => loadMoreSpaces()}
-            >
-              {userSpaces.length > 0 ? (
-                userSpaces.map((space) => (
-                  <Card key={space.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer" 
-                        onClick={() => navigate(`/space/${space.id}`)}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-2">{space.name}</h3>
-                          <p className="text-muted-foreground text-sm mb-3">{space.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{space.subscribers_count} membres</span>
-                            <Badge variant="outline">{space.category}</Badge>
-                            {space.is_public && <Badge variant="secondary">Public</Badge>}
+            {spacesLoading && userSpaces.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Chargement des espaces...</p>
+              </div>
+            ) : userSpaces.length > 0 ? (
+              <div className="space-y-3 sm:space-y-4">
+                {userSpaces.map((space) => (
+                  <Card 
+                    key={space.id} 
+                    className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+                    onClick={() => navigate(`/space/${space.id}`)}
+                  >
+                    <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                      <div className="flex items-start justify-between gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Hash className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                              <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
+                                {space.name}
+                              </h3>
+                              {space.is_verified && (
+                                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                                  ✓
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                              <Badge variant="outline" className="text-xs flex-shrink-0">
+                                {space.category}
+                              </Badge>
+                              <span className="hidden sm:inline">•</span>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                <span>{space.subscribers_count}</span>
+                              </div>
+                              {space.is_public && (
+                                <>
+                                  <span className="hidden sm:inline">•</span>
+                                  <Badge variant="secondary" className="text-xs">Public</Badge>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
+                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                        {space.description || "Aucune description disponible"}
+                      </p>
                     </CardContent>
                   </Card>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
-                  <p className="text-muted-foreground">
-                    @{userProfile.username} n'a pas encore créé d'espaces
-                  </p>
-                </div>
-              )}
-            </InfiniteScrollLoader>
+                ))}
+                
+                {spacesHasMore && (
+                  <div className="text-center py-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => loadMoreSpaces({ user_spaces: true })}
+                      disabled={spacesLoading}
+                      className="gap-2"
+                    >
+                      {spacesLoading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      Charger plus
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
+                <p className="text-muted-foreground">
+                  @{userProfile.username} n'a pas encore créé d'espaces
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
