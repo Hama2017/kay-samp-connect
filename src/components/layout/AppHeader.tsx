@@ -67,7 +67,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </div> */}
           
           {/* User Profile */}
-         {/*  <DropdownMenu>
+       <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative btn-mobile rounded-full hover:bg-primary/5">
                 <Avatar className="h-8 w-8">
@@ -94,7 +94,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 Paramètres
               </DropdownMenuItem>
               {/* Theme toggle in mobile dropdown */}
-            {/*   <div className="sm:hidden">
+             <div className="sm:hidden">
                 <DropdownMenuSeparator />
                 <div className="flex items-center justify-between p-2">
                   <span className="text-sm">Thème</span>
@@ -106,7 +106,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 Se déconnecter
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu> */}
+          </DropdownMenu> 
 
 
         </div>

@@ -3,24 +3,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import { Loader2, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const { updateUserProfile } = useAuth();
 
-  const { phone, username, from } = location.state || {};
+  const { phone, from } = location.state || {};
 
-  // Countdown timer for resend
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -30,7 +31,6 @@ export default function VerifyOTP() {
     }
   }, [countdown]);
 
-  // Redirect if no phone number
   useEffect(() => {
     if (!phone) {
       navigate('/phone-login');
@@ -39,46 +39,75 @@ export default function VerifyOTP() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (otp.length !== 6) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez entrer le code à 6 chiffres.",
-        variant: "destructive",
-      });
+      setError("Veuillez entrer le code à 6 chiffres.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-otp', {
-        body: { 
-          phone: phone,
-          otp: otp,
-          username: username
-        }
+      console.log('🔐 Vérification OTP avec Supabase Auth pour:', phone);
+      
+      // 🔥 UTILISER SUPABASE AUTH POUR VÉRIFIER L'OTP
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: phone,
+        token: otp,
+        type: 'sms'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erreur vérification OTP:', error);
+        throw error;
+      }
+
+      console.log('✅ OTP vérifié avec succès:', data);
+
+      // Vérifier si c'est un nouvel utilisateur
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', data.user.id)
+          .single();
+
+        // Si pas de profil ou username vide, rediriger vers onboarding
+        if (!profile || !profile.username) {
+          console.log('📝 Nouvel utilisateur, redirection vers onboarding');
+          navigate('/onboarding', { replace: true });
+          return;
+        }
+      }
 
       toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté à votre compte.",
+        title: "Connexion réussie ✅",
+        description: "Vous êtes maintenant connecté !",
       });
 
-      // Update user profile in context
+      // Update user profile
       await updateUserProfile();
 
-      // Redirect to intended page or home
+      // Redirect
       const redirectTo = from?.pathname || '/';
       navigate(redirectTo, { replace: true });
 
     } catch (error: any) {
-      console.error('Error verifying OTP:', error);
+      console.error('❌ Erreur complète:', error);
+      
+      let errorMessage = "Code invalide ou expiré.";
+      
+      if (error.message?.includes('expired')) {
+        errorMessage = "Le code a expiré. Demandez-en un nouveau.";
+      } else if (error.message?.includes('invalid')) {
+        errorMessage = "Code incorrect. Vérifiez votre SMS.";
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Erreur",
-        description: error.message || "Code invalide ou expiré. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
       setOtp("");
@@ -93,25 +122,25 @@ export default function VerifyOTP() {
     setIsLoading(true);
     setCanResend(false);
     setCountdown(60);
+    setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: { phone: phone }
+      console.log('🔄 Renvoi OTP à:', phone);
+      
+      // 🔥 RENVOYER L'OTP AVEC SUPABASE AUTH
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phone
       });
 
       if (error) throw error;
 
       toast({
-        title: "Code renvoyé",
-        description: "Un nouveau code a été envoyé sur votre téléphone.",
+        title: "Code renvoyé ✅",
+        description: "Un nouveau code a été envoyé",
       });
     } catch (error: any) {
-      console.error('Error resending OTP:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de renvoyer le code. Veuillez réessayer.",
-        variant: "destructive",
-      });
+      console.error('❌ Erreur renvoi OTP:', error);
+      setError("Impossible de renvoyer le code.");
       setCanResend(true);
       setCountdown(0);
     } finally {
@@ -120,7 +149,7 @@ export default function VerifyOTP() {
   };
 
   if (!phone) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   return (
@@ -140,13 +169,24 @@ export default function VerifyOTP() {
             <span className="font-medium">{phone}</span>
           </CardDescription>
         </CardHeader>
+        
         <CardContent className="space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-center">
               <InputOTP
                 maxLength={6}
                 value={otp}
-                onChange={(value) => setOtp(value)}
+                onChange={(value) => {
+                  setOtp(value);
+                  setError(null);
+                }}
                 disabled={isLoading}
               >
                 <InputOTPGroup>

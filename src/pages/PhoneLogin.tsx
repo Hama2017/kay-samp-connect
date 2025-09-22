@@ -3,103 +3,107 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Phone, ArrowLeft } from "lucide-react";
+import { Loader2, Phone, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PhoneLogin() {
   const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<'phone' | 'username'>('phone');
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Formater le numéro de téléphone
+  const formatPhoneNumber = (phoneInput: string): string => {
+    let cleaned = phoneInput.replace(/[^\d+]/g, '');
+    
+    if (cleaned.startsWith('0')) {
+      cleaned = '+33' + cleaned.substring(1);
+    }
+    
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+33' + cleaned;
+    }
+    
+    return cleaned;
+  };
+
+  const validatePhoneNumber = (phoneInput: string): boolean => {
+    const formatted = formatPhoneNumber(phoneInput);
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    return phoneRegex.test(formatted);
+  };
+
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (!phone.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez entrer votre numéro de téléphone.",
-        variant: "destructive",
-      });
+      setError("Veuillez entrer votre numéro de téléphone.");
       return;
     }
 
-    // Format phone number to international format
-    const formattedPhone = phone.startsWith('+') ? phone : `+33${phone.replace(/^0/, '')}`;
+    if (!validatePhoneNumber(phone)) {
+      setError("Numéro invalide. Format: +33612345678 ou 0612345678");
+      return;
+    }
 
+    const formattedPhone = formatPhoneNumber(phone);
     setIsLoading(true);
 
     try {
-      // Check if user exists with this phone number
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('phone', formattedPhone)
-        .single();
+      console.log('📱 Envoi OTP avec Supabase Auth à:', formattedPhone);
+      
+      // 🔥 UTILISER SUPABASE AUTH AU LIEU DES EDGE FUNCTIONS
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+        options: {
+          // Optionnel : personnaliser le message SMS
+          // channel: 'sms',
+        }
+      });
 
-      if (existingUser) {
-        // User exists, send OTP directly
-        await sendOTP(formattedPhone);
-      } else {
-        // New user, ask for username first
-        setStep('username');
-        setIsLoading(false);
+      if (error) {
+        console.error('❌ Erreur Supabase Auth:', error);
+        throw error;
       }
-    } catch (error) {
-      console.error('Error checking user:', error);
-      setIsLoading(false);
-    }
-  };
 
-  const handleUsernameSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!username.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez entrer un nom d'utilisateur.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const formattedPhone = phone.startsWith('+') ? phone : `+33${phone.replace(/^0/, '')}`;
-    await sendOTP(formattedPhone, username);
-  };
-
-  const sendOTP = async (formattedPhone: string, usernameToUse?: string) => {
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: { phone: formattedPhone }
-      });
-
-      if (error) throw error;
+      console.log('✅ OTP envoyé avec succès:', data);
 
       toast({
-        title: "Code envoyé",
-        description: "Un code de vérification a été envoyé sur votre téléphone.",
+        title: "Code envoyé ✅",
+        description: "Vérifiez vos SMS pour le code de vérification",
       });
 
-      // Navigate to OTP verification page
+      // Rediriger vers la page de vérification OTP
       navigate('/verify-otp', { 
         state: { 
-          phone: formattedPhone, 
-          username: usernameToUse || username,
+          phone: formattedPhone,
           from: location.state?.from 
         } 
       });
+
     } catch (error: any) {
-      console.error('Error sending OTP:', error);
+      console.error('❌ Erreur complète:', error);
+      
+      let errorMessage = "Impossible d'envoyer le code. Réessayez.";
+      
+      if (error.message?.includes('rate limit')) {
+        errorMessage = "Trop de tentatives. Attendez quelques minutes.";
+      } else if (error.message?.includes('Invalid phone')) {
+        errorMessage = "Numéro de téléphone invalide.";
+      } else if (error.message?.includes('Phone provider')) {
+        errorMessage = "Service SMS non configuré dans Supabase Auth.";
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Erreur",
-        description: error.message || "Impossible d'envoyer le code. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -119,99 +123,75 @@ export default function PhoneLogin() {
             />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {step === 'phone' ? 'Connexion par SMS' : 'Créer votre profil'}
+            Connexion par SMS
           </CardTitle>
           <CardDescription>
-            {step === 'phone' 
-              ? 'Entrez votre numéro de téléphone pour recevoir un code de vérification'
-              : 'Choisissez un nom d\'utilisateur pour créer votre compte'
-            }
+            Entrez votre numéro de téléphone pour recevoir un code
           </CardDescription>
         </CardHeader>
+        
         <CardContent className="space-y-4">
-          {step === 'phone' ? (
-            <form onSubmit={handlePhoneSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  Numéro de téléphone
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="06 12 34 56 78"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Envoi en cours...
-                  </>
-                ) : (
-                  'Envoyer le code'
-                )}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleUsernameSubmit} className="space-y-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setStep('phone')}
-                className="mb-4"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour
-              </Button>
-              
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium">
-                  Nom d'utilisateur
-                </label>
+          <form onSubmit={handlePhoneSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="phone" className="text-sm font-medium">
+                Numéro de téléphone
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  id="username"
-                  type="text"
-                  placeholder="votre_nom_utilisateur"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="phone"
+                  type="tel"
+                  placeholder="+33 6 12 34 56 78"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    setError(null);
+                  }}
+                  className="pl-10"
                   disabled={isLoading}
                 />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Format: +33612345678 ou 0612345678
+              </p>
+            </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Envoi en cours...
-                  </>
-                ) : (
-                  'Envoyer le code'
-                )}
-              </Button>
-            </form>
-          )}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Envoi en cours...
+                </>
+              ) : (
+                'Envoyer le code'
+              )}
+            </Button>
+          </form>
 
           <div className="text-center text-sm text-muted-foreground">
             Vous préférez utiliser un email ?{" "}
             <Link to="/login" className="text-primary hover:underline">
               Connexion classique
             </Link>
+          </div>
+
+          {/* Info de debug */}
+          <div className="mt-4 p-3 bg-muted rounded-lg text-xs">
+            <p className="font-medium mb-1">ℹ️ Configuration requise :</p>
+            <p className="text-muted-foreground">
+              Supabase → Settings → Authentication → Phone Auth doit être activé avec Twilio
+            </p>
           </div>
         </CardContent>
       </Card>
