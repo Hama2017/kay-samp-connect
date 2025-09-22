@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,6 +124,7 @@ const timePeriods = [
 
 export default function Trending() {
   const [selectedPeriod, setSelectedPeriod] = useState("day");
+  const navigate = useNavigate();
   const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
   const { spaces, fetchSpaces, isLoading: spacesLoading } = useSpaces();
   const { contributors, fetchTopContributors, isLoading: contributorsLoading } = useTopContributors();
@@ -191,7 +193,11 @@ export default function Trending() {
 
         <TabsContent value="posts" className="space-y-4">
           {topPosts.map((post, index) => (
-            <Card key={post.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+            <Card 
+              key={post.id} 
+              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+              onClick={() => navigate(`/post/${post.id}`)}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
@@ -262,7 +268,11 @@ export default function Trending() {
 
         <TabsContent value="spaces" className="space-y-4">
           {topSpaces.map((space, index) => (
-            <Card key={space.id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+            <Card 
+              key={space.id} 
+              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+              onClick={() => navigate(`/space/${space.id}`)}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
@@ -331,7 +341,11 @@ export default function Trending() {
 
         <TabsContent value="contributors" className="space-y-4">
           {contributors.map((contributor, index) => (
-            <Card key={contributor.user_id} className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up">
+            <Card 
+              key={contributor.user_id} 
+              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
+              onClick={() => navigate(`/user/${contributor.username}`)}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
