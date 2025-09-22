@@ -1,40 +1,26 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowLeft, MessageCircle, Share, Flag, Clock, Eye } from 'lucide-react';
+import { ArrowLeft, Share, Flag, Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
 import { usePostDetail } from '@/hooks/usePostDetail';
 import { usePageTracking } from '@/hooks/usePageTracking';
 import { PostActions } from '@/components/PostActions';
 import PostMediaDisplay from '@/components/PostMediaDisplay';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { PostCommentsModal } from '@/components/PostCommentsModal';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { post, isLoading, error, votePost, addComment, voteComment } = usePostDetail(id || '');
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { post, isLoading, error, votePost } = usePostDetail(id || '');
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
   usePageTracking();
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim() || isSubmitting) return;
-
-    setIsSubmitting(true);
-    const success = await addComment(newComment);
-    if (success) {
-      setNewComment('');
-      // Pas besoin de rafraîchir, le hook se charge déjà de mettre à jour les commentaires
-    }
-    setIsSubmitting(false);
-  };
 
   if (isLoading) {
     return (
@@ -219,112 +205,18 @@ export default function PostDetail() {
               }
             }}
             onVote={votePost}
-            onOpenComments={() => {}} // Déjà sur la page des commentaires
-            hideCommentButton={true}
+            onOpenComments={() => setSelectedPost(post)}
           />
         </CardContent>
       </Card>
 
-      {/* Section des commentaires */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">
-              Commentaires ({post.comments.length})
-            </h2>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="space-y-4">
-          {/* Formulaire d'ajout de commentaire */}
-          <form onSubmit={handleSubmitComment} className="space-y-3">
-            <Textarea
-              placeholder="Ajouter un commentaire..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="min-h-[80px] resize-none"
-              disabled={isSubmitting}
-            />
-            <div className="flex justify-end">
-              <Button 
-                type="submit" 
-                disabled={!newComment.trim() || isSubmitting}
-                size="sm"
-              >
-                {isSubmitting ? 'Envoi...' : 'Commenter'}
-              </Button>
-            </div>
-          </form>
-          
-          {/* Liste des commentaires */}
-          <div className="space-y-4">
-            {post.comments.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Aucun commentaire pour le moment. Soyez le premier à commenter !
-                </p>
-              </div>
-            ) : (
-              post.comments.map((comment) => (
-                <Card key={comment.id} className="border-l-4 border-l-primary/20">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10 flex-shrink-0">
-                        <AvatarImage src={comment.profiles.profile_picture_url} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                          {comment.profiles.username.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-sm">
-                            @{comment.profiles.username}
-                          </span>
-                          {comment.profiles.is_verified && (
-                            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                              ✓
-                            </Badge>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: fr })}
-                          </span>
-                        </div>
-                        
-                        <p className="text-sm break-words whitespace-pre-wrap">
-                          {comment.content}
-                        </p>
-                        
-                        {/* Actions du commentaire */}
-                        <div className="flex items-center gap-4 pt-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => voteComment(comment.id, 'up')}
-                            className={`h-8 px-2 ${comment.current_user_vote === 'up' ? 'text-primary' : ''}`}
-                          >
-                            👍 {comment.votes_up > 0 && comment.votes_up}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => voteComment(comment.id, 'down')}
-                            className={`h-8 px-2 ${comment.current_user_vote === 'down' ? 'text-destructive' : ''}`}
-                          >
-                            👎 {comment.votes_down > 0 && comment.votes_down}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Modal des commentaires */}
+      <PostCommentsModal
+        post={selectedPost}
+        isOpen={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
+        onVote={votePost}
+      />
     </div>
   );
 }
