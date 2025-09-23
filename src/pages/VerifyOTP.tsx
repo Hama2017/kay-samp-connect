@@ -164,7 +164,7 @@ export default function VerifyOTP() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
-              src="/src/assets/kaaysamp-logo.jpg" 
+              src="/src/assets/kaaysamp-logo.png" 
               alt="KaaySamp" 
               className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/20"
             />

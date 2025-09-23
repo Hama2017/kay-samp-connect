@@ -515,6 +515,7 @@ export type Database = {
           created_at: string | null
           followers_count: number | null
           following_count: number | null
+          full_name: string | null
           id: string
           is_verified: boolean | null
           phone: string | null
@@ -524,7 +525,6 @@ export type Database = {
           show_followers: boolean | null
           updated_at: string | null
           username: string
-          full_name: string
         }
         Insert: {
           bio?: string | null
@@ -532,6 +532,7 @@ export type Database = {
           created_at?: string | null
           followers_count?: number | null
           following_count?: number | null
+          full_name?: string | null
           id: string
           is_verified?: boolean | null
           phone?: string | null
@@ -541,7 +542,6 @@ export type Database = {
           show_followers?: boolean | null
           updated_at?: string | null
           username: string
-          full_name: string
         }
         Update: {
           bio?: string | null
@@ -549,6 +549,7 @@ export type Database = {
           created_at?: string | null
           followers_count?: number | null
           following_count?: number | null
+          full_name?: string | null
           id?: string
           is_verified?: boolean | null
           phone?: string | null
@@ -558,7 +559,6 @@ export type Database = {
           show_followers?: boolean | null
           updated_at?: string | null
           username?: string
-          full_name?: string | null 
         }
         Relationships: []
       }

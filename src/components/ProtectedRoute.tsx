@@ -22,18 +22,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    // Redirect to login page with return url
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Redirect to auth page with return url
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if user needs onboarding (skip for onboarding page itself)
-  if (location.pathname !== '/onboarding') {
+  // Check if user needs onboarding (skip for onboarding pages)
+  if (!location.pathname.startsWith('/onboarding')) {
     const userOnboardingKey = `onboarding_completed_${user.id}`;
     const hasCompletedOnboarding = localStorage.getItem(userOnboardingKey) === 'true' || 
                                  localStorage.getItem('onboarding_completed') === 'true';
     
     if (!hasCompletedOnboarding) {
-      return <Navigate to="/onboarding" replace />;
+      return <Navigate to="/onboarding/name" replace />;
     }
   }
 

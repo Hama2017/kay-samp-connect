@@ -110,6 +110,11 @@ export default function OnboardingUsername() {
         description: `@${username}`,
       });
 
+      // 🔥 MARQUER L'ONBOARDING COMME TERMINÉ
+      const userOnboardingKey = `onboarding_completed_${userId}`;
+      localStorage.setItem(userOnboardingKey, 'true');
+      localStorage.setItem('onboarding_completed', 'true');
+
       await updateUserProfile();
       navigate('/', { replace: true });
 
@@ -127,7 +132,7 @@ export default function OnboardingUsername() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
-              src="/src/assets/kaaysamp-logo.jpg" 
+              src="/src/assets/kaaysamp-logo.png" 
               alt="KaaySamp" 
               className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/20"
             />
@@ -230,5 +235,6 @@ export default function OnboardingUsername() {
           </div>
         </CardContent>
       </Card>
-    </div>)
+    </div>
+  );
 }
