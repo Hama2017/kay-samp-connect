@@ -51,6 +51,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // Profil n'existe pas, le créer automatiquement
+          console.log('🔧 Profil manquant, création automatique...');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              username: `user_${userId.substring(0, 8)}`,
+              full_name: null,
+              phone: null
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Error creating profile:', createError);
+            return null;
+          }
+          
+          return newProfile;
+        }
         console.error('Error fetching profile:', error);
         return null;
       }
@@ -71,13 +92,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           // Defer profile fetching to avoid deadlock
           setTimeout(async () => {
-            const profile = await fetchProfile(session.user.id);
-            setUser({
-              ...session.user,
-              profile: profile || undefined
-            });
-            setIsLoading(false);
-          }, 0);
+            try {
+              const profile = await fetchProfile(session.user.id);
+              setUser({
+                ...session.user,
+                profile: profile || undefined
+              });
+            } catch (error) {
+              console.error('Error in auth state change:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          }, 100); // Augmenter le délai pour éviter les conflits
         } else {
           setUser(null);
           setIsLoading(false);
@@ -90,11 +116,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setUser({
-          ...session.user,
-          profile: profile || undefined
-        });
+        try {
+          const profile = await fetchProfile(session.user.id);
+          setUser({
+            ...session.user,
+            profile: profile || undefined
+          });
+        } catch (error) {
+          console.error('Error fetching initial profile:', error);
+          setUser({ ...session.user, profile: undefined });
+        }
       }
       setIsLoading(false);
     });
