@@ -33,7 +33,7 @@ export default function VerifyOTP() {
 
   useEffect(() => {
     if (!phone) {
-      navigate('/phone-login');
+      navigate('/auth');
     }
   }, [phone, navigate]);
 
@@ -49,9 +49,8 @@ export default function VerifyOTP() {
     setIsLoading(true);
 
     try {
-      console.log('🔐 Vérification OTP avec Supabase Auth pour:', phone);
+      console.log('🔐 Vérification OTP pour:', phone);
       
-      // 🔥 UTILISER SUPABASE AUTH POUR VÉRIFIER L'OTP
       const { data, error } = await supabase.auth.verifyOtp({
         phone: phone,
         token: otp,
@@ -59,42 +58,60 @@ export default function VerifyOTP() {
       });
 
       if (error) {
-        console.error('❌ Erreur vérification OTP:', error);
+        console.error('❌ Erreur vérification:', error);
         throw error;
       }
 
-      console.log('✅ OTP vérifié avec succès:', data);
+      console.log('✅ OTP vérifié:', data);
 
-      // Vérifier si c'est un nouvel utilisateur
+      // 🔥 VÉRIFIER SI C'EST UN NOUVEL UTILISATEUR
       if (data.user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('username')
+          .select('*')  // 🔥 CORRECTION: Sélectionner tous les champs
           .eq('id', data.user.id)
           .single();
 
-        // Si pas de profil ou username vide, rediriger vers onboarding
-        if (!profile || !profile.username) {
-          console.log('📝 Nouvel utilisateur, redirection vers onboarding');
-          navigate('/onboarding', { replace: true });
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Erreur profil:', profileError);
+        }
+
+        // 🔥 NOUVEAU USER = Pas de profil OU username auto-généré
+        const isNewUser = !profile || 
+                         !profile.username || 
+                         profile.username.startsWith('user_');
+
+        console.log('Is new user?', isNewUser, profile);
+
+        if (isNewUser) {
+          console.log('📝 Nouveau utilisateur → Étape 1: Nom complet');
+          toast({
+            title: "Code vérifié ✅",
+            description: "Créons votre profil !",
+          });
+          // 🔥 REDIRIGER VERS ÉTAPE 1: NOM COMPLET
+          navigate('/onboarding/name', { 
+            replace: true,
+            state: { userId: data.user.id }
+          });
           return;
         }
+
+        // 🔥 UTILISATEUR EXISTANT → CONNEXION DIRECTE
+        console.log('👤 Utilisateur existant → Connexion');
+        toast({
+          title: "Connexion réussie ✅",
+          description: `Bienvenue ${profile.full_name || '@' + profile.username} !`,
+        });
       }
 
-      toast({
-        title: "Connexion réussie ✅",
-        description: "Vous êtes maintenant connecté !",
-      });
-
-      // Update user profile
       await updateUserProfile();
 
-      // Redirect
       const redirectTo = from?.pathname || '/';
       navigate(redirectTo, { replace: true });
 
     } catch (error: any) {
-      console.error('❌ Erreur complète:', error);
+      console.error('❌ Erreur:', error);
       
       let errorMessage = "Code invalide ou expiré.";
       
@@ -105,11 +122,6 @@ export default function VerifyOTP() {
       }
       
       setError(errorMessage);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
       setOtp("");
     } finally {
       setIsLoading(false);
@@ -125,9 +137,6 @@ export default function VerifyOTP() {
     setError(null);
 
     try {
-      console.log('🔄 Renvoi OTP à:', phone);
-      
-      // 🔥 RENVOYER L'OTP AVEC SUPABASE AUTH
       const { error } = await supabase.auth.signInWithOtp({
         phone: phone
       });
@@ -136,10 +145,9 @@ export default function VerifyOTP() {
 
       toast({
         title: "Code renvoyé ✅",
-        description: "Un nouveau code a été envoyé",
+        description: "Vérifiez vos SMS",
       });
     } catch (error: any) {
-      console.error('❌ Erreur renvoi OTP:', error);
       setError("Impossible de renvoyer le code.");
       setCanResend(true);
       setCountdown(0);
@@ -148,26 +156,28 @@ export default function VerifyOTP() {
     }
   };
 
-  if (!phone) {
-    return null;
-  }
+  if (!phone) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-secondary/20">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-hero">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
             <img 
               src="/src/assets/kaaysamp-logo.jpg" 
-              alt="KaaySamp Logo" 
-              className="h-12 w-12 rounded-full"
+              alt="KaaySamp" 
+              className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/20"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Vérification</CardTitle>
-          <CardDescription>
-            Entrez le code à 6 chiffres envoyé au<br />
-            <span className="font-medium">{phone}</span>
-          </CardDescription>
+          <div>
+            <CardTitle className="text-2xl font-bold">
+              Vérification
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              Code envoyé au<br />
+              <span className="font-semibold text-foreground">{phone}</span>
+            </CardDescription>
+          </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -190,57 +200,61 @@ export default function VerifyOTP() {
                 disabled={isLoading}
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
+                  <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
+                  <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
+                  <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
+                  <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
+                  <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
+                  <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
                 </InputOTPGroup>
               </InputOTP>
             </div>
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full h-12 text-lg font-semibold" 
               disabled={isLoading || otp.length !== 6}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Vérification...
                 </>
               ) : (
-                'Vérifier le code'
+                'Vérifier'
               )}
             </Button>
           </form>
 
-          <div className="text-center space-y-4">
-            <Button
-              variant="ghost"
-              onClick={handleResend}
-              disabled={!canResend || isLoading}
-              className="text-sm"
-            >
-              {canResend ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Renvoyer le code
-                </>
-              ) : (
-                `Renvoyer dans ${countdown}s`
-              )}
-            </Button>
+          <div className="space-y-3">
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                onClick={handleResend}
+                disabled={!canResend || isLoading}
+                className="text-sm"
+              >
+                {canResend ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Renvoyer le code
+                  </>
+                ) : (
+                  `Renvoyer dans ${countdown}s`
+                )}
+              </Button>
+            </div>
 
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/phone-login')}
-              className="text-sm"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Changer de numéro
-            </Button>
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => navigate('/auth')}
+                className="text-sm text-muted-foreground"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Changer de numéro
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

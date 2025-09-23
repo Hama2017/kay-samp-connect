@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -18,17 +18,15 @@ import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import PhoneLogin from "@/pages/PhoneLogin";
+import UnifiedAuth from "@/pages/UnifiedAuth";
 import VerifyOTP from "@/pages/VerifyOTP";
-import Onboarding from "@/pages/Onboarding";
+import OnboardingName from "@/pages/OnboardingName";
+import Onboarding from "@/pages/Onboarding"; // C'est la page username
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Bookmarks from "./pages/Bookmarks";
 import PostDetail from "./pages/PostDetail";
 
-// Composant pour tracker les pages
 function PageTracker() {
   usePageTracking();
   return null;
@@ -44,15 +42,22 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <PageTracker />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/phone-login" element={<PhoneLogin />} />
-          <Route path="/verify-otp" element={<VerifyOTP />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Routes>
+            {/* 🔥 AUTHENTIFICATION - Route unique par téléphone */}
+            <Route path="/auth" element={<UnifiedAuth />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
             
-            {/* Protected routes with layout */}
+            {/* 🔥 ONBOARDING en 2 étapes - Nouveaux utilisateurs uniquement */}
+            <Route path="/onboarding/name" element={<OnboardingName />} />
+            <Route path="/onboarding/username" element={<Onboarding />} />
+            
+            {/* 🔥 REDIRECTIONS - Anciennes routes → Nouvelle route auth */}
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/register" element={<Navigate to="/auth" replace />} />
+            <Route path="/phone-login" element={<Navigate to="/auth" replace />} />
+            <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
+            
+            {/* Routes protégées avec layout */}
             <Route path="/" element={
               <ProtectedRoute>
                 <AppLayout />
@@ -71,7 +76,7 @@ const App = () => (
               <Route path="bookmarks" element={<Bookmarks />} />
             </Route>
             
-            {/* Protected routes without layout for full screen pages */}
+            {/* Routes protégées sans layout (plein écran) */}
             <Route path="create-post" element={
               <ProtectedRoute>
                 <CreatePost />
@@ -83,7 +88,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Catch-all route */}
+            {/* 404 - Page non trouvée */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <PWAPrompt />
