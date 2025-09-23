@@ -28,11 +28,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Check if user needs onboarding (skip for onboarding pages)
   if (!location.pathname.startsWith('/onboarding')) {
-    const userOnboardingKey = `onboarding_completed_${user.id}`;
-    const hasCompletedOnboarding = localStorage.getItem(userOnboardingKey) === 'true' || 
-                                 localStorage.getItem('onboarding_completed') === 'true';
-    
-    if (!hasCompletedOnboarding) {
+    if (!user.profile?.full_name || user.profile.username?.startsWith('user_')) {
       return <Navigate to="/onboarding/name" replace />;
     }
   }

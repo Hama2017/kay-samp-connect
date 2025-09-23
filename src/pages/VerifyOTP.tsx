@@ -76,10 +76,12 @@ export default function VerifyOTP() {
           console.error('Erreur profil:', profileError);
         }
 
-        // 🔥 NOUVEAU USER = Pas de profil OU username auto-généré
+        // 🔥 NOUVEAU USER = Pas de profil OU username auto-généré OU pas de full_name
         const isNewUser = !profile || 
                          !profile.username || 
-                         profile.username.startsWith('user_');
+                         profile.username.startsWith('user_') ||
+                         !profile.full_name ||
+                         profile.full_name === null;
 
         console.log('Is new user?', isNewUser, profile);
 
