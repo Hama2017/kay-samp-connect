@@ -34,14 +34,25 @@ export default function SpaceDetail() {
   // All useMemo hooks MUST be before any conditional returns
   const space = spaces.find(s => s.id === spaceId);
   const spacePosts = useMemo(() => {
-    console.log('spacePosts useMemo called', { postsLength: posts.length, spaceId });
+    console.log('spacePosts useMemo called', { 
+      postsLength: posts.length, 
+      spaceId, 
+      selectedCategory,
+      posts: posts.map(p => ({ id: p.id, categories: p.categories, space_id: p.space_id }))
+    });
+    
     let filteredPosts = posts.filter(post => post.space_id === spaceId);
+    console.log('Posts in space:', filteredPosts.map(p => ({ id: p.id, categories: p.categories })));
     
     // Filter by category if a specific category is selected
     if (selectedCategory !== "Toutes") {
-      filteredPosts = filteredPosts.filter(post => 
-        post.categories?.includes(selectedCategory)
-      );
+      const beforeFilter = filteredPosts.length;
+      filteredPosts = filteredPosts.filter(post => {
+        const hasCategory = post.categories?.includes(selectedCategory);
+        console.log(`Post ${post.id} has category ${selectedCategory}:`, hasCategory, 'Post categories:', post.categories);
+        return hasCategory;
+      });
+      console.log(`Category filter: ${beforeFilter} -> ${filteredPosts.length} posts`);
     }
     
     return filteredPosts;
