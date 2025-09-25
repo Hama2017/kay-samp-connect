@@ -38,6 +38,7 @@ export default function SpaceAdmin() {
   const [newCategory, setNewCategory] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Load space data
   useEffect(() => {
@@ -270,7 +271,18 @@ export default function SpaceAdmin() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="font-medium">{subscriber.username}</p>
+                      <p className="font-medium">
+                        {subscriber.user_id === user?.id ? (
+                          <span className="text-primary">Moi</span>
+                        ) : (
+                          <span 
+                            className="hover:text-primary cursor-pointer transition-colors"
+                            onClick={() => navigate(`/profile/${subscriber.user_id}`)}
+                          >
+                            {subscriber.username}
+                          </span>
+                        )}
+                      </p>
                       {subscriber.full_name && (
                         <p className="text-sm text-muted-foreground">{subscriber.full_name}</p>
                       )}
@@ -307,13 +319,29 @@ export default function SpaceAdmin() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action supprimera définitivement l'espace "{space.name}" et tous les posts associés. 
+                    Cette action supprimera définitivement l'espace "{space?.name}" et tous les posts associés. 
                     Cette action est irréversible.
+                    
+                    <div className="mt-4 space-y-2">
+                      <label className="text-sm font-medium">
+                        Pour confirmer, tapez <span className="font-mono bg-muted px-1 py-0.5 rounded">SUPPRIMER DÉFINITIVEMENT</span>
+                      </label>
+                      <Input
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="Tapez SUPPRIMER DÉFINITIVEMENT"
+                        className="font-mono"
+                      />
+                    </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Annuler</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDelete} 
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deleteConfirmText !== "SUPPRIMER DÉFINITIVEMENT"}
+                  >
                     Supprimer définitivement
                   </AlertDialogAction>
                 </AlertDialogFooter>

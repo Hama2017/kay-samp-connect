@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface Subscriber {
   id: string;
+  user_id: string;
   username: string;
   full_name?: string;
   profile_picture_url?: string;
@@ -16,12 +17,10 @@ export const useSpaceAdmin = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscribers = useCallback(async (spaceId: string) => {
-    console.log('fetchSubscribers called with spaceId:', spaceId);
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('Making query to space_subscriptions...');
       const { data, error: fetchError } = await supabase
         .from('space_subscriptions')
         .select(`
@@ -38,14 +37,13 @@ export const useSpaceAdmin = () => {
         .eq('space_id', spaceId)
         .order('subscribed_at', { ascending: false });
 
-      console.log('Query result:', { data, fetchError });
-
       if (fetchError) {
         throw fetchError;
       }
 
       const formattedSubscribers = data?.map(sub => ({
         id: sub.profiles.id,
+        user_id: sub.user_id,
         username: sub.profiles.username,
         full_name: sub.profiles.full_name,
         profile_picture_url: sub.profiles.profile_picture_url,
@@ -53,7 +51,6 @@ export const useSpaceAdmin = () => {
         subscribed_at: sub.subscribed_at
       })) || [];
 
-      console.log('Formatted subscribers:', formattedSubscribers);
       setSubscribers(formattedSubscribers);
     } catch (err) {
       console.error('Error fetching subscribers:', err);

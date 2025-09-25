@@ -211,13 +211,15 @@ export default function SpaceDetail() {
           </div>
           
           <div className="flex gap-3">
-            <Button
-              variant={space.is_subscribed ? "outline" : "default"}
-              className="flex-1"
-              onClick={handleSubscriptionToggle}
-            >
-              {space.is_subscribed ? "Abonné" : "S'abonner"}
-            </Button>
+            {user && space.creator_id !== user.id && (
+              <Button
+                variant={space.is_subscribed ? "outline" : "default"}
+                className="flex-1"
+                onClick={handleSubscriptionToggle}
+              >
+                {space.is_subscribed ? "Abonné" : "S'abonner"}
+              </Button>
+            )}
             
             {(() => {
               const { canPost, message } = canUserPostInSpace(space, user?.id, false);

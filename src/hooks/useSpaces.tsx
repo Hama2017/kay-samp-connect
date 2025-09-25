@@ -152,6 +152,19 @@ export function useSpaces() {
 
       if (error) throw error;
 
+      // Automatically subscribe the creator to their space
+      const { error: subscriptionError } = await supabase
+        .from('space_subscriptions')
+        .insert({
+          user_id: user.id,
+          space_id: data.id
+        });
+
+      if (subscriptionError) {
+        console.error('Error auto-subscribing creator:', subscriptionError);
+        // Don't throw here, space creation was successful
+      }
+
       toast({
         title: "Espace créé !",
         description: `L'espace "${spaceData.name}" a été créé avec succès`,
