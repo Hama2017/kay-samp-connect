@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -18,7 +17,6 @@ export default function VerifyOTP() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { updateUserProfile } = useAuth();
 
   const { phone, from } = location.state || {};
 
@@ -51,6 +49,7 @@ export default function VerifyOTP() {
     try {
       console.log('🔐 Vérification OTP pour:', phone);
       
+      // 🔥 ÉTAPE 1: Vérifier l'OTP
       const { data, error } = await supabase.auth.verifyOtp({
         phone: phone,
         token: otp,
@@ -62,55 +61,60 @@ export default function VerifyOTP() {
         throw error;
       }
 
-      console.log('✅ OTP vérifié:', data);
+      console.log('✅ OTP vérifié, user:', data.user);
 
-      // 🔥 VÉRIFIER SI C'EST UN NOUVEL UTILISATEUR
-      if (data.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')  // 🔥 CORRECTION: Sélectionner tous les champs
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('Erreur profil:', profileError);
-        }
-
-        // 🔥 NOUVEAU USER = Pas de profil OU username auto-généré OU pas de full_name
-        const isNewUser = !profile || 
-                         !profile.username || 
-                         profile.username.startsWith('user_') ||
-                         !profile.full_name ||
-                         profile.full_name === null;
-
-        console.log('Is new user?', isNewUser, profile);
-
-        if (isNewUser) {
-          console.log('📝 Nouveau utilisateur → Étape 1: Nom complet');
-          toast({
-            title: "Code vérifié ✅",
-            description: "Créons votre profil !",
-          });
-          // 🔥 REDIRIGER VERS ÉTAPE 1: NOM COMPLET
-          navigate('/onboarding/name', { 
-            replace: true,
-            state: { userId: data.user.id }
-          });
-          return;
-        }
-
-        // 🔥 UTILISATEUR EXISTANT → CONNEXION DIRECTE
-        console.log('👤 Utilisateur existant → Connexion');
-        toast({
-          title: "Connexion réussie ✅",
-          description: `Bienvenue ${profile.full_name || '@' + profile.username} !`,
-        });
+      if (!data.user) {
+        throw new Error("Erreur de connexion");
       }
 
-      await updateUserProfile();
+      // 🔥 ÉTAPE 2: Vérifier si le profil existe et est complet
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, phone')
+        .eq('id', data.user.id)
+        .single();
 
-      const redirectTo = from?.pathname || '/';
-      navigate(redirectTo, { replace: true });
+      console.log('📋 Profil récupéré:', profile);
+
+      // 🔥 DÉTERMINER SI C'EST UN NOUVEAU USER
+      const isNewUser = !profile || 
+                       !profile.username || 
+                       profile.username.startsWith('user_') ||
+                       !profile.full_name;
+
+      console.log('🆕 Nouveau user?', isNewUser);
+
+      if (isNewUser) {
+        // NOUVEAU UTILISATEUR → Compléter le profil
+        toast({
+          title: "Code vérifié ✅",
+          description: "Créons votre profil !",
+        });
+        
+        navigate('/profile-completion', { 
+          replace: true,
+          state: { userId: data.user.id }
+        });
+      } else {
+        // UTILISATEUR EXISTANT → Connexion directe
+        toast({
+          title: "Connexion réussie ✅",
+          description: `Content de vous revoir ${profile.full_name || '@' + profile.username} !`,
+        });
+
+        // 🔥 VÉRIFIER SI ONBOARDING APP DÉJÀ FAIT
+        const onboardingKey = `app_onboarding_completed_${data.user.id}`;
+        const hasSeenOnboarding = localStorage.getItem(onboardingKey);
+
+        if (!hasSeenOnboarding) {
+          // Montrer le carousel de présentation
+          navigate('/app-onboarding', { replace: true });
+        } else {
+          // Aller directement à l'accueil
+          const redirectTo = from?.pathname || '/';
+          navigate(redirectTo, { replace: true });
+        }
+      }
 
     } catch (error: any) {
       console.error('❌ Erreur:', error);

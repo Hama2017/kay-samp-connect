@@ -20,8 +20,8 @@ import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
 import UnifiedAuth from "@/pages/UnifiedAuth";
 import VerifyOTP from "@/pages/VerifyOTP";
-import OnboardingName from "@/pages/OnboardingName";
-import Onboarding from "@/pages/Onboarding"; // C'est la page username
+import ProfileCompletion from "@/pages/ProfileCompletion";
+import AppOnboarding from "@/pages/AppOnboarding";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Bookmarks from "./pages/Bookmarks";
@@ -47,15 +47,19 @@ const App = () => (
             <Route path="/auth" element={<UnifiedAuth />} />
             <Route path="/verify-otp" element={<VerifyOTP />} />
             
-            {/* 🔥 ONBOARDING en 2 étapes - Nouveaux utilisateurs uniquement */}
-            <Route path="/onboarding/name" element={<OnboardingName />} />
-            <Route path="/onboarding/username" element={<Onboarding />} />
+            {/* 🔥 COMPLÉTION PROFIL - Page unique pour nom + username */}
+            <Route path="/profile-completion" element={<ProfileCompletion />} />
+            
+            {/* 🔥 ONBOARDING APP - Carousel de présentation (3 étapes) */}
+            <Route path="/app-onboarding" element={<AppOnboarding />} />
             
             {/* 🔥 REDIRECTIONS - Anciennes routes → Nouvelle route auth */}
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/register" element={<Navigate to="/auth" replace />} />
             <Route path="/phone-login" element={<Navigate to="/auth" replace />} />
             <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
+            <Route path="/onboarding/name" element={<Navigate to="/profile-completion" replace />} />
+            <Route path="/onboarding/username" element={<Navigate to="/profile-completion" replace />} />
             
             {/* Routes protégées avec layout */}
             <Route path="/" element={
