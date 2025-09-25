@@ -162,7 +162,8 @@ export function usePosts() {
           title: postData.title,
           author_id: user.id,
           space_id: postData.space_id,
-          hashtags: postData.hashtags
+          hashtags: postData.hashtags,
+          categories: postData.categories
         })
         .select()
         .single();

@@ -48,7 +48,8 @@ export default function SpaceDetail() {
     if (selectedCategory !== "Toutes") {
       const beforeFilter = filteredPosts.length;
       filteredPosts = filteredPosts.filter(post => {
-        const hasCategory = post.categories?.includes(selectedCategory);
+        const postCategories = post.categories || [];
+        const hasCategory = postCategories.includes(selectedCategory);
         console.log(`Post ${post.id} has category ${selectedCategory}:`, hasCategory, 'Post categories:', post.categories);
         return hasCategory;
       });
