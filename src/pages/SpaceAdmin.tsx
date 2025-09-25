@@ -48,7 +48,7 @@ export default function SpaceAdmin() {
       });
       fetchSubscribers(spaceId!);
     }
-  }, [space, spaceId, fetchSubscribers]);
+  }, [space, spaceId]);
 
   // Redirect if user is not the creator
   useEffect(() => {
