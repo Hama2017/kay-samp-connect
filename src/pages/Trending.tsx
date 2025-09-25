@@ -302,9 +302,13 @@ export default function Trending() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Badge variant="outline" className="text-xs">
-                        {space.category}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {space.categories.map((category) => (
+                          <Badge key={category} variant="outline" className="text-xs">
+                            {category}
+                          </Badge>
+                        ))}
+                      </div>
                       <span>•</span>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />

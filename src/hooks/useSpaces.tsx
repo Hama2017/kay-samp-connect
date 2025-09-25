@@ -7,7 +7,7 @@ export interface Space {
   id: string;
   name: string;
   description?: string;
-  category: string;
+  categories: string[];
   cover_image_url?: string;
   is_verified: boolean;
   is_public: boolean;
@@ -32,7 +32,7 @@ export interface Space {
 export interface CreateSpaceData {
   name: string;
   description?: string;
-  category: string;
+  categories: string[];
   cover_image_url?: string;
   is_public?: boolean;
   rules?: string[];
@@ -78,7 +78,7 @@ export function useSpaces() {
 
       // Apply category filter
       if (filters?.category && filters.category !== 'Tous') {
-        query = query.eq('category', filters.category);
+        query = query.contains('categories', [filters.category]);
       }
 
       // Apply search filter

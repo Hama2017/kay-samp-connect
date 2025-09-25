@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { X, Image, Video, Play, FileImage, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { usePosts } from "@/hooks/usePosts";
@@ -26,6 +27,7 @@ export default function CreatePost() {
   const [formData, setFormData] = useState({
     content: "",
     selectedFiles: [] as any[],
+    categories: [] as string[],
   });
   
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -164,6 +166,7 @@ export default function CreatePost() {
         content: formData.content,
         space_id: spaceId,
         hashtags,
+        categories: formData.categories.length > 0 ? formData.categories : undefined,
         media_files: formData.selectedFiles.length > 0 ? formData.selectedFiles : undefined
       });
 
@@ -200,7 +203,11 @@ export default function CreatePost() {
           <Button 
             onClick={() => handleSubmit()}
             className="px-6 font-medium"
-            disabled={!formData.content.trim() || isLoading}
+            disabled={
+              !formData.content.trim() || 
+              isLoading ||
+              (isInSpace && currentSpace && currentSpace.categories && currentSpace.categories.length > 1 && formData.categories.length === 0)
+            }
           >
             {isLoading ? "Publication..." : "Publier"}
           </Button>
@@ -298,6 +305,59 @@ export default function CreatePost() {
               )}
             </div>
           </div>
+
+          {/* Category Selection for multi-category spaces */}
+          {isInSpace && currentSpace && currentSpace.categories && currentSpace.categories.length > 1 && (
+            <div className="px-4 py-3 border-t border-border">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">
+                  Catégories <span className="text-destructive">*</span>
+                  <span className="text-xs text-muted-foreground block mt-1">
+                    Choisissez au moins une catégorie pour ce post
+                  </span>
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {currentSpace.categories.map((category) => (
+                    <label
+                      key={category}
+                      className={`
+                        flex items-center space-x-2 px-3 py-2 text-sm rounded-full border cursor-pointer transition-all
+                        ${formData.categories.includes(category) 
+                          ? 'border-primary bg-primary text-primary-foreground' 
+                          : 'border-input hover:border-primary/50'
+                        }
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.categories.includes(category)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: [...prev.categories, category] 
+                            }));
+                          } else {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: prev.categories.filter(c => c !== category) 
+                            }));
+                          }
+                        }}
+                        className="sr-only"
+                      />
+                      <span className="select-none">{category}</span>
+                    </label>
+                  ))}
+                </div>
+                {formData.categories.length === 0 && (
+                  <p className="text-xs text-destructive">
+                    Veuillez sélectionner au moins une catégorie
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Media Toolbar */}
           <div className="flex items-center gap-2 mt-6 pt-4 border-t">

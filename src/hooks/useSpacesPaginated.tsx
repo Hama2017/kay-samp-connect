@@ -6,7 +6,7 @@ export interface Space {
   id: string;
   name: string;
   description?: string;
-  category: string;
+  categories: string[];
   is_public: boolean;
   is_verified: boolean;
   cover_image_url?: string;
@@ -48,8 +48,8 @@ export function useSpacesPaginated() {
         query = query.eq('creator_id', user.id);
       }
 
-      if (filters?.category) {
-        query = query.eq('category', filters.category);
+      if (filters?.category && filters.category !== 'Tous') {
+        query = query.contains('categories', [filters.category]);
       }
 
       const { data, error } = await query;

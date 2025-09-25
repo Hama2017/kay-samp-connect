@@ -445,6 +445,7 @@ export type Database = {
       posts: {
         Row: {
           author_id: string
+          categories: string[] | null
           comments_count: number
           content: string
           created_at: string
@@ -461,6 +462,7 @@ export type Database = {
         }
         Insert: {
           author_id: string
+          categories?: string[] | null
           comments_count?: number
           content: string
           created_at?: string
@@ -477,6 +479,7 @@ export type Database = {
         }
         Update: {
           author_id?: string
+          categories?: string[] | null
           comments_count?: number
           content?: string
           created_at?: string
@@ -650,7 +653,7 @@ export type Database = {
       spaces: {
         Row: {
           badge: Database["public"]["Enums"]["space_badge"] | null
-          category: string
+          categories: string[] | null
           cover_image_url: string | null
           created_at: string
           creator_id: string
@@ -667,7 +670,7 @@ export type Database = {
         }
         Insert: {
           badge?: Database["public"]["Enums"]["space_badge"] | null
-          category: string
+          categories?: string[] | null
           cover_image_url?: string | null
           created_at?: string
           creator_id: string
@@ -684,7 +687,7 @@ export type Database = {
         }
         Update: {
           badge?: Database["public"]["Enums"]["space_badge"] | null
-          category?: string
+          categories?: string[] | null
           cover_image_url?: string | null
           created_at?: string
           creator_id?: string

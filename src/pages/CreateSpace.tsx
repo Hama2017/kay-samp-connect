@@ -32,7 +32,7 @@ export default function CreateSpace() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "",
+    categories: [] as string[],
     badge: "" as "kaaysamp" | "factcheck" | "evenement" | "none" | "",
     whoCanPublish: "subscribers" as string,
   });
@@ -40,10 +40,10 @@ export default function CreateSpace() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || !formData.category) {
+    if (!formData.name || !formData.description || formData.categories.length === 0) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "Veuillez remplir tous les champs obligatoires et choisir au moins une catégorie",
         variant: "destructive",
       });
       return;
@@ -54,7 +54,7 @@ export default function CreateSpace() {
       await createSpace({
         name: formData.name,
         description: formData.description,
-        category: formData.category,
+        categories: formData.categories,
         badge: formData.badge === "none" ? undefined : formData.badge || undefined,
         who_can_publish: [formData.whoCanPublish],
       });
@@ -74,7 +74,7 @@ export default function CreateSpace() {
       if (isDuplicateName) {
         toast({
           title: "Nom déjà utilisé",
-          description: `Un espace "${formData.name}" existe déjà dans la catégorie "${formData.category}". Veuillez choisir un autre nom.`,
+          description: `Un espace "${formData.name}" existe déjà. Veuillez choisir un autre nom.`,
           variant: "destructive",
         });
       } else {
@@ -146,23 +146,59 @@ export default function CreateSpace() {
               />
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
+            {/* Categories */}
+            <div className="space-y-3">
               <Label className="text-sm font-medium">
-                Catégorie principale <span className="text-destructive">*</span>
+                Catégories <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground block mt-1">
+                  Choisissez au moins une catégorie (plusieurs possibles)
+                </span>
               </Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger className="border-primary/20 focus:border-primary/40">
-                  <SelectValue placeholder="Choisis une catégorie" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((category) => (
+                  <label
+                    key={category}
+                    className={`
+                      flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all
+                      ${formData.categories.includes(category) 
+                        ? 'border-primary bg-primary/5 text-primary' 
+                        : 'border-input hover:border-primary/50'
+                      }
+                    `}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.categories.includes(category)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            categories: [...prev.categories, category] 
+                          }));
+                        } else {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            categories: prev.categories.filter(c => c !== category) 
+                          }));
+                        }
+                      }}
+                      className="sr-only"
+                    />
+                    <div className={`
+                      w-4 h-4 border-2 rounded flex items-center justify-center
+                      ${formData.categories.includes(category) 
+                        ? 'border-primary bg-primary' 
+                        : 'border-input'
+                      }
+                    `}>
+                      {formData.categories.includes(category) && (
+                        <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                      )}
+                    </div>
+                    <span className="text-sm font-medium select-none">{category}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Badge */}

@@ -205,9 +205,13 @@ export default function Discover() {
                       </div>
                       
                       <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <Badge variant="outline" className="text-xs flex-shrink-0">
-                          {space.category}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1">
+                          {space.categories && space.categories.map((category) => (
+                            <Badge key={category} variant="outline" className="text-xs flex-shrink-0">
+                              {category}
+                            </Badge>
+                          ))}
+                        </div>
                         <span className="hidden sm:inline">•</span>
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />

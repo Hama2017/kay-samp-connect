@@ -80,7 +80,7 @@ export function useSearch() {
           id: space.id,
           name: space.name,
           description: space.description,
-          category: space.category,
+          category: space.categories ? space.categories.join(", ") : "",
           subscribersCount: space.subscribers_count || 0,
           isVerified: space.is_verified || false,
           lastActivity: space.updated_at,

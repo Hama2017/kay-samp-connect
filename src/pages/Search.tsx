@@ -288,7 +288,11 @@ export default function Search() {
                                 </div>
                                 <div className="flex items-center space-x-4 text-xs text-muted-foreground ml-14">
                                   <span>{space.subscribersCount.toLocaleString()} membres</span>
-                                  <Badge variant="outline" className="text-xs">{space.category}</Badge>
+                                  <div className="flex flex-wrap gap-1">
+                                    {space.category && space.category.split(", ").map((cat: string) => (
+                                      <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                               <Button 
@@ -413,8 +417,12 @@ export default function Search() {
                               </div>
                               <p className="text-sm text-muted-foreground">{space.description}</p>
                               <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                <span>{space.subscribersCount} abonnés</span>
-                                <Badge variant="outline">{space.category}</Badge>
+                <span>{space.subscribersCount} abonnés</span>
+                <div className="flex flex-wrap gap-1">
+                  {space.category && space.category.split(", ").map((cat: string) => (
+                    <Badge key={cat} variant="outline">{cat}</Badge>
+                  ))}
+                </div>
                               </div>
                             </div>
                             <Button variant={space.isSubscribed ? "outline" : "default"} size="sm">

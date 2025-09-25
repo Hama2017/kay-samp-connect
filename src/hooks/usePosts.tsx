@@ -14,6 +14,7 @@ export interface Post {
   comments_count: number;
   views_count: number;
   hashtags?: string[];
+  categories?: string[];
   created_at: string;
   updated_at: string;
   current_user_vote?: 'up' | 'down' | null;
@@ -27,7 +28,7 @@ export interface Post {
   spaces?: {
     id: string;
     name: string;
-    category?: string;
+    categories?: string[];
   };
   post_media?: Array<{
     id: string;
@@ -42,6 +43,7 @@ export interface CreatePostData {
   title?: string;
   space_id?: string;
   hashtags?: string[];
+  categories?: string[];
   media_files?: any[];
 }
 
@@ -83,7 +85,7 @@ export function usePosts() {
           spaces (
             id,
             name,
-            category
+            categories
           ),
           post_media (
             id,

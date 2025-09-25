@@ -91,7 +91,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                       
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground truncate flex-1">
-                          {space.category}
+                          {space.categories && space.categories.join(" • ")}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
                           <Users className="h-3 w-3 text-muted-foreground" />
