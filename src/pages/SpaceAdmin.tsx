@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useSpaces } from "@/hooks/useSpaces";
+import { useSpaces, Space } from "@/hooks/useSpaces";
 import { useSpaceAdmin } from "@/hooks/useSpaceAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -24,9 +24,11 @@ export default function SpaceAdmin() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { spaces, updateSpace, deleteSpace } = useSpaces();
+  const { updateSpace, deleteSpace, getSpaceById } = useSpaces();
   const { subscribers, fetchSubscribers, isLoading: subscribersLoading } = useSpaceAdmin();
   
+  const [space, setSpace] = useState<Space | null>(null);
+  const [isLoadingSpace, setIsLoadingSpace] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -37,20 +39,31 @@ export default function SpaceAdmin() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const space = spaces.find(s => s.id === spaceId);
-
+  // Load space data
   useEffect(() => {
-    console.log('SpaceAdmin useEffect:', { space: !!space, spaceId });
-    if (space) {
-      console.log('Setting form data and fetching subscribers for space:', space.name);
-      setFormData({
-        name: space.name,
-        description: space.description || "",
-        categories: space.categories || []
-      });
-      fetchSubscribers(spaceId!);
-    }
-  }, [space, spaceId]);
+    const loadSpace = async () => {
+      if (!spaceId) return;
+      
+      try {
+        setIsLoadingSpace(true);
+        const spaceData = await getSpaceById(spaceId);
+        setSpace(spaceData);
+        setFormData({
+          name: spaceData.name,
+          description: spaceData.description || "",
+          categories: spaceData.categories || []
+        });
+        fetchSubscribers(spaceId);
+      } catch (error) {
+        console.error('Error loading space:', error);
+        navigate('/');
+      } finally {
+        setIsLoadingSpace(false);
+      }
+    };
+
+    loadSpace();
+  }, [spaceId, getSpaceById, fetchSubscribers, navigate]);
 
   // Redirect if user is not the creator
   useEffect(() => {
@@ -113,8 +126,12 @@ export default function SpaceAdmin() {
     });
   };
 
-  if (!space) {
-    return <LoadingSpinner />;
+  if (isLoadingSpace) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
