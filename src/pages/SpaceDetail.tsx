@@ -27,6 +27,7 @@ export default function SpaceDetail() {
   const { user } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
@@ -34,8 +35,17 @@ export default function SpaceDetail() {
   const space = spaces.find(s => s.id === spaceId);
   const spacePosts = useMemo(() => {
     console.log('spacePosts useMemo called', { postsLength: posts.length, spaceId });
-    return posts.filter(post => post.space_id === spaceId);
-  }, [posts, spaceId]);
+    let filteredPosts = posts.filter(post => post.space_id === spaceId);
+    
+    // Filter by category if a specific category is selected
+    if (selectedCategory !== "Toutes") {
+      filteredPosts = filteredPosts.filter(post => 
+        post.categories?.includes(selectedCategory)
+      );
+    }
+    
+    return filteredPosts;
+  }, [posts, spaceId, selectedCategory]);
 
   const sortedPosts = useMemo(() => {
     console.log('sortedPosts useMemo called', { spacePostsLength: spacePosts.length, selectedFilter });
@@ -242,6 +252,33 @@ export default function SpaceDetail() {
           <h3 className="font-semibold text-lg">Publications</h3>
         </div>
         
+        {/* Category filters - only show if space has more than one category */}
+        {space.categories && space.categories.length > 1 && (
+          <div className="mb-4">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <Button
+                variant={selectedCategory === "Toutes" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory("Toutes")}
+                className="whitespace-nowrap"
+              >
+                Toutes
+              </Button>
+              {space.categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className="whitespace-nowrap"
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Sort filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {sortFilters.map((filter) => {

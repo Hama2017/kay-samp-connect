@@ -50,7 +50,10 @@ export default function Home() {
   const filteredAndSortedPosts = useMemo(() => {
     let filteredPosts = selectedCategory === "Tous" 
       ? posts 
-      : posts.filter(post => post.spaces?.name === selectedCategory);
+      : posts.filter(post => 
+          post.categories?.includes(selectedCategory) || 
+          post.spaces?.categories?.includes(selectedCategory)
+        );
     
     return filteredPosts;
   }, [posts, selectedCategory]);
