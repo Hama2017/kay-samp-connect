@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
+import SpaceAdmin from "./pages/SpaceAdmin";
 import UnifiedAuth from "@/pages/UnifiedAuth";
 import VerifyOTP from "@/pages/VerifyOTP";
 import ProfileCompletion from "@/pages/ProfileCompletion";
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="user/:username" element={<UserProfile />} />
               <Route path="post/:id" element={<PostDetail />} />
               <Route path="space/:spaceId" element={<SpaceDetail />} />
+              <Route path="space/:spaceId/admin" element={<SpaceAdmin />} />
               <Route path="settings" element={<Settings />} />
               <Route path="search" element={<Search />} />
               <Route path="bookmarks" element={<Bookmarks />} />

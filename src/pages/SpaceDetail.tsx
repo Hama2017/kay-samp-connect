@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame } from "lucide-react";
+import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -223,16 +223,28 @@ export default function SpaceDetail() {
               const { canPost, message } = canUserPostInSpace(space, user?.id, false);
               
               return (
-                <Button 
-                  variant="outline" 
-                  onClick={() => canPost && navigate(`/create/${spaceId}`)}
-                  className="gap-2"
-                  disabled={!canPost}
-                  title={message}
-                >
-                  <Plus className="h-4 w-4" />
-                  {canPost ? "Créer un post" : message}
-                </Button>
+                <div className="flex gap-2">
+                  {user && space.creator_id === user.id && (
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate(`/space/${spaceId}/admin`)}
+                      className="gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Administrer
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    onClick={() => canPost && navigate(`/create/${spaceId}`)}
+                    className="gap-2"
+                    disabled={!canPost}
+                    title={message}
+                  >
+                    <Plus className="h-4 w-4" />
+                    {canPost ? "Créer un post" : message}
+                  </Button>
+                </div>
               );
             })()}
           </div>

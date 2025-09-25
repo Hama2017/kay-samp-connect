@@ -297,6 +297,68 @@ export function useSpaces() {
     }
   }, [user]);
 
+  const updateSpace = useCallback(async (spaceId: string, updateData: {
+    name?: string;
+    description?: string;
+    categories?: string[];
+    cover_image_url?: string;
+  }) => {
+    try {
+      const { data, error } = await supabase
+        .from('spaces')
+        .update(updateData)
+        .eq('id', spaceId)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setSpaces(prevSpaces => 
+        prevSpaces.map(space => 
+          space.id === spaceId ? { ...space, ...data } : space
+        )
+      );
+
+      return data;
+    } catch (error) {
+      console.error('Error updating space:', error);
+      throw error;
+    }
+  }, []);
+
+  const deleteSpace = useCallback(async (spaceId: string) => {
+    try {
+      // First delete all posts in the space (which will cascade to comments, votes, etc.)
+      const { error: postsError } = await supabase
+        .from('posts')
+        .delete()
+        .eq('space_id', spaceId);
+
+      if (postsError) {
+        throw postsError;
+      }
+
+      // Then delete the space itself
+      const { error: spaceError } = await supabase
+        .from('spaces')
+        .delete()
+        .eq('id', spaceId);
+
+      if (spaceError) {
+        throw spaceError;
+      }
+
+      // Update local state
+      setSpaces(prevSpaces => prevSpaces.filter(space => space.id !== spaceId));
+    } catch (error) {
+      console.error('Error deleting space:', error);
+      throw error;
+    }
+  }, []);
+
   return {
     spaces,
     isLoading,
@@ -306,5 +368,7 @@ export function useSpaces() {
     subscribeToSpace,
     unsubscribeFromSpace,
     getSpaceById,
+    updateSpace,
+    deleteSpace,
   };
 }
