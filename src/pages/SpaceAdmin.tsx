@@ -40,7 +40,9 @@ export default function SpaceAdmin() {
   const space = spaces.find(s => s.id === spaceId);
 
   useEffect(() => {
+    console.log('SpaceAdmin useEffect:', { space: !!space, spaceId });
     if (space) {
+      console.log('Setting form data and fetching subscribers for space:', space.name);
       setFormData({
         name: space.name,
         description: space.description || "",

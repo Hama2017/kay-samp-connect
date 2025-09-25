@@ -16,10 +16,12 @@ export const useSpaceAdmin = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscribers = useCallback(async (spaceId: string) => {
+    console.log('fetchSubscribers called with spaceId:', spaceId);
     setIsLoading(true);
     setError(null);
     
     try {
+      console.log('Making query to space_subscriptions...');
       const { data, error: fetchError } = await supabase
         .from('space_subscriptions')
         .select(`
@@ -36,6 +38,8 @@ export const useSpaceAdmin = () => {
         .eq('space_id', spaceId)
         .order('subscribed_at', { ascending: false });
 
+      console.log('Query result:', { data, fetchError });
+
       if (fetchError) {
         throw fetchError;
       }
@@ -49,6 +53,7 @@ export const useSpaceAdmin = () => {
         subscribed_at: sub.subscribed_at
       })) || [];
 
+      console.log('Formatted subscribers:', formattedSubscribers);
       setSubscribers(formattedSubscribers);
     } catch (err) {
       console.error('Error fetching subscribers:', err);
