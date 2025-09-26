@@ -9,6 +9,7 @@ export interface Space {
   description?: string;
   categories: string[];
   cover_image_url?: string;
+  background_image_url?: string;
   is_verified: boolean;
   is_public: boolean;
   creator_id: string;
@@ -34,6 +35,7 @@ export interface CreateSpaceData {
   description?: string;
   categories: string[];
   cover_image_url?: string;
+  background_image_url?: string;
   is_public?: boolean;
   rules?: string[];
   badge?: 'kaaysamp' | 'factcheck' | 'evenement';
@@ -315,6 +317,7 @@ export function useSpaces() {
     description?: string;
     categories?: string[];
     cover_image_url?: string;
+    background_image_url?: string;
   }) => {
     try {
       const { data, error } = await supabase

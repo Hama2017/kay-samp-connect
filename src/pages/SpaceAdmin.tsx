@@ -10,15 +10,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useSpaces, Space } from "@/hooks/useSpaces";
 import { useSpaceAdmin } from "@/hooks/useSpaceAdmin";
+import { useCategories } from "@/hooks/useCategories";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { BackgroundImageUpload } from "@/components/BackgroundImageUpload";
 import { toast } from "sonner";
-
-const availableCategories = [
-  "Général", "Actualités", "Technologie", "Sport", "Culture", 
-  "Science", "Politique", "Économie", "Santé", "Éducation",
-  "Voyage", "Cuisine", "Mode", "Art", "Musique", "Cinéma"
-];
+import { Link } from "react-router-dom";
 
 export default function SpaceAdmin() {
   const { spaceId } = useParams();
@@ -26,6 +23,7 @@ export default function SpaceAdmin() {
   const { user } = useAuth();
   const { updateSpace, deleteSpace, getSpaceById } = useSpaces();
   const { subscribers, fetchSubscribers, isLoading: subscribersLoading } = useSpaceAdmin();
+  const { categories } = useCategories();
   
   const [space, setSpace] = useState<Space | null>(null);
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
@@ -33,7 +31,8 @@ export default function SpaceAdmin() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    categories: [] as string[]
+    categories: [] as string[],
+    background_image_url: ""
   });
   const [newCategory, setNewCategory] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -52,7 +51,8 @@ export default function SpaceAdmin() {
         setFormData({
           name: spaceData.name,
           description: spaceData.description || "",
-          categories: spaceData.categories || []
+          categories: spaceData.categories || [],
+          background_image_url: spaceData.background_image_url || ""
         });
         fetchSubscribers(spaceId);
       } catch (error) {
@@ -82,7 +82,8 @@ export default function SpaceAdmin() {
       await updateSpace(spaceId, {
         name: formData.name,
         description: formData.description,
-        categories: formData.categories
+        categories: formData.categories,
+        background_image_url: formData.background_image_url
       });
       setIsEditing(false);
       toast.success("Espace mis à jour avec succès");
@@ -209,10 +210,10 @@ export default function SpaceAdmin() {
                       className="flex-1 px-3 py-2 border border-input rounded-md bg-background text-sm"
                     >
                       <option value="">Sélectionner une catégorie</option>
-                      {availableCategories
-                        .filter(cat => !formData.categories.includes(cat))
+                      {categories
+                        .filter(cat => !formData.categories.includes(cat.name))
                         .map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
+                          <option key={cat.id} value={cat.name}>{cat.name}</option>
                         ))}
                     </select>
                     <Button onClick={addCategory} disabled={!newCategory}>
@@ -223,6 +224,14 @@ export default function SpaceAdmin() {
                 <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
                   {isUpdating ? "Mise à jour..." : "Sauvegarder les modifications"}
                 </Button>
+                <div>
+                  <label className="text-sm font-medium">Image de fond</label>
+                  <BackgroundImageUpload
+                    currentImageUrl={formData.background_image_url}
+                    onImageUploaded={(url) => setFormData({ ...formData, background_image_url: url })}
+                    onImageRemoved={() => setFormData({ ...formData, background_image_url: "" })}
+                  />
+                </div>
               </>
             ) : (
               <>

@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
+import { useCategories } from "@/hooks/useCategories";
 import { usePageTracking, useInteractionTracking } from "@/hooks/usePageTracking";
 import { useAuth } from "@/contexts/AuthContext";
 import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
+import { SpaceInvitationNotifications } from "@/components/SpaceInvitationNotifications";
 
 const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
 

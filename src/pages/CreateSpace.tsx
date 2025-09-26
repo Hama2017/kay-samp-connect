@@ -1,41 +1,35 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useSpaces } from "@/hooks/useSpaces";
-
-const categories = [
-  "Sport",
-  "Culture & Musique", 
-  "Cuisine",
-  "Technologie",
-  "Religion",
-  "Politique",
-  "Éducation",
-  "Santé",
-  "Business",
-  "Divertissement"
-];
+import { useCategories } from "@/hooks/useCategories";
+import { useSpaceInvitations } from "@/hooks/useSpaceInvitations";
+import { UserSearchCombobox } from "@/components/UserSearchCombobox";
 
 export default function CreateSpace() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { createSpace } = useSpaces();
+  const { categories, isLoading: categoriesLoading } = useCategories();
+  const { sendInvitation } = useSpaceInvitations();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     categories: [] as string[],
-    badge: "" as "kaaysamp" | "factcheck" | "evenement" | "none" | "",
     whoCanPublish: "subscribers" as string,
+    invitedUsers: [] as { id: string; username: string; profile_picture_url?: string }[],
   });
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; username: string; profile_picture_url?: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +45,23 @@ export default function CreateSpace() {
 
     setIsLoading(true);
     try {
-      await createSpace({
+      const spaceData = await createSpace({
         name: formData.name,
         description: formData.description,
         categories: formData.categories,
-        badge: formData.badge === "none" ? undefined : formData.badge || undefined,
-        who_can_publish: [formData.whoCanPublish],
+        who_can_publish: formData.whoCanPublish === 'invitation' ? ['invited'] : [formData.whoCanPublish],
       });
+      
+      // Envoyer les invitations si le mode invitation est sélectionné
+      if (formData.whoCanPublish === 'invitation' && formData.invitedUsers.length > 0 && spaceData) {
+        for (const user of formData.invitedUsers) {
+          try {
+            await sendInvitation(spaceData.id, user.id, `Vous êtes invité à rejoindre l'espace "${formData.name}"`);
+          } catch (error) {
+            console.error('Error sending invitation:', error);
+          }
+        }
+      }
       
       toast({
         title: "Espace créé !",
@@ -87,6 +91,24 @@ export default function CreateSpace() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddUser = () => {
+    if (selectedUser && !formData.invitedUsers.find(u => u.id === selectedUser.id)) {
+      setFormData(prev => ({
+        ...prev,
+        invitedUsers: [...prev.invitedUsers, selectedUser]
+      }));
+      setSelectedUser(null);
+      setShowInviteDialog(false);
+    }
+  };
+
+  const handleRemoveUser = (userId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      invitedUsers: prev.invitedUsers.filter(u => u.id !== userId)
+    }));
   };
 
   return (
@@ -154,75 +176,59 @@ export default function CreateSpace() {
                   Choisissez au moins une catégorie (plusieurs possibles)
                 </span>
               </Label>
-              <div className="grid grid-cols-2 gap-2">
-                {categories.map((category) => (
-                  <label
-                    key={category}
-                    className={`
-                      flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all
-                      ${formData.categories.includes(category) 
-                        ? 'border-primary bg-primary/5 text-primary' 
-                        : 'border-input hover:border-primary/50'
-                      }
-                    `}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.categories.includes(category)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData(prev => ({ 
-                            ...prev, 
-                            categories: [...prev.categories, category] 
-                          }));
-                        } else {
-                          setFormData(prev => ({ 
-                            ...prev, 
-                            categories: prev.categories.filter(c => c !== category) 
-                          }));
+              {categoriesLoading ? (
+                <div className="animate-pulse space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-12 bg-muted rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className={`
+                        flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all
+                        ${formData.categories.includes(category.name) 
+                          ? 'border-primary bg-primary/5 text-primary' 
+                          : 'border-input hover:border-primary/50'
                         }
-                      }}
-                      className="sr-only"
-                    />
-                    <div className={`
-                      w-4 h-4 border-2 rounded flex items-center justify-center
-                      ${formData.categories.includes(category) 
-                        ? 'border-primary bg-primary' 
-                        : 'border-input'
-                      }
-                    `}>
-                      {formData.categories.includes(category) && (
-                        <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
-                      )}
-                    </div>
-                    <span className="text-sm font-medium select-none">{category}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Badge */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Badge spécial (optionnel)
-              </Label>
-               <Select 
-                value={formData.badge} 
-                onValueChange={(value) => setFormData(prev => ({ 
-                  ...prev, 
-                  badge: value as "kaaysamp" | "factcheck" | "evenement" | "none" | ""
-                }))}
-              >
-                <SelectTrigger className="border-primary/20 focus:border-primary/40">
-                  <SelectValue placeholder="Choisir un badge (optionnel)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Aucun badge</SelectItem>
-                  <SelectItem value="kaaysamp">🏆 KaaySamp</SelectItem>
-                  <SelectItem value="factcheck">✅ Fact Check</SelectItem>
-                  <SelectItem value="evenement">📅 Événement</SelectItem>
-                </SelectContent>
-              </Select>
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.categories.includes(category.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: [...prev.categories, category.name] 
+                            }));
+                          } else {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: prev.categories.filter(c => c !== category.name) 
+                            }));
+                          }
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`
+                        w-4 h-4 border-2 rounded flex items-center justify-center
+                        ${formData.categories.includes(category.name) 
+                          ? 'border-primary bg-primary' 
+                          : 'border-input'
+                        }
+                      `}>
+                        {formData.categories.includes(category.name) && (
+                          <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                        )}
+                      </div>
+                      <span className="text-sm font-medium select-none">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Publishing permissions */}
@@ -255,7 +261,81 @@ export default function CreateSpace() {
                     Utilisateurs vérifiés seulement
                   </Label>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="invitation" id="invitation-only" />
+                  <Label htmlFor="invitation-only" className="text-sm">
+                    Par invitation seulement
+                  </Label>
+                </div>
               </RadioGroup>
+
+              {/* Invitation section */}
+              {formData.whoCanPublish === 'invitation' && (
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium">
+                      Utilisateurs invités ({formData.invitedUsers.length})
+                    </Label>
+                    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+                      <DialogTrigger asChild>
+                        <Button type="button" size="sm" variant="outline">
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          Inviter
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Inviter un utilisateur</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <UserSearchCombobox
+                            value={selectedUser?.id}
+                            onValueChange={(userId, user) => setSelectedUser(user)}
+                            placeholder="Rechercher un utilisateur..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setShowInviteDialog(false)}
+                            >
+                              Annuler
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleAddUser}
+                              disabled={!selectedUser}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Ajouter
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
+                  {formData.invitedUsers.length > 0 && (
+                    <div className="space-y-2">
+                      {formData.invitedUsers.map((user) => (
+                        <div key={user.id} className="flex items-center justify-between py-2 px-3 bg-background rounded border">
+                          <span className="text-sm">@{user.username}</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveUser(user.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            Retirer
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Submit button */}

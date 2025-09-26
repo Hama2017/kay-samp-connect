@@ -102,6 +102,42 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comment_media: {
         Row: {
           comment_id: string
@@ -246,6 +282,7 @@ export type Database = {
           is_read: boolean
           message: string
           metadata: Json | null
+          related_invitation_id: string | null
           related_post_id: string | null
           related_space_id: string | null
           title: string
@@ -260,6 +297,7 @@ export type Database = {
           is_read?: boolean
           message: string
           metadata?: Json | null
+          related_invitation_id?: string | null
           related_post_id?: string | null
           related_space_id?: string | null
           title: string
@@ -274,6 +312,7 @@ export type Database = {
           is_read?: boolean
           message?: string
           metadata?: Json | null
+          related_invitation_id?: string | null
           related_post_id?: string | null
           related_space_id?: string | null
           title?: string
@@ -286,6 +325,13 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_related_invitation_id_fkey"
+            columns: ["related_invitation_id"]
+            isOneToOne: false
+            referencedRelation: "space_invitations"
             referencedColumns: ["id"]
           },
           {
@@ -565,6 +611,47 @@ export type Database = {
         }
         Relationships: []
       }
+      space_invitations: {
+        Row: {
+          id: string
+          invited_at: string
+          invited_user_id: string
+          inviter_id: string
+          message: string | null
+          responded_at: string | null
+          space_id: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string
+          invited_user_id: string
+          inviter_id: string
+          message?: string | null
+          responded_at?: string | null
+          space_id: string
+          status?: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string
+          invited_user_id?: string
+          inviter_id?: string
+          message?: string | null
+          responded_at?: string | null
+          space_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_invitations_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       space_moderators: {
         Row: {
           assigned_at: string
@@ -652,6 +739,7 @@ export type Database = {
       }
       spaces: {
         Row: {
+          background_image_url: string | null
           badge: Database["public"]["Enums"]["space_badge"] | null
           categories: string[] | null
           cover_image_url: string | null
@@ -669,6 +757,7 @@ export type Database = {
           who_can_publish: string[] | null
         }
         Insert: {
+          background_image_url?: string | null
           badge?: Database["public"]["Enums"]["space_badge"] | null
           categories?: string[] | null
           cover_image_url?: string | null
@@ -686,6 +775,7 @@ export type Database = {
           who_can_publish?: string[] | null
         }
         Update: {
+          background_image_url?: string | null
           badge?: Database["public"]["Enums"]["space_badge"] | null
           categories?: string[] | null
           cover_image_url?: string | null
