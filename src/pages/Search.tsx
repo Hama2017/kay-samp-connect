@@ -13,18 +13,18 @@ import { EmptyState } from "@/components/EmptyState";
 import { SearchResultsSkeleton, FeedSkeleton } from "@/components/SkeletonLoader";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PullToRefresh } from "@/components/MobileOptimized";
-
-const categories = [
-  "Tous", "Sport", "Politique", "Cuisine", "Technologie", "Culture", "Société", "Économie"
-];
+import { useCategories } from "@/hooks/useCategories";
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { query, setQuery, filters, setFilters, searchResults, isSearching, isLoading: searchLoading } = useSearch();
+  const { categories } = useCategories();
   
   const [localQuery, setLocalQuery] = useState(query);
   const [isLoading, setIsLoading] = useState(false);
+
+  const categoryOptions = ['Tous', ...categories.map(c => c.name)];
 
   // Simuler le délai de recherche
   const performSearch = async (searchQuery: string) => {
@@ -146,7 +146,7 @@ export default function Search() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {categoryOptions.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>

@@ -12,8 +12,6 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
 import { SpaceInvitationNotifications } from "@/components/SpaceInvitationNotifications";
 
-const categories = ["Tous", "Sport", "Culture", "Cuisine", "Technologie", "Religion"];
-
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock, short: "Récents" },
   { id: "viral", label: "Plus viraux", icon: TrendingUp, short: "Viraux" },
@@ -26,11 +24,14 @@ export default function Home() {
   const { user } = useAuth();
   const { posts, isLoading, fetchPosts, loadMorePosts, votePost, incrementViews, hasMore } = usePosts();
   const { spaces } = useSpaces();
+  const { categories } = useCategories();
   const { trackClick, trackLike, trackShare } = useInteractionTracking();
   
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [selectedFilter, setSelectedFilter] = useState("viral");
   const [selectedPost, setSelectedPost] = useState<any>(null);
+
+  const categoryOptions = ['Tous', ...categories.map(c => c.name)];
 
   // Fetch posts on component mount
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function Home() {
         <div className="mb-3">
           <div className="flex gap-1.5 overflow-x-auto pb-2 mobile-scroll">
             <div className="flex gap-1.5 px-1">
-              {categories.map((category) => (
+              {categoryOptions.map((category) => (
                 <Button
                   key={category}
                   variant={selectedCategory === category ? "senegal" : "outline"}

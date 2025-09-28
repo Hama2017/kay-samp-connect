@@ -1,10 +1,11 @@
-import { Search, Menu, Settings } from "lucide-react";
+import { Search, Menu, Settings, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SpaceInvitationNotifications } from "@/components/SpaceInvitationNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +61,8 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             <Search className="h-5 w-5" />
           </Button>
           
+          {/* Space Invitations */}
+          <SpaceInvitationNotifications />
           
           {/* Theme Toggle - Hidden on mobile to save space */}
   {/*         <div className="hidden sm:block">

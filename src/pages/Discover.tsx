@@ -9,6 +9,7 @@ import { SpaceBadge } from '@/components/SpaceBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSpaces } from "@/hooks/useSpaces";
 import { usePageTracking } from "@/hooks/usePageTracking";
+import { useCategories } from "@/hooks/useCategories";
 
 // Mock data for popular spaces
 const mockSpaces = [
@@ -54,7 +55,7 @@ const mockSpaces = [
   },
 ];
 
-const categories = ["Tous", "Sport", "Culture & Musique", "Cuisine", "Technologie", "Religion"];
+
 
 const sortOptions = [
   { value: "popular", label: "Plus populaires" },
@@ -66,10 +67,13 @@ const sortOptions = [
 export default function Discover() {
   const navigate = useNavigate();
   const { spaces, isLoading, fetchSpaces, subscribeToSpace, unsubscribeFromSpace } = useSpaces();
+  const { categories } = useCategories();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [sortBy, setSortBy] = useState("popular");
   const [showVerifiedOnly, setShowVerifiedOnly] = useState("tous");
+
+  const categoryOptions = ['Tous', ...categories.map(c => c.name)];
 
   // Track page view
   usePageTracking();
@@ -119,7 +123,7 @@ export default function Discover() {
       <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
         {/* Category filter */}
         <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-          {categories.map((category) => (
+          {categoryOptions.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "senegal" : "outline"}

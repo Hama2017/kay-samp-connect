@@ -163,6 +163,16 @@ export default function SpaceDetail() {
 
       {/* Space header */}
       <Card className="mb-6">
+        {space.background_image_url && (
+          <div className="h-48 bg-gradient-primary rounded-t-lg relative overflow-hidden">
+            <img 
+              src={space.background_image_url} 
+              alt="Background" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/20"></div>
+          </div>
+        )}
         {space.cover_image_url && (
           <div className="h-32 bg-gradient-primary rounded-t-lg relative overflow-hidden">
             <img 
