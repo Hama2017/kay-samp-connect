@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useSpaceInvitations } from '@/hooks/useSpaceInvitations';
 import { Card } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -29,9 +30,14 @@ export function UserSearchCombobox({ selectedUsers, onUsersChange, placeholder =
       if (searchQuery.trim().length >= 2) {
         setIsSearching(true);
         const results = await searchUsers(searchQuery);
-        // Filter out already selected users
+        
+        // Get current user
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        // Filter out already selected users and current user
         const filteredResults = results.filter(
-          result => !selectedUsers.some(selected => selected.id === result.id)
+          result => !selectedUsers.some(selected => selected.id === result.id) 
+            && result.id !== currentUser?.id
         );
         setUsers(filteredResults);
         setIsSearching(false);
