@@ -644,6 +644,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "space_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_invitations_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "space_invitations_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
