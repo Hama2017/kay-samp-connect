@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, UserPlus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useCategories } from "@/hooks/useCategories";
@@ -28,8 +27,6 @@ export default function CreateSpace() {
     whoCanPublish: "subscribers" as string,
     invitedUsers: [] as { id: string; username: string; profile_picture_url?: string }[],
   });
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ id: string; username: string; profile_picture_url?: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,23 +90,6 @@ export default function CreateSpace() {
     }
   };
 
-  const handleAddUser = () => {
-    if (selectedUser && !formData.invitedUsers.find(u => u.id === selectedUser.id)) {
-      setFormData(prev => ({
-        ...prev,
-        invitedUsers: [...prev.invitedUsers, selectedUser]
-      }));
-      setSelectedUser(null);
-      setShowInviteDialog(false);
-    }
-  };
-
-  const handleRemoveUser = (userId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      invitedUsers: prev.invitedUsers.filter(u => u.id !== userId)
-    }));
-  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -273,66 +253,14 @@ export default function CreateSpace() {
               {/* Invitation section */}
               {formData.whoCanPublish === 'invitation' && (
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <Label className="text-sm font-medium">
-                      Utilisateurs invités ({formData.invitedUsers.length})
-                    </Label>
-                    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-                      <DialogTrigger asChild>
-                        <Button type="button" size="sm" variant="outline">
-                          <UserPlus className="h-4 w-4 mr-1" />
-                          Inviter
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Inviter un utilisateur</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <UserSearchCombobox
-                            onUserSelect={(user) => setSelectedUser(user)}
-                            placeholder="Saisir un nom d'utilisateur..."
-                          />
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setShowInviteDialog(false)}
-                            >
-                              Annuler
-                            </Button>
-                            <Button
-                              type="button"
-                              onClick={handleAddUser}
-                              disabled={!selectedUser}
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Ajouter
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-
-                  {formData.invitedUsers.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.invitedUsers.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between py-2 px-3 bg-background rounded border">
-                          <span className="text-sm">@{user.username}</span>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveUser(user.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            Retirer
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <Label className="text-sm font-medium mb-3 block">
+                    Inviter des utilisateurs
+                  </Label>
+                  <UserSearchCombobox
+                    selectedUsers={formData.invitedUsers}
+                    onUsersChange={(users) => setFormData(prev => ({ ...prev, invitedUsers: users }))}
+                    placeholder="Saisir un nom d'utilisateur..."
+                  />
                 </div>
               )}
             </div>
