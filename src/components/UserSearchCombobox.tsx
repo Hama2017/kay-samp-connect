@@ -55,7 +55,7 @@ export function UserSearchCombobox({ selectedUsers, onUsersChange, placeholder =
   };
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-3 relative">
       <Input
         type="text"
         placeholder={placeholder}
@@ -65,7 +65,7 @@ export function UserSearchCombobox({ selectedUsers, onUsersChange, placeholder =
       />
       
       {searchQuery.trim().length >= 2 && (
-        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-background">
+        <Card className="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-background">
           {isSearching ? (
             <div className="p-4 text-sm text-muted-foreground text-center">
               Recherche en cours...
