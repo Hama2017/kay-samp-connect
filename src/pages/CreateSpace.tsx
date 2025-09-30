@@ -79,7 +79,7 @@ export default function CreateSpace() {
         description: `L'espace "${formData.name}" a été créé avec succès`,
       });
       
-      navigate("/discover");
+      navigate(`/space/${spaceData.id}`);
     } catch (error: any) {
       // Check if it's a duplicate name error
       const isDuplicateName = error.code === '23505' || 

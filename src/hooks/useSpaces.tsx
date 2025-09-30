@@ -318,6 +318,7 @@ export function useSpaces() {
     categories?: string[];
     cover_image_url?: string;
     background_image_url?: string;
+    who_can_publish?: string[];
   }) => {
     try {
       const { data, error } = await supabase

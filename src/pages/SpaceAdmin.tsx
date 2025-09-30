@@ -32,7 +32,8 @@ export default function SpaceAdmin() {
     name: "",
     description: "",
     categories: [] as string[],
-    background_image_url: ""
+    background_image_url: "",
+    who_can_publish: [] as string[]
   });
   const [newCategory, setNewCategory] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -52,7 +53,8 @@ export default function SpaceAdmin() {
           name: spaceData.name,
           description: spaceData.description || "",
           categories: spaceData.categories || [],
-          background_image_url: spaceData.background_image_url || ""
+          background_image_url: spaceData.background_image_url || "",
+          who_can_publish: spaceData.who_can_publish || ['subscribers']
         });
         fetchSubscribers(spaceId);
       } catch (error) {
@@ -83,7 +85,8 @@ export default function SpaceAdmin() {
         name: formData.name,
         description: formData.description,
         categories: formData.categories,
-        background_image_url: formData.background_image_url
+        background_image_url: formData.background_image_url,
+        who_can_publish: formData.who_can_publish
       });
       setIsEditing(false);
       toast.success("Espace mis à jour avec succès");
@@ -221,6 +224,47 @@ export default function SpaceAdmin() {
                     </Button>
                   </div>
                 </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Qui peut publier ?</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+                      <input
+                        type="radio"
+                        checked={formData.who_can_publish.includes('creator_only')}
+                        onChange={() => setFormData({ ...formData, who_can_publish: ['creator_only'] })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Moi seulement</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+                      <input
+                        type="radio"
+                        checked={formData.who_can_publish.includes('subscribers')}
+                        onChange={() => setFormData({ ...formData, who_can_publish: ['subscribers'] })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Tous les abonnés</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+                      <input
+                        type="radio"
+                        checked={formData.who_can_publish.includes('verified_only')}
+                        onChange={() => setFormData({ ...formData, who_can_publish: ['verified_only'] })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Utilisateurs vérifiés seulement</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+                      <input
+                        type="radio"
+                        checked={formData.who_can_publish.includes('invited')}
+                        onChange={() => setFormData({ ...formData, who_can_publish: ['invited'] })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Par invitation seulement</span>
+                    </label>
+                  </div>
+                </div>
                 <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
                   {isUpdating ? "Mise à jour..." : "Sauvegarder les modifications"}
                 </Button>
@@ -248,6 +292,15 @@ export default function SpaceAdmin() {
                       </Badge>
                     )) || <span className="text-muted-foreground text-sm">Aucune catégorie</span>}
                   </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Qui peut publier:</p>
+                  <Badge variant="outline">
+                    {space.who_can_publish?.[0] === 'creator_only' && 'Moi seulement'}
+                    {space.who_can_publish?.[0] === 'subscribers' && 'Tous les abonnés'}
+                    {space.who_can_publish?.[0] === 'verified_only' && 'Utilisateurs vérifiés'}
+                    {space.who_can_publish?.[0] === 'invited' && 'Par invitation'}
+                  </Badge>
                 </div>
                 <div className="flex gap-4 text-sm text-muted-foreground">
                   <span>{space.subscribers_count || 0} abonnés</span>
