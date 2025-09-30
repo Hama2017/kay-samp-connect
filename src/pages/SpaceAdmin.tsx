@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useSpaces, Space } from "@/hooks/useSpaces";
 import { useSpaceAdmin } from "@/hooks/useSpaceAdmin";
@@ -33,7 +35,7 @@ export default function SpaceAdmin() {
     description: "",
     categories: [] as string[],
     background_image_url: "",
-    who_can_publish: [] as string[]
+    whoCanPublish: "subscribers" as string
   });
   const [newCategory, setNewCategory] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -54,7 +56,7 @@ export default function SpaceAdmin() {
           description: spaceData.description || "",
           categories: spaceData.categories || [],
           background_image_url: spaceData.background_image_url || "",
-          who_can_publish: spaceData.who_can_publish || ['subscribers']
+          whoCanPublish: spaceData.who_can_publish?.[0] || 'subscribers'
         });
         fetchSubscribers(spaceId);
       } catch (error) {
@@ -86,7 +88,7 @@ export default function SpaceAdmin() {
         description: formData.description,
         categories: formData.categories,
         background_image_url: formData.background_image_url,
-        who_can_publish: formData.who_can_publish
+        who_can_publish: formData.whoCanPublish === 'invitation' ? ['invited'] : [formData.whoCanPublish]
       });
       setIsEditing(false);
       toast.success("Espace mis à jour avec succès");
@@ -224,50 +226,46 @@ export default function SpaceAdmin() {
                     </Button>
                   </div>
                 </div>
+                
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Qui peut publier ?</label>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={formData.who_can_publish.includes('creator_only')}
-                        onChange={() => setFormData({ ...formData, who_can_publish: ['creator_only'] })}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Moi seulement</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={formData.who_can_publish.includes('subscribers')}
-                        onChange={() => setFormData({ ...formData, who_can_publish: ['subscribers'] })}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Tous les abonnés</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={formData.who_can_publish.includes('verified_only')}
-                        onChange={() => setFormData({ ...formData, who_can_publish: ['verified_only'] })}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Utilisateurs vérifiés seulement</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={formData.who_can_publish.includes('invited')}
-                        onChange={() => setFormData({ ...formData, who_can_publish: ['invited'] })}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">Par invitation seulement</span>
-                    </label>
-                  </div>
+                  <Label className="text-sm font-medium mb-2 block">
+                    Qui peut publier ? <span className="text-destructive">*</span>
+                  </Label>
+                  
+                  <RadioGroup 
+                    value={formData.whoCanPublish} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, whoCanPublish: value }))}
+                  >
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="creator_only" id="edit-creator-only" />
+                      <Label htmlFor="edit-creator-only" className="text-sm cursor-pointer">
+                        Moi seulement
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="subscribers" id="edit-all-subscribers" />
+                      <Label htmlFor="edit-all-subscribers" className="text-sm cursor-pointer">
+                        Tous les abonnés
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="verified_only" id="edit-verified-users" />
+                      <Label htmlFor="edit-verified-users" className="text-sm cursor-pointer">
+                        Utilisateurs vérifiés seulement
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <RadioGroupItem value="invitation" id="edit-invitation-only" />
+                      <Label htmlFor="edit-invitation-only" className="text-sm cursor-pointer">
+                        Par invitation seulement
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-                <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
-                  {isUpdating ? "Mise à jour..." : "Sauvegarder les modifications"}
-                </Button>
+
                 <div>
                   <label className="text-sm font-medium">Image de fond</label>
                   <BackgroundImageUpload
@@ -276,6 +274,10 @@ export default function SpaceAdmin() {
                     onImageRemoved={() => setFormData({ ...formData, background_image_url: "" })}
                   />
                 </div>
+                
+                <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
+                  {isUpdating ? "Mise à jour..." : "Sauvegarder les modifications"}
+                </Button>
               </>
             ) : (
               <>
