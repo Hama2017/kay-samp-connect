@@ -13,11 +13,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useSpaces, Space } from "@/hooks/useSpaces";
 import { useSpaceAdmin } from "@/hooks/useSpaceAdmin";
 import { useCategories } from "@/hooks/useCategories";
+import { useSpaceInvitations } from "@/hooks/useSpaceInvitations";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { BackgroundImageUpload } from "@/components/BackgroundImageUpload";
+import { UserSearchCombobox } from "@/components/UserSearchCombobox";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function SpaceAdmin() {
   const { spaceId } = useParams();
@@ -26,6 +29,7 @@ export default function SpaceAdmin() {
   const { updateSpace, deleteSpace, getSpaceById } = useSpaces();
   const { subscribers, fetchSubscribers, isLoading: subscribersLoading } = useSpaceAdmin();
   const { categories } = useCategories();
+  const { sendInvitation } = useSpaceInvitations();
   
   const [space, setSpace] = useState<Space | null>(null);
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
@@ -41,6 +45,8 @@ export default function SpaceAdmin() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [invitedUsers, setInvitedUsers] = useState<Array<{ id: string; username: string; profile_picture_url?: string; invitation_id?: string }>>([]);
+  const [selectedNewUsers, setSelectedNewUsers] = useState<Array<{ id: string; username: string; profile_picture_url?: string }>>([]);
 
   // Load space data
   useEffect(() => {
@@ -59,6 +65,11 @@ export default function SpaceAdmin() {
           whoCanPublish: spaceData.who_can_publish?.[0] || 'subscribers'
         });
         fetchSubscribers(spaceId);
+        
+        // Charger les invitations si l'espace est en mode invitation
+        if (spaceData.who_can_publish?.[0] === 'invited') {
+          loadInvitations();
+        }
       } catch (error) {
         console.error('Error loading space:', error);
         navigate('/');
@@ -69,6 +80,41 @@ export default function SpaceAdmin() {
 
     loadSpace();
   }, [spaceId, getSpaceById, fetchSubscribers, navigate]);
+
+  // Charger les invitations existantes
+  const loadInvitations = async () => {
+    if (!spaceId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('space_invitations')
+        .select(`
+          id,
+          invited_user_id,
+          status,
+          invited_profile:profiles!space_invitations_invited_user_id_fkey (
+            id,
+            username,
+            profile_picture_url
+          )
+        `)
+        .eq('space_id', spaceId)
+        .eq('status', 'pending');
+      
+      if (error) throw error;
+      
+      const users = data.map(inv => ({
+        id: inv.invited_user_id,
+        username: inv.invited_profile?.username || '',
+        profile_picture_url: inv.invited_profile?.profile_picture_url,
+        invitation_id: inv.id
+      }));
+      
+      setInvitedUsers(users);
+    } catch (error) {
+      console.error('Error loading invitations:', error);
+    }
+  };
 
   // Redirect if user is not the creator
   useEffect(() => {
@@ -90,6 +136,20 @@ export default function SpaceAdmin() {
         background_image_url: formData.background_image_url,
         who_can_publish: formData.whoCanPublish === 'invitation' ? ['invited'] : [formData.whoCanPublish]
       });
+      
+      // Envoyer les nouvelles invitations si on est en mode invitation
+      if (formData.whoCanPublish === 'invitation' && selectedNewUsers.length > 0) {
+        for (const user of selectedNewUsers) {
+          try {
+            await sendInvitation(spaceId, user.id, `Vous êtes invité à rejoindre l'espace "${formData.name}"`);
+          } catch (error) {
+            console.error('Error sending invitation to:', user.username, error);
+          }
+        }
+        setSelectedNewUsers([]);
+        loadInvitations();
+      }
+      
       setIsEditing(false);
       toast.success("Espace mis à jour avec succès");
     } catch (error) {
@@ -97,6 +157,23 @@ export default function SpaceAdmin() {
       toast.error("Erreur lors de la mise à jour");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleRemoveInvitation = async (invitationId: string, userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('space_invitations')
+        .delete()
+        .eq('id', invitationId);
+      
+      if (error) throw error;
+      
+      setInvitedUsers(prev => prev.filter(u => u.id !== userId));
+      toast.success("Invitation supprimée");
+    } catch (error) {
+      console.error('Error removing invitation:', error);
+      toast.error("Erreur lors de la suppression de l'invitation");
     }
   };
 
@@ -265,6 +342,54 @@ export default function SpaceAdmin() {
                     </div>
                   </RadioGroup>
                 </div>
+
+                {/* Afficher la gestion des invitations si mode invitation sélectionné */}
+                {formData.whoCanPublish === 'invitation' && (
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                    <Label className="text-sm font-medium">
+                      Utilisateurs invités ({invitedUsers.length})
+                    </Label>
+                    
+                    {/* Liste des utilisateurs déjà invités */}
+                    {invitedUsers.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Invitations en attente:</p>
+                        {invitedUsers.map((user) => (
+                          <div key={user.id} className="flex items-center justify-between py-2 px-3 bg-background rounded border">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={user.profile_picture_url} />
+                                <AvatarFallback className="text-xs">
+                                  {user.username?.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm">@{user.username}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => user.invitation_id && handleRemoveInvitation(user.invitation_id, user.id)}
+                              className="text-destructive hover:text-destructive h-7"
+                            >
+                              Retirer
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Ajouter de nouvelles invitations */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Inviter de nouveaux utilisateurs</Label>
+                      <UserSearchCombobox
+                        selectedUsers={selectedNewUsers}
+                        onUsersChange={setSelectedNewUsers}
+                        placeholder="Rechercher un utilisateur à inviter..."
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-sm font-medium">Image de fond</label>
