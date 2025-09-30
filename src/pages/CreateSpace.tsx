@@ -290,9 +290,8 @@ export default function CreateSpace() {
                         </DialogHeader>
                         <div className="space-y-4">
                           <UserSearchCombobox
-                            value={selectedUser?.id}
-                            onValueChange={(userId, user) => setSelectedUser(user)}
-                            placeholder="Rechercher un utilisateur..."
+                            onUserSelect={(user) => setSelectedUser(user)}
+                            placeholder="Saisir un nom d'utilisateur..."
                           />
                           <div className="flex justify-end gap-2">
                             <Button

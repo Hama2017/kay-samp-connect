@@ -1,22 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Check, ChevronsUpDown, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSpaceInvitations } from '@/hooks/useSpaceInvitations';
+import { Card } from '@/components/ui/card';
 
 interface UserProfile {
   id: string;
@@ -25,23 +12,23 @@ interface UserProfile {
 }
 
 interface UserSearchComboboxProps {
-  value?: string;
-  onValueChange: (userId: string, user: UserProfile) => void;
+  onUserSelect: (user: UserProfile) => void;
   placeholder?: string;
 }
 
-export function UserSearchCombobox({ value, onValueChange, placeholder = "Rechercher un utilisateur..." }: UserSearchComboboxProps) {
-  const [open, setOpen] = useState(false);
+export function UserSearchCombobox({ onUserSelect, placeholder = "Saisir un nom d'utilisateur..." }: UserSearchComboboxProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const { searchUsers } = useSpaceInvitations();
 
   useEffect(() => {
     const searchUsersDebounced = async () => {
-      if (searchQuery.trim()) {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
         const results = await searchUsers(searchQuery);
         setUsers(results);
+        setIsSearching(false);
       } else {
         setUsers([]);
       }
@@ -51,74 +38,53 @@ export function UserSearchCombobox({ value, onValueChange, placeholder = "Recher
     return () => clearTimeout(timeoutId);
   }, [searchQuery, searchUsers]);
 
-  const handleSelect = (user: UserProfile) => {
-    setSelectedUser(user);
-    onValueChange(user.id, user);
-    setOpen(false);
+  const handleUserClick = (user: UserProfile) => {
+    onUserSelect(user);
+    setSearchQuery('');
+    setUsers([]);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          {selectedUser ? (
-            <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={selectedUser.profile_picture_url} />
-                <AvatarFallback>
-                  <User className="h-3 w-3" />
-                </AvatarFallback>
-              </Avatar>
-              <span>@{selectedUser.username}</span>
+    <div className="relative w-full">
+      <Input
+        type="text"
+        placeholder={placeholder}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full"
+      />
+      
+      {searchQuery.trim().length >= 2 && (
+        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto">
+          {isSearching ? (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              Recherche en cours...
+            </div>
+          ) : users.length === 0 ? (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              Aucun utilisateur trouvé
             </div>
           ) : (
-            placeholder
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput 
-            placeholder="Tapez un nom d'utilisateur..." 
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {searchQuery ? "Aucun utilisateur trouvé." : "Tapez pour rechercher des utilisateurs."}
-            </CommandEmpty>
-            <CommandGroup>
+            <div className="p-2">
               {users.map((user) => (
-                <CommandItem
+                <div
                   key={user.id}
-                  onSelect={() => handleSelect(user)}
-                  className="flex items-center gap-2"
+                  onClick={() => handleUserClick(user)}
+                  className="flex items-center gap-3 p-2 hover:bg-accent rounded-md cursor-pointer transition-colors"
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === user.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={user.profile_picture_url} />
                     <AvatarFallback>
-                      <User className="h-3 w-3" />
+                      <User className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <span>@{user.username}</span>
-                </CommandItem>
+                  <span className="text-sm font-medium">@{user.username}</span>
+                </div>
               ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+            </div>
+          )}
+        </Card>
+      )}
+    </div>
   );
 }
