@@ -51,12 +51,26 @@ export default function CreateSpace() {
       
       // Envoyer les invitations si le mode invitation est sélectionné
       if (formData.whoCanPublish === 'invitation' && formData.invitedUsers.length > 0 && spaceData) {
+        console.log('Sending invitations to:', formData.invitedUsers);
+        let successCount = 0;
+        let errorCount = 0;
+        
         for (const user of formData.invitedUsers) {
           try {
             await sendInvitation(spaceData.id, user.id, `Vous êtes invité à rejoindre l'espace "${formData.name}"`);
+            successCount++;
+            console.log('Invitation sent successfully to:', user.username);
           } catch (error) {
-            console.error('Error sending invitation:', error);
+            errorCount++;
+            console.error('Error sending invitation to:', user.username, error);
           }
+        }
+        
+        if (successCount > 0) {
+          toast({
+            title: "Invitations envoyées",
+            description: `${successCount} invitation(s) envoyée(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`,
+          });
         }
       }
       

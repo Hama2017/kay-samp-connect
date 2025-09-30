@@ -76,20 +76,29 @@ export function useSpaceInvitations() {
   const sendInvitation = useCallback(async (spaceId: string, invitedUserId: string, message?: string) => {
     if (!user) throw new Error('User must be authenticated');
 
+    console.log('Attempting to send invitation:', { spaceId, invitedUserId, message });
+
     try {
-      const { error } = await supabase
+      const { data: invitationData, error } = await supabase
         .from('space_invitations')
         .insert({
           space_id: spaceId,
           inviter_id: user.id,
           invited_user_id: invitedUserId,
           message
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting invitation:', error);
+        throw error;
+      }
+
+      console.log('Invitation created:', invitationData);
 
       // Créer une notification pour l'utilisateur invité
-      const { error: notificationError } = await supabase
+      const { data: notificationData, error: notificationError } = await supabase
         .from('notifications')
         .insert({
           user_id: invitedUserId,
@@ -97,17 +106,17 @@ export function useSpaceInvitations() {
           title: 'Nouvelle invitation d\'espace',
           message: `Vous avez été invité à rejoindre un espace${message ? `: ${message}` : ''}`,
           related_space_id: spaceId,
+          related_invitation_id: invitationData.id,
           actor_id: user.id
-        });
+        })
+        .select()
+        .single();
 
       if (notificationError) {
         console.error('Error creating notification:', notificationError);
+      } else {
+        console.log('Notification created:', notificationData);
       }
-
-      toast({
-        title: "Invitation envoyée !",
-        description: "L'invitation a été envoyée avec succès",
-      });
 
     } catch (err: any) {
       console.error('Error sending invitation:', err);

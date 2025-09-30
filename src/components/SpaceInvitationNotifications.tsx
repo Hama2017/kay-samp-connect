@@ -8,6 +8,7 @@ import { useSpaceInvitations } from '@/hooks/useSpaceInvitations';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
 
 export function SpaceInvitationNotifications() {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,39 @@ export function SpaceInvitationNotifications() {
 
   useEffect(() => {
     fetchMyInvitations();
+    
+    // S'abonner aux nouvelles invitations en temps réel
+    const channel = supabase
+      .channel('space-invitations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'space_invitations'
+        },
+        () => {
+          console.log('New invitation received, refreshing...');
+          fetchMyInvitations();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'space_invitations'
+        },
+        () => {
+          console.log('Invitation updated, refreshing...');
+          fetchMyInvitations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchMyInvitations]);
 
   const handleAccept = async (invitationId: string) => {
