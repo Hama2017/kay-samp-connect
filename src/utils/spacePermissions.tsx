@@ -3,7 +3,8 @@ import { Space } from '@/hooks/useSpaces';
 export function canUserPostInSpace(
   space: Space, 
   userId?: string, 
-  isUserVerified?: boolean
+  isUserVerified?: boolean,
+  hasAcceptedInvitation?: boolean
 ): { canPost: boolean; message: string } {
   // Si l'utilisateur n'est pas connecté
   if (!userId) {
@@ -28,6 +29,20 @@ export function canUserPostInSpace(
     return {
       canPost: false,
       message: 'Seul le créateur de l\'espace peut publier'
+    };
+  }
+
+  // Vérifier si c'est un espace sur invitation uniquement
+  if (whoCanPublish.includes('invited')) {
+    if (!hasAcceptedInvitation) {
+      return {
+        canPost: false,
+        message: 'Vous devez accepter l\'invitation pour publier'
+      };
+    }
+    return {
+      canPost: true,
+      message: ''
     };
   }
 

@@ -13,6 +13,7 @@ import { PostModal } from "@/components/PostModal";
 import { SpaceBadge } from '@/components/SpaceBadge';
 import { canUserPostInSpace } from '@/utils/spacePermissions';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock },
@@ -28,6 +29,7 @@ export default function SpaceDetail() {
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
+  const [hasAcceptedInvitation, setHasAcceptedInvitation] = useState(false);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
@@ -121,6 +123,31 @@ export default function SpaceDetail() {
     selectedFilter,
     spaceId
   });
+
+  // Check if user has accepted invitation for this space
+  useEffect(() => {
+    const checkInvitation = async () => {
+      if (!user?.id || !spaceId) return;
+      
+      const { data, error } = await supabase
+        .from('space_invitations')
+        .select('status')
+        .eq('space_id', spaceId)
+        .eq('invited_user_id', user.id)
+        .eq('status', 'accepted')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking invitation:', error);
+        setHasAcceptedInvitation(false);
+        return;
+      }
+      
+      setHasAcceptedInvitation(!!data);
+    };
+    
+    checkInvitation();
+  }, [user?.id, spaceId]);
 
   useEffect(() => {
     if (spaceId) {
@@ -232,7 +259,12 @@ export default function SpaceDetail() {
             )}
             
             {(() => {
-              const { canPost, message } = canUserPostInSpace(space, user?.id, false);
+              const { canPost, message } = canUserPostInSpace(
+                space, 
+                user?.id, 
+                false, 
+                hasAcceptedInvitation
+              );
               
               return (
                 <div className="flex gap-2">
