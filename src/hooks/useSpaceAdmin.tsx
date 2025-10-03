@@ -26,7 +26,7 @@ export const useSpaceAdmin = () => {
         .select(`
           user_id,
           subscribed_at,
-          profiles!inner(
+          profiles (
             id,
             username,
             full_name,
@@ -38,19 +38,23 @@ export const useSpaceAdmin = () => {
         .order('subscribed_at', { ascending: false });
 
       if (fetchError) {
+        console.error('Supabase error:', fetchError);
         throw fetchError;
       }
 
+      console.log('Fetched subscriptions data:', data);
+
       const formattedSubscribers = data?.map(sub => ({
-        id: sub.profiles.id,
+        id: sub.profiles?.id || sub.user_id,
         user_id: sub.user_id,
-        username: sub.profiles.username,
-        full_name: sub.profiles.full_name,
-        profile_picture_url: sub.profiles.profile_picture_url,
-        is_verified: sub.profiles.is_verified,
+        username: sub.profiles?.username || 'Utilisateur',
+        full_name: sub.profiles?.full_name,
+        profile_picture_url: sub.profiles?.profile_picture_url,
+        is_verified: sub.profiles?.is_verified,
         subscribed_at: sub.subscribed_at
       })) || [];
 
+      console.log('Formatted subscribers:', formattedSubscribers);
       setSubscribers(formattedSubscribers);
     } catch (err) {
       console.error('Error fetching subscribers:', err);

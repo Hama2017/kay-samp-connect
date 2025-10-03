@@ -97,7 +97,7 @@ export default function SpaceAdmin() {
           )
         `)
         .eq('space_id', spaceId)
-        .eq('status', 'pending');
+        .eq('status', 'accepted');
       
       if (error) throw error;
       
@@ -458,7 +458,7 @@ export default function SpaceAdmin() {
                       </Avatar>
                       <div className="flex-1">
                         <p className="font-medium">@{user.username}</p>
-                        <p className="text-xs text-muted-foreground">Invitation en attente</p>
+                        <p className="text-xs text-muted-foreground">Membre contributeur</p>
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
