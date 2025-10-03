@@ -167,11 +167,12 @@ export default function SpaceAdmin() {
       
       if (error) throw error;
       
-      setInvitedUsers(prev => prev.filter(u => u.id !== userId));
-      toast.success("Invitation supprimée");
+      // Recharger la liste des invitations après suppression
+      await loadInvitations();
+      toast.success("Membre retiré avec succès");
     } catch (error) {
       console.error('Error removing invitation:', error);
-      toast.error("Erreur lors de la suppression de l'invitation");
+      toast.error("Erreur lors de la suppression");
     }
   };
 
@@ -522,7 +523,7 @@ export default function SpaceAdmin() {
                         ) : (
                           <span 
                             className="hover:text-primary cursor-pointer transition-colors"
-                            onClick={() => navigate(`/profile/${subscriber.user_id}`)}
+                            onClick={() => navigate(`/user/${subscriber.username}`)}
                           >
                             @{subscriber.username}
                           </span>

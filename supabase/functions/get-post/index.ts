@@ -39,7 +39,7 @@ serve(async (req) => {
       .from('posts')
       .select(`
         *,
-        profiles!inner(
+        profiles(
           username,
           profile_picture_url,
           is_verified,
@@ -91,7 +91,7 @@ serve(async (req) => {
       .from('comments')
       .select(`
         *,
-        profiles!inner(
+        profiles(
           username,
           profile_picture_url,
           is_verified
