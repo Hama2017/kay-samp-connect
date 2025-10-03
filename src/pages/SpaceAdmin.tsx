@@ -64,12 +64,10 @@ export default function SpaceAdmin() {
           background_image_url: spaceData.background_image_url || "",
           whoCanPublish: spaceData.who_can_publish?.[0] || 'subscribers'
         });
-        fetchSubscribers(spaceId);
+        await fetchSubscribers(spaceId);
         
-        // Charger les invitations si l'espace est en mode invitation
-        if (spaceData.who_can_publish?.[0] === 'invited') {
-          loadInvitations();
-        }
+        // Toujours charger les invitations pour afficher la liste
+        await loadInvitations();
       } catch (error) {
         console.error('Error loading space:', error);
         navigate('/');
@@ -103,12 +101,12 @@ export default function SpaceAdmin() {
       
       if (error) throw error;
       
-      const users = data.map(inv => ({
+      const users = data?.map(inv => ({
         id: inv.invited_user_id,
         username: inv.invited_profile?.username || '',
         profile_picture_url: inv.invited_profile?.profile_picture_url,
         invitation_id: inv.id
-      }));
+      })) || [];
       
       setInvitedUsers(users);
     } catch (error) {
@@ -438,12 +436,70 @@ export default function SpaceAdmin() {
           </CardContent>
         </Card>
 
+        {/* Invited Users Card - Only show if space uses invitation system */}
+        {space.who_can_publish?.[0] === 'invited' && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Membres invités ({invitedUsers.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {invitedUsers.length > 0 ? (
+                <div className="grid gap-3">
+                  {invitedUsers.map((user) => (
+                    <div key={user.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.profile_picture_url} />
+                        <AvatarFallback>
+                          {user.username?.charAt(0)?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">@{user.username}</p>
+                        <p className="text-xs text-muted-foreground">Invitation en attente</p>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Retirer l'invitation ?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Voulez-vous vraiment retirer l'invitation de @{user.username} ? Cette personne ne pourra plus publier dans cet espace.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => user.invitation_id && handleRemoveInvitation(user.invitation_id, user.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Retirer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Aucun membre invité pour le moment</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Subscribers Card */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Abonnés ({space.subscribers_count || 0})
+              Abonnés ({subscribers.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -468,7 +524,7 @@ export default function SpaceAdmin() {
                             className="hover:text-primary cursor-pointer transition-colors"
                             onClick={() => navigate(`/profile/${subscriber.user_id}`)}
                           >
-                            {subscriber.username}
+                            @{subscriber.username}
                           </span>
                         )}
                       </p>
