@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Edit3, Upload, Plus, Trash2, Settings } from "lucide-react";
+import { ArrowLeft, Users, Edit3, Upload, Plus, Trash2, Settings, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -173,6 +173,25 @@ export default function SpaceAdmin() {
     } catch (error) {
       console.error('Error removing invitation:', error);
       toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleRemoveSubscriber = async (userId: string, username: string) => {
+    try {
+      const { error } = await supabase
+        .from('space_subscriptions')
+        .delete()
+        .eq('space_id', spaceId)
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      // Recharger la liste des abonnés après suppression
+      await fetchSubscribers(spaceId!);
+      toast.success(`@${username} a été retiré de l'espace`);
+    } catch (error) {
+      console.error('Error removing subscriber:', error);
+      toast.error("Erreur lors de la suppression de l'abonné");
     }
   };
 
@@ -535,6 +554,33 @@ export default function SpaceAdmin() {
                     </div>
                     {subscriber.is_verified && (
                       <Badge variant="secondary" className="text-xs">Vérifié</Badge>
+                    )}
+                    {subscriber.user_id !== user?.id && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <UserMinus className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Retirer cet abonné ?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Êtes-vous sûr de vouloir retirer @{subscriber.username} de cet espace ? 
+                              Cette action est irréversible.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleRemoveSubscriber(subscriber.user_id, subscriber.username)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Retirer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 ))}
