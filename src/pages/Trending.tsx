@@ -216,7 +216,7 @@ export default function Trending() {
               className="hover:shadow-lg transition-all duration-300 animate-fade-in-up relative"
             >
               {/* Badge position */}
-              <div className="absolute top-4 left-4 z-10">
+              <div className="absolute top-4 right-4 z-10">
                 <Badge 
                   variant={index === 0 ? "default" : "secondary"}
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
@@ -227,7 +227,7 @@ export default function Trending() {
                 </Badge>
               </div>
 
-              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6 pl-16">
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <Avatar 

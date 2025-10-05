@@ -295,18 +295,18 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[90vh] flex flex-col bg-white">
+      <DrawerContent className="max-h-[90vh] flex flex-col bg-background">
         {/* Header - Style TikTok */}
-        <DrawerHeader className="flex-shrink-0 border-b border-gray-100 py-4 bg-white">
+        <DrawerHeader className="flex-shrink-0 border-b border-border py-4 bg-background">
           <div className="flex items-center justify-center relative">
-            <DrawerTitle className="text-lg font-semibold text-black text-center">
+            <DrawerTitle className="text-lg font-semibold text-foreground text-center">
               {post.comments_count} commentaires
             </DrawerTitle>
             <DrawerClose asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-0 h-8 w-8 hover:bg-gray-100 rounded-full text-black"
+                className="absolute right-0 h-8 w-8 hover:bg-accent rounded-full"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -315,23 +315,23 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
         </DrawerHeader>
 
         {/* Zone de commentaires */}
-        <div className="flex-1 relative overflow-auto bg-white">
+        <div className="flex-1 relative overflow-auto bg-background">
           <ScrollArea className="h-full">
             <div className="px-0 py-0">
               {isLoading && comments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="animate-spin h-6 w-6 border-2 border-black border-t-transparent rounded-full mb-3"></div>
-                  <p className="text-gray-500 text-sm">Chargement des commentaires...</p>
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mb-3"></div>
+                  <p className="text-muted-foreground text-sm">Chargement des commentaires...</p>
                 </div>
               ) : comments.length > 0 ? (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-border">
                   {comments.map((comment) => (
                     <div key={comment.id} className="py-4 px-4">
                       {/* Commentaire principal - Style TikTok */}
                       <div className="flex items-start gap-3">
                         <Avatar className="h-10 w-10 flex-shrink-0">
                           <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
-                          <AvatarFallback className="bg-gray-300 text-gray-600 text-sm font-medium">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
                             {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
                           </AvatarFallback>
                         </Avatar>
@@ -339,17 +339,17 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                         <div className="flex-1 min-w-0">
                           {/* Username et temps */}
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-base text-black">
+                            <span className="font-semibold text-base text-foreground">
                               {comment.profiles?.username || "Unknown"}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                               {formatDate(comment.created_at)}
                             </span>
                           </div>
                           
                           {/* Contenu du commentaire */}
                           {comment.content && (
-                            <p className="text-base text-black mb-2 leading-normal break-all">
+                            <p className="text-base text-foreground mb-2 leading-normal break-all">
                               {comment.content}
                             </p>
                           )}
@@ -362,7 +362,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                   key={media.id}
                                   src={media.media_url}
                                   alt="Comment media"
-                                  className="max-w-full h-auto rounded-lg max-h-40 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="max-w-full h-auto rounded-lg max-h-40 border border-border cursor-pointer hover:opacity-90 transition-opacity"
                                   loading="lazy"
                                   onClick={() => setFullscreenImage(media.media_url)}
                                 />
@@ -374,7 +374,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                           <div className="flex items-center gap-6 mt-2">
                             <button 
                               onClick={() => handleVoteComment(comment.id, 'up')}
-                              className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors"
+                              className="flex items-center gap-2 text-muted-foreground hover:text-green-500 transition-colors"
                               disabled={isSubmitting}
                             >
                               <ChevronUp className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
@@ -383,7 +383,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                             
                             <button 
                               onClick={() => handleVoteComment(comment.id, 'down')}
-                              className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
+                              className="flex items-center gap-2 text-muted-foreground hover:text-red-500 transition-colors"
                               disabled={isSubmitting}
                             >
                               <ChevronDown className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
@@ -392,7 +392,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                             
                             <button 
                               onClick={() => handleReplyClick(comment.id, comment.profiles?.username || "Unknown")}
-                              className="text-gray-600 hover:text-black transition-colors text-sm font-medium"
+                              className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
                               disabled={isSubmitting}
                             >
                               Répondre
@@ -403,7 +403,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                           {comment.replies && comment.replies.length > 0 && (
                             <button
                               onClick={() => toggleReplies(comment.id)}
-                              className="flex items-center gap-2 mt-3 text-gray-600 hover:text-black transition-colors"
+                              className="flex items-center gap-2 mt-3 text-muted-foreground hover:text-foreground transition-colors"
                             >
                               <span className="text-sm font-medium">
                                 {expandedReplies.has(comment.id) ? (
@@ -424,25 +424,25 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                       {comment.replies && comment.replies.length > 0 && expandedReplies.has(comment.id) && (
                         <div className="mt-4 space-y-4">
                           {comment.replies.map((reply: any) => (
-                            <div key={reply.id} className="flex items-start gap-3 ml-8 border-l-2 border-gray-100 pl-4">
+                            <div key={reply.id} className="flex items-start gap-3 ml-8 border-l-2 border-border pl-4">
                               <Avatar className="h-8 w-8 flex-shrink-0">
                                 <AvatarImage src={reply.profiles?.profile_picture_url || ""} />
-                                <AvatarFallback className="bg-gray-300 text-gray-600 text-xs">
+                                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                                   {reply.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
                                 </AvatarFallback>
                               </Avatar>
                               
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-semibold text-sm text-black">
+                                  <span className="font-semibold text-sm text-foreground">
                                     {reply.profiles?.username || "Unknown"}
                                   </span>
-                                  <span className="text-xs text-gray-500">
+                                  <span className="text-xs text-muted-foreground">
                                     {formatDate(reply.created_at)}
                                   </span>
                                 </div>
                                 
-                                <p className="text-base text-black mb-2 leading-normal break-all">
+                                <p className="text-base text-foreground mb-2 leading-normal break-all">
                                   {reply.content}
                                 </p>
 
@@ -454,7 +454,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                         key={media.id}
                                         src={media.media_url}
                                         alt="Comment media"
-                                        className="max-w-full h-auto rounded-lg max-h-40 border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                        className="max-w-full h-auto rounded-lg max-h-40 border border-border cursor-pointer hover:opacity-90 transition-opacity"
                                         loading="lazy"
                                         onClick={() => setFullscreenImage(media.media_url)}
                                       />
@@ -465,7 +465,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                 <div className="flex items-center gap-4 mt-2">
                                   <button 
                                     onClick={() => handleVoteComment(reply.id, 'up')}
-                                    className="flex items-center gap-1.5 text-gray-600 hover:text-green-500 transition-colors"
+                                    className="flex items-center gap-1.5 text-muted-foreground hover:text-green-500 transition-colors"
                                     disabled={isSubmitting}
                                   >
                                     <ChevronUp className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
@@ -474,7 +474,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                                   
                                   <button 
                                     onClick={() => handleVoteComment(reply.id, 'down')}
-                                    className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors"
+                                    className="flex items-center gap-1.5 text-muted-foreground hover:text-red-500 transition-colors"
                                     disabled={isSubmitting}
                                   >
                                     <ChevronDown className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
@@ -496,11 +496,10 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                         variant="ghost"
                         onClick={() => loadMoreComments(post.id)}
                         disabled={isLoading}
-                        className="text-black hover:bg-gray-100"
                       >
                         {isLoading ? (
                           <>
-                            <div className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full mr-2"></div>
+                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mr-2"></div>
                             Chargement...
                           </>
                         ) : (
@@ -512,9 +511,9 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-500 font-medium mb-1">Aucun commentaire</p>
-                  <p className="text-sm text-gray-400">Soyez le premier à commenter !</p>
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground font-medium mb-1">Aucun commentaire</p>
+                  <p className="text-sm text-muted-foreground">Soyez le premier à commenter !</p>
                 </div>
               )}
             </div>
@@ -522,19 +521,19 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
         </div>
 
         {/* Zone de saisie - Style TikTok */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 p-4">
+        <div className="flex-shrink-0 bg-background border-t border-border p-4">
           {/* Indicateur de réponse */}
           {replyingTo && replyingToUsername && (
-            <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+            <div className="mb-3 p-3 bg-muted rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-foreground">
                   Réponse à <span className="font-semibold">@{replyingToUsername}</span>
                 </span>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={handleCancelReply}
-                  className="h-6 w-6 p-0 hover:bg-gray-200 rounded-full"
+                  className="h-6 w-6 p-0 hover:bg-accent rounded-full"
                   disabled={isSubmitting}
                 >
                   <X className="h-3 w-3" />
@@ -545,16 +544,16 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
 
           {/* Prévisualisation média */}
           {(selectedGif || selectedImage) && (
-            <div className="mb-3 p-2 bg-gray-50 rounded-lg">
+            <div className="mb-3 p-2 bg-muted rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-gray-600 font-medium">
+                <span className="text-xs text-muted-foreground font-medium">
                   {selectedImage ? 'Image sélectionnée' : 'GIF sélectionné'}
                 </span>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={removeMedia}
-                  className="h-5 w-5 p-0 hover:bg-gray-200 rounded"
+                  className="h-5 w-5 p-0 hover:bg-accent rounded"
                   disabled={isSubmitting}
                 >
                   <X className="h-3 w-3" />
@@ -585,7 +584,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="min-h-[44px] resize-none border-gray-300 focus:border-black focus:ring-black text-base bg-gray-50"
+                className="min-h-[44px] resize-none border-border focus:border-primary focus:ring-primary text-base bg-muted"
                 rows={1}
                 disabled={isSubmitting}
               />
@@ -598,7 +597,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowGifSelector(true)}
-                    className="h-8 px-0 text-gray-600 hover:text-black"
+                    className="h-8 px-0 text-muted-foreground hover:text-foreground"
                     disabled={isSubmitting}
                   >
                     <Image className="h-5 w-5" />

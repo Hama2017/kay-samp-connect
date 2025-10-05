@@ -238,12 +238,6 @@ export default function Profile() {
                                 <Users className="h-3 w-3" />
                                 <span>{space.subscribers_count}</span>
                               </div>
-                              {space.is_public && (
-                                <>
-                                  <span className="hidden sm:inline">•</span>
-                                  <Badge variant="secondary" className="text-xs">Public</Badge>
-                                </>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -296,41 +290,18 @@ export default function Profile() {
               </div>
             ) : bookmarks.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
-                {bookmarks.filter(bookmark => bookmark.item_type === 'post').map((bookmark) => {
-                  const post = posts.find(p => p.id === bookmark.item_id);
-                  if (!post) return null;
-                  
-                  return (
-                    <InfinitePostsList
-                      key={bookmark.id}
-                      posts={[post]}
-                      onLoadMore={async () => {}}
-                      onVote={votePost}
-                      onIncrementViews={(postId) => {}}
-                      onPostClick={(post) => navigate(`/post/${post.id}`)}
-                      hasMore={false}
-                      isLoading={false}
-                    />
-                  );
-                }).filter(Boolean)}
-                
-                {bookmarksHasMore && (
-                  <div className="text-center py-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => loadMoreBookmarks({ item_type: 'post' })}
-                      disabled={bookmarksLoading}
-                      className="gap-2"
-                    >
-                      {bookmarksLoading ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                      Charger plus
-                    </Button>
-                  </div>
-                )}
+                <InfinitePostsList
+                  posts={bookmarks
+                    .filter(bookmark => bookmark.item_type === 'post')
+                    .map(bookmark => posts.find(p => p.id === bookmark.item_id))
+                    .filter(Boolean) as any[]}
+                  onLoadMore={async () => loadMoreBookmarks({ item_type: 'post' })}
+                  onVote={votePost}
+                  onIncrementViews={(postId) => {}}
+                  onPostClick={(post) => navigate(`/post/${post.id}`)}
+                  hasMore={bookmarksHasMore}
+                  isLoading={bookmarksLoading}
+                />
               </div>
             ) : (
               <div className="text-center py-12">
