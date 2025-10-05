@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users } from "lucide-react";
+import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useTopContributors } from "@/hooks/useTopContributors";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PostActions } from "@/components/PostActions";
+import PostMediaDisplay from "@/components/PostMediaDisplay";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data for trending
 const mockTrendingData = {
@@ -125,7 +128,8 @@ const timePeriods = [
 export default function Trending() {
   const [selectedPeriod, setSelectedPeriod] = useState("day");
   const navigate = useNavigate();
-  const { posts, fetchPosts, isLoading: postsLoading } = usePosts();
+  const { user } = useAuth();
+  const { posts, fetchPosts, isLoading: postsLoading, votePost } = usePosts();
   const { spaces, fetchSpaces, isLoading: spacesLoading } = useSpaces();
   const { contributors, fetchTopContributors, isLoading: contributorsLoading } = useTopContributors();
 
@@ -142,6 +146,20 @@ export default function Trending() {
   // Get top posts, spaces
   const topPosts = posts.slice(0, 5);
   const topSpaces = spaces.slice(0, 5);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+    
+    if (diffInMinutes < 60) {
+      return `il y a ${diffInMinutes}min`;
+    } else if (diffInMinutes < 1440) {
+      return `il y a ${Math.floor(diffInMinutes / 60)}h`;
+    } else {
+      return `il y a ${Math.floor(diffInMinutes / 1440)}j`;
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -195,72 +213,111 @@ export default function Trending() {
           {topPosts.map((post, index) => (
             <Card 
               key={post.id} 
-              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
-              onClick={() => navigate(`/post/${post.id}`)}
+              className="hover:shadow-lg transition-all duration-300 animate-fade-in-up relative"
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <Badge 
-                      variant={index === 0 ? "default" : "secondary"}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? "bg-gradient-primary" : ""
-                      }`}
+              {/* Badge position */}
+              <div className="absolute top-4 left-4 z-10">
+                <Badge 
+                  variant={index === 0 ? "default" : "secondary"}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                    index === 0 ? "bg-gradient-primary shadow-lg" : ""
+                  }`}
+                >
+                  {index + 1}
+                </Badge>
+              </div>
+
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6 pl-16">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <Avatar 
+                      className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (user?.profile?.username === post.profiles?.username) {
+                          navigate('/profile');
+                        } else {
+                          navigate(`/user/${post.profiles?.username}`);
+                        }
+                      }}
                     >
-                      {index + 1}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground mb-2 leading-relaxed">
-                      {post.content}
-                    </p>
+                      <AvatarImage src={post.profiles?.profile_picture_url} />
+                      <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
+                        {post.profiles?.username?.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     
-                    {post.hashtags && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {post.hashtags.map((tag) => (
-                          <span key={tag} className="text-sm text-primary">
-                            {tag}
-                          </span>
-                        ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <span 
+                          className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (user?.profile?.username === post.profiles?.username) {
+                              navigate('/profile');
+                            } else {
+                              navigate(`/user/${post.profiles?.username}`);
+                            }
+                          }}
+                        >
+                          @{post.profiles?.username || "Utilisateur"}
+                        </span>
+                        {post.profiles?.is_verified && (
+                          <BadgeCheck size={20} color="#329056ff" />
+                        )}
                       </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>par @{post.profiles?.username || "Utilisateur"}</span>
-                      <span>•</span>
-                      <span>{post.spaces?.name || "Espace"}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-primary">
-                      {post.votes_up + post.views_count}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      interactions
+                      <p className="text-xs text-muted-foreground truncate">
+                        {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
+                      </p>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <ArrowUp className="h-4 w-4" />
-                      <span>{post.votes_up}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>{post.comments_count}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{post.views_count}</span>
-                    </div>
+              <CardContent 
+                className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6 cursor-pointer"
+                onClick={() => navigate(`/post/${post.id}`)}
+              >
+                {/* Titre si présent */}
+                {post.title && (
+                  <div className="text-lg font-bold text-foreground break-words mb-3">
+                    {post.title}
                   </div>
-                </div>
+                )}
+                
+                {/* Contenu */}
+                <div 
+                  className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
+                  dangerouslySetInnerHTML={{
+                    __html: post.content.replace(/#(\w+)/g, '<span style="color: #1f9463; font-weight: 600;">#$1</span>')
+                  }}
+                />
+                
+                {/* Médias */}
+                {post.post_media && post.post_media.length > 0 && (
+                  <PostMediaDisplay 
+                    media={post.post_media} 
+                    maxHeight="max-h-[60vh]"
+                  />
+                )}
+                
+                {/* Hashtags */}
+                {post.hashtags && post.hashtags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {post.hashtags.map((tag, tagIndex) => (
+                      <span key={tagIndex} className="text-xs text-[#1f9463] hover:text-[#43ca92] cursor-pointer transition-colors">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Actions */}
+                <PostActions 
+                  post={post}
+                  onVote={votePost}
+                  onOpenComments={() => navigate(`/post/${post.id}`)}
+                />
               </CardContent>
             </Card>
           ))}
