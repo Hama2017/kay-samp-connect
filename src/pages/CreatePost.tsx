@@ -184,7 +184,7 @@ export default function CreatePost() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header épuré */}
-      <div className="sticky top-0 z-50 bg-background border-b">
+      <div className="sticky top-0 z-50 bg-background border-b safe-area-top">
         <div className="flex items-center justify-between px-4 py-3">
           <Button
             variant="ghost"
@@ -360,7 +360,7 @@ export default function CreatePost() {
           )}
 
           {/* Media Toolbar */}
-          <div className="flex items-center gap-2 mt-6 pt-4 border-t">
+          <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t">
             <input
               type="file"
               id="file-upload"

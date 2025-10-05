@@ -176,7 +176,7 @@ All colors MUST be HSL. */
   }
 }
 
-/* 📱 UTILITAIRES MOBILES */
+/* 📱 UTILITAIRES MOBILES - VERSION CORRIGÉE */
 @layer components {
   .btn-mobile {
     @apply min-h-[44px] min-w-[44px] touch-manipulation;
@@ -192,12 +192,12 @@ All colors MUST be HSL. */
     transform: translateZ(0);
   }
 
-  /* 📍 NAVIGATION FIXE SIMPLE */
-  .navbar-mobile {
+  /* 📍 SUPPRIMÉ - Ne plus utiliser ces classes avec le header auto-hide */
+  /* .navbar-mobile {
     @apply fixed top-0 left-0 right-0 z-50;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  }
+  } */
 
   .bottom-nav-mobile {
     @apply fixed bottom-0 left-0 right-0 z-50;
@@ -205,12 +205,12 @@ All colors MUST be HSL. */
     -webkit-backdrop-filter: blur(10px);
   }
 
-  /* 📄 CONTENU AVEC ESPACE POUR NAV */
+  /* 📄 CONTENU AVEC ESPACE POUR NAV - VERSION SIMPLIFIÉE */
   .content-mobile {
-    margin-top: 4rem; /* 64px pour header */
+    /* SUPPRIMÉ: margin-top car le header est déjà fixed avec pt-16 dans AppLayout */
     margin-bottom: 4rem; /* 64px pour bottom nav */
-    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+    min-height: calc(100vh - 8rem); /* Pour permettre le scroll */
   }
 
   /* 📦 CONTENEUR MOBILE SIMPLE */
@@ -221,7 +221,6 @@ All colors MUST be HSL. */
     overflow-x: hidden;
   }
 }
-
 /* KaaySamp custom animations */
 @keyframes gentle-bounce {
   0%, 100% { transform: translateY(0); }

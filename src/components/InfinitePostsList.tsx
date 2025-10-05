@@ -222,7 +222,7 @@ export function InfinitePostsList({
                   className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full transition-colors ${
                     bookmarked
                       ? "bg-[#1f9463] hover:bg-[#43ca92] text-white border-[#1f9463]"
-                      : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border-gray-200 hover:border-[#1f9463]/30"
+                      : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border-[#28313d] hover:border-[#1f9463]/30"
                   }`}
                 >
                   {bookmarked ? "Sampna" : "DemaySamp"}
