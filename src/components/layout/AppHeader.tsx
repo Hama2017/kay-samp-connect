@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import kaaysampLogo from "@/assets/kaaysamp-logo.png";
-import { useState, useEffect } from "react";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
@@ -23,38 +22,9 @@ interface AppHeaderProps {
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [show, setShow] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  useEffect(() => {
-    const controlNavbar = () => {
-      if (typeof window !== 'undefined') {
-        const currentScrollY = window.scrollY;
-        
-        if (currentScrollY > lastScrollY && currentScrollY > 80) {
-          // Scroll vers le bas - cacher
-          setShow(false);
-        } else {
-          // Scroll vers le haut - montrer
-          setShow(true);
-        }
-        
-        setLastScrollY(currentScrollY);
-      }
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', controlNavbar);
-      return () => {
-        window.removeEventListener('scroll', controlNavbar);
-      };
-    }
-  }, [lastScrollY]);
   
   return (
-    <header className={`w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-      show ? 'translate-y-0' : '-translate-y-full'
-    }`}>
+    <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50">
       <div className="flex h-16 items-center justify-between px-4">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center gap-3">
