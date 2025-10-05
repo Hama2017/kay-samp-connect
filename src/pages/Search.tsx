@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, Filter, Users, MessageSquare, Hash, X } from "lucide-react";
+import { Search as SearchIcon, Filter, Users, MessageSquare, Hash, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import { SearchResultsSkeleton, FeedSkeleton } from "@/components/SkeletonLoader
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PullToRefresh } from "@/components/MobileOptimized";
 import { useCategories } from "@/hooks/useCategories";
+import { InfinitePostsList } from "@/components/InfinitePostsList";
+import { SpaceBadge } from '@/components/SpaceBadge';
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -226,42 +228,15 @@ export default function Search() {
                   {searchResults.posts.length > 0 && (
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold text-foreground">Posts populaires</h3>
-                      {searchResults.posts.slice(0, 3).map((post) => (
-                         <Card key={post.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-                          <CardContent className="p-4" onClick={() => handlePostClick(post.id)}>
-                            <div className="flex items-start space-x-3">
-                              <Avatar className="h-10 w-10 ring-2 ring-primary/10">
-                                <AvatarImage src={post.author.profilePicture} />
-                                <AvatarFallback className="bg-gradient-primary text-white">
-                                  {post.author.username[0]?.toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 space-y-2 min-w-0">
-                                <div className="flex items-center space-x-2 flex-wrap">
-                                  <span className="font-medium text-sm">@{post.author.username}</span>
-                                  {post.author.isVerified && <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">✓</Badge>}
-                                  <span className="text-muted-foreground hidden sm:inline">•</span>
-                                  <Badge variant="outline" className="text-xs">{post.space.name}</Badge>
-                                  <span className="text-muted-foreground hidden sm:inline">•</span>
-                                  <Badge variant="outline" className="text-xs">{post.category}</Badge>
-                                </div>
-                                <p className="text-sm text-foreground leading-relaxed break-words">{post.content}</p>
-                                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                  <span className="flex items-center gap-1">
-                                    👍 {post.votesUp}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    💬 {post.commentsCount}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    👀 {post.viewsCount}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                      <InfinitePostsList
+                        posts={searchResults.posts.slice(0, 3)}
+                        onLoadMore={async () => {}}
+                        onVote={async () => {}}
+                        onIncrementViews={async () => {}}
+                        onPostClick={(post) => navigate(`/post/${post.id}`)}
+                        hasMore={false}
+                        isLoading={false}
+                      />
                     </div>
                   )}
 
@@ -270,43 +245,64 @@ export default function Search() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold text-foreground">Espaces recommandés</h3>
                       {searchResults.spaces.slice(0, 2).map((space) => (
-                        <Card key={space.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-                          <CardContent className="p-4" onClick={() => handleSpaceClick(space.id)}>
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-2 flex-1 min-w-0">
-                                <div className="flex items-center space-x-2">
-                                  <div className="h-12 w-12 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0">
-                                    {space.name.substring(0, 2).toUpperCase()}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center space-x-2 mb-1">
-                                      <h3 className="font-semibold text-sm truncate">{space.name}</h3>
-                                      {space.isVerified && <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">✓</Badge>}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground line-clamp-1">{space.description}</p>
-                                  </div>
+                        <Card 
+                          key={space.id} 
+                          className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                          onClick={() => handleSpaceClick(space.id)}
+                        >
+                          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                            <div className="flex items-start justify-between gap-2 sm:gap-3">
+                              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Hash className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                                 </div>
-                                <div className="flex items-center space-x-4 text-xs text-muted-foreground ml-14">
-                                  <span>{space.subscribersCount.toLocaleString()} membres</span>
-                                  <div className="flex flex-wrap gap-1">
-                                    {space.category && space.category.split(", ").map((cat: string) => (
-                                      <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>
-                                    ))}
+                                
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                                    <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
+                                      {space.name}
+                                    </h3>
+                                    {space.isVerified && (
+                                      <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                                        ✓
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                                    <div className="flex flex-wrap gap-1">
+                                      {space.category && space.category.split(", ").map((cat: string) => (
+                                        <Badge key={cat} variant="outline" className="text-xs flex-shrink-0">
+                                          {cat}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                    <span className="hidden sm:inline">•</span>
+                                    <div className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      <span>{space.subscribersCount}</span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                              <Button 
-                                variant={space.isSubscribed ? "outline" : "default"} 
+                              
+                              <Button
+                                variant={space.isSubscribed ? "outline" : "senegal"}
                                 size="sm"
-                                className="ml-4 text-xs"
+                                className="flex-shrink-0 text-xs sm:text-sm px-3 sm:px-4"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // Handle subscription toggle
                                 }}
                               >
                                 {space.isSubscribed ? "Abonné" : "S'abonner"}
                               </Button>
                             </div>
+                          </CardHeader>
+                          
+                          <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
+                            <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                              {space.description || "Aucune description disponible"}
+                            </p>
                           </CardContent>
                         </Card>
                       ))}
@@ -369,32 +365,15 @@ export default function Search() {
                       description={`Aucun post ne correspond à "${query}"`}
                     />
                   ) : (
-                    searchResults.posts.map((post) => (
-                      <Card key={post.id} className="cursor-pointer hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-4" onClick={() => handlePostClick(post.id)}>
-                          <div className="flex items-start space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={post.author.profilePicture} />
-                              <AvatarFallback>{post.author.username[0]?.toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium">@{post.author.username}</span>
-                                {post.author.isVerified && <Badge variant="secondary" className="text-xs">✓</Badge>}
-                                <span className="text-muted-foreground">•</span>
-                                <Badge variant="outline">{post.space.name}</Badge>
-                              </div>
-                              <p className="text-sm">{post.content}</p>
-                              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                <span>{post.votesUp} votes</span>
-                                <span>{post.commentsCount} commentaires</span>
-                                <span>{post.viewsCount} vues</span>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
+                    <InfinitePostsList
+                      posts={searchResults.posts}
+                      onLoadMore={async () => {}}
+                      onVote={async () => {}}
+                      onIncrementViews={async () => {}}
+                      onPostClick={(post) => navigate(`/post/${post.id}`)}
+                      hasMore={false}
+                      isLoading={false}
+                    />
                   )}
                 </TabsContent>
 
@@ -407,28 +386,64 @@ export default function Search() {
                     />
                   ) : (
                     searchResults.spaces.map((space) => (
-                      <Card key={space.id} className="cursor-pointer hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-4" onClick={() => handleSpaceClick(space.id)}>
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <div className="flex items-center space-x-2">
-                                <h3 className="font-semibold">{space.name}</h3>
-                                {space.isVerified && <Badge variant="secondary" className="text-xs">✓</Badge>}
+                      <Card 
+                        key={space.id} 
+                        className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                        onClick={() => handleSpaceClick(space.id)}
+                      >
+                        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                          <div className="flex items-start justify-between gap-2 sm:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Hash className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
                               </div>
-                              <p className="text-sm text-muted-foreground">{space.description}</p>
-                              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                <span>{space.subscribersCount} abonnés</span>
-                <div className="flex flex-wrap gap-1">
-                  {space.category && space.category.split(", ").map((cat: string) => (
-                    <Badge key={cat} variant="outline">{cat}</Badge>
-                  ))}
-                </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                                  <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
+                                    {space.name}
+                                  </h3>
+                                  {space.isVerified && (
+                                    <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                                      ✓
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                                  <div className="flex flex-wrap gap-1">
+                                    {space.category && space.category.split(", ").map((cat: string) => (
+                                      <Badge key={cat} variant="outline" className="text-xs flex-shrink-0">
+                                        {cat}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                  <span className="hidden sm:inline">•</span>
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-3 w-3" />
+                                    <span>{space.subscribersCount}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <Button variant={space.isSubscribed ? "outline" : "default"} size="sm">
+                            
+                            <Button
+                              variant={space.isSubscribed ? "outline" : "senegal"}
+                              size="sm"
+                              className="flex-shrink-0 text-xs sm:text-sm px-3 sm:px-4"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
                               {space.isSubscribed ? "Abonné" : "S'abonner"}
                             </Button>
                           </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
+                          <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                            {space.description || "Aucune description disponible"}
+                          </p>
                         </CardContent>
                       </Card>
                     ))
