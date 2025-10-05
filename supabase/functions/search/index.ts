@@ -69,14 +69,14 @@ serve(async (req) => {
           comments_count,
           views_count,
           profiles!inner(username, profile_picture_url, is_verified),
-          spaces(id, name, category)
+          spaces(id, name, categories)
         `)
         .or(`content.ilike.${searchTerm},hashtags.cs.{${query}}`)
         .limit(limit);
 
       // Filtre par catégorie via les espaces
       if (category !== 'Tous') {
-        postsQuery = postsQuery.eq('spaces.category', category);
+        postsQuery = postsQuery.contains('spaces.categories', [category]);
       }
 
       // Tri
@@ -110,7 +110,7 @@ serve(async (req) => {
           id,
           name,
           description,
-          category,
+          categories,
           subscribers_count,
           is_verified,
           updated_at,
@@ -121,7 +121,7 @@ serve(async (req) => {
 
       // Filtre par catégorie
       if (category !== 'Tous') {
-        spacesQuery = spacesQuery.eq('category', category);
+        spacesQuery = spacesQuery.contains('categories', [category]);
       }
 
       // Tri
@@ -159,7 +159,6 @@ serve(async (req) => {
         .from('profiles')
         .select(`
           id,
-          user_id,
           username,
           bio,
           profile_picture_url,
