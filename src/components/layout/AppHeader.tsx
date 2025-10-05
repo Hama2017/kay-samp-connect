@@ -30,10 +30,16 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Cacher le header si on scroll vers le bas, montrer si on scroll vers le haut
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      // Si on est tout en haut, toujours montrer
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      }
+      // Si on scroll vers le bas, cacher
+      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
         setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
+      }
+      // Si on scroll vers le haut (remonte), montrer
+      else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       }
       
