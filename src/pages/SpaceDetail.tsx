@@ -278,16 +278,16 @@ export default function SpaceDetail() {
                       Administrer
                     </Button>
                   )}
-                  <Button 
-                    variant="outline" 
-                    onClick={() => canPost && navigate(`/create/${spaceId}`)}
-                    className="gap-2"
-                    disabled={!canPost}
-                    title={message}
-                  >
-                    <Plus className="h-4 w-4" />
-                    {canPost ? "Créer un post" : message}
-                  </Button>
+                  {canPost && (
+                    <Button 
+                      variant="default" 
+                      onClick={() => navigate(`/create/${spaceId}`)}
+                      className="gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Créer un post
+                    </Button>
+                  )}
                 </div>
               );
             })()}

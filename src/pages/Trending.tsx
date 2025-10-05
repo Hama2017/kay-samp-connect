@@ -348,7 +348,7 @@ export default function Trending() {
                   </div>
                   
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-semibold text-foreground">
                         {space.name}
                       </h3>
@@ -357,20 +357,17 @@ export default function Trending() {
                           ✓
                         </Badge>
                       )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="flex flex-wrap gap-1">
-                        {space.categories.map((category) => (
-                          <Badge key={category} variant="outline" className="text-xs">
-                            {category}
-                          </Badge>
-                        ))}
-                      </div>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Users className="h-3 w-3" />
                         <span>{space.subscribers_count}</span>
                       </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 text-sm text-muted-foreground">
+                      {space.categories.map((category) => (
+                        <Badge key={category} variant="outline" className="text-xs">
+                          {category}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                   

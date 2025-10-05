@@ -192,12 +192,11 @@ All colors MUST be HSL. */
     transform: translateZ(0);
   }
 
-  /* 📍 SUPPRIMÉ - Ne plus utiliser ces classes avec le header auto-hide */
-  /* .navbar-mobile {
-    @apply fixed top-0 left-0 right-0 z-50;
+  /* 📍 Navigation top - Header auto-hide */
+  .navbar-mobile {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  } */
+  }
 
   .bottom-nav-mobile {
     @apply fixed bottom-0 left-0 right-0 z-50;
@@ -205,9 +204,9 @@ All colors MUST be HSL. */
     -webkit-backdrop-filter: blur(10px);
   }
 
-  /* 📄 CONTENU AVEC ESPACE POUR NAV - VERSION SIMPLIFIÉE */
+  /* 📄 CONTENU AVEC ESPACE POUR NAV */
   .content-mobile {
-    /* SUPPRIMÉ: margin-top car le header est déjà fixed avec pt-16 dans AppLayout */
+    padding-top: 4rem; /* 64px pour header */
     margin-bottom: 4rem; /* 64px pour bottom nav */
     padding-bottom: env(safe-area-inset-bottom);
     min-height: calc(100vh - 8rem); /* Pour permettre le scroll */

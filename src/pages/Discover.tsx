@@ -158,7 +158,10 @@ export default function Discover() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="tous">Tous</SelectItem>
-              <SelectItem value="verifies">Vérifiés ✓</SelectItem>
+              <SelectItem value="verifies">Vérifiés</SelectItem>
+              <SelectItem value="evenement">Événement</SelectItem>
+              <SelectItem value="kaaysamp">KaaySamp</SelectItem>
+              <SelectItem value="factcheck">Fact Check</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -228,20 +231,13 @@ export default function Discover() {
                   <Button
                     variant={space.is_subscribed ? "outline" : "senegal"}
                     size="sm"
-                    className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-4"
+                    className="flex-shrink-0 text-xs sm:text-sm px-3 sm:px-4"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSubscriptionToggle(space);
                     }}
                   >
-                    {space.is_subscribed ? (
-                      <span className="sm:hidden">✓</span>
-                    ) : (
-                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
-                    )}
-                    <span className="hidden sm:inline">
-                      {space.is_subscribed ? "Abonné" : "S'abonner"}
-                    </span>
+                    {space.is_subscribed ? "Abonné" : "S'abonner"}
                   </Button>
                 </div>
               </CardHeader>
