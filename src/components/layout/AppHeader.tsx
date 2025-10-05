@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import kaaysampLogo from "@/assets/kaaysamp-logo.png";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
@@ -24,7 +24,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,21 +34,21 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
       if (currentScrollY < 10) {
         setIsVisible(true);
       }
-      // Si on scroll vers le bas, cacher
-      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      // Si on scroll vers le bas (descend), cacher
+      else if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
         setIsVisible(false);
       }
       // Si on scroll vers le haut (remonte), montrer
-      else if (currentScrollY < lastScrollY) {
+      else if (currentScrollY < lastScrollY.current) {
         setIsVisible(true);
       }
       
-      setLastScrollY(currentScrollY);
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
   
   return (
     <header className={`w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
