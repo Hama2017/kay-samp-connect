@@ -10,26 +10,21 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      {/* STRUCTURE SIMPLE - PAS DE POSITION FIXED GLOBALE */}
       <div className="min-h-screen w-full bg-background">
         
         {/* HEADER FIXE */}
-        <div className="navbar-mobile safe-area-top">
-          <AppHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        </div>
+        <AppHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* SIDEBAR */}
         <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        {/* CONTENU PRINCIPAL AVEC MARGINS */}
-        <main className="content-mobile">
+        {/* CONTENU PRINCIPAL AVEC PADDING TOP */}
+        <main className="pt-16 pb-16 min-h-screen">
           <Outlet />
         </main>
 
         {/* NAVIGATION BOTTOM FIXE */}
-        <div className="bottom-nav-mobile safe-area-bottom">
-          <BottomNavigation />
-        </div>
+        <BottomNavigation />
       </div>
     </SidebarProvider>
   );
