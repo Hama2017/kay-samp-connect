@@ -48,7 +48,7 @@ serve(async (req) => {
         spaces(
           id,
           name,
-          category
+          categories
         ),
         post_media(
           id,
