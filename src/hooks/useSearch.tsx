@@ -54,47 +54,51 @@ export function useSearch() {
 
       if (error) throw error;
 
-      // Transform data to match expected format
+      // Transform data to match expected format with safety checks
       const transformedData = {
-        posts: (data.posts || []).map((post: any) => ({
-          id: post.id,
-          content: post.content,
-          publicationDate: post.created_at,
-          votesUp: post.votes_up || 0,
-          votesDown: post.votes_down || 0,
-          commentsCount: post.comments_count || 0,
-          viewsCount: post.views_count || 0,
-          hashtags: post.hashtags || [],
-          category: post.spaces?.category || 'Général',
-          author: {
-            username: post.profiles.username,
-            profilePicture: post.profiles.profile_picture_url || '',
-            isVerified: post.profiles.is_verified || false,
-          },
-          space: {
-            name: post.spaces?.name || 'Général',
-            id: post.spaces?.id || 'general',
-          }
-        })),
+        posts: (data.posts || [])
+          .filter((post: any) => post && post.profiles) // Filtrer les posts sans profil
+          .map((post: any) => ({
+            id: post.id,
+            content: post.content,
+            publicationDate: post.created_at,
+            votesUp: post.votes_up || 0,
+            votesDown: post.votes_down || 0,
+            commentsCount: post.comments_count || 0,
+            viewsCount: post.views_count || 0,
+            hashtags: post.hashtags || [],
+            category: post.spaces?.category || 'Général',
+            author: {
+              username: post.profiles?.username || 'Utilisateur',
+              profilePicture: post.profiles?.profile_picture_url || '',
+              isVerified: post.profiles?.is_verified || false,
+            },
+            space: {
+              name: post.spaces?.name || 'Général',
+              id: post.spaces?.id || 'general',
+            }
+          })),
         spaces: (data.spaces || []).map((space: any) => ({
           id: space.id,
-          name: space.name,
-          description: space.description,
+          name: space.name || 'Espace',
+          description: space.description || '',
           category: space.categories ? space.categories.join(", ") : "",
           subscribersCount: space.subscribers_count || 0,
           isVerified: space.is_verified || false,
           lastActivity: space.updated_at,
           isSubscribed: space.is_subscribed || false,
         })),
-        users: (data.users || []).map((user: any) => ({
-          id: user.id,
-          username: user.username,
-          bio: user.bio || '',
-          profilePicture: user.profile_picture_url || '',
-          isVerified: user.is_verified || false,
-          followersCount: user.followers_count || 0,
-          followingCount: user.following_count || 0,
-        })),
+        users: (data.users || [])
+          .filter((user: any) => user && user.username) // Filtrer les utilisateurs invalides
+          .map((user: any) => ({
+            id: user.id,
+            username: user.username || 'Utilisateur',
+            bio: user.bio || '',
+            profilePicture: user.profile_picture_url || '',
+            isVerified: user.is_verified || false,
+            followersCount: user.followers_count || 0,
+            followingCount: user.following_count || 0,
+          })),
         totalResults: data.totalResults || 0
       };
 
