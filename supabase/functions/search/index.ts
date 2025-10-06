@@ -69,7 +69,8 @@ serve(async (req) => {
           comments_count,
           views_count,
           profiles!inner(username, profile_picture_url, is_verified),
-          spaces(id, name, categories)
+          spaces(id, name, categories),
+          post_media(id, media_url, media_type, media_order, youtube_video_id, thumbnail_url)
         `)
         .or(`content.ilike.${searchTerm},hashtags.cs.{${query}}`)
         .limit(limit);

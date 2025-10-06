@@ -79,7 +79,14 @@ export function useSearch() {
               name: post.spaces.name || 'Général',
               category: post.spaces.categories ? post.spaces.categories.join(", ") : '',
             } : undefined,
-            post_media: []
+            post_media: (post.post_media || []).map((media: any) => ({
+              id: media.id,
+              media_url: media.media_url,
+              media_type: media.media_type,
+              media_order: media.media_order || 0,
+              youtube_video_id: media.youtube_video_id,
+              thumbnail_url: media.thumbnail_url
+            }))
           })),
         spaces: (data.spaces || []).map((space: any) => ({
           id: space.id,
