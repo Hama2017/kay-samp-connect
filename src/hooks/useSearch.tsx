@@ -61,22 +61,25 @@ export function useSearch() {
           .map((post: any) => ({
             id: post.id,
             content: post.content,
-            publicationDate: post.created_at,
-            votesUp: post.votes_up || 0,
-            votesDown: post.votes_down || 0,
-            commentsCount: post.comments_count || 0,
-            viewsCount: post.views_count || 0,
+            created_at: post.created_at,
+            votes_up: post.votes_up || 0,
+            votes_down: post.votes_down || 0,
+            comments_count: post.comments_count || 0,
+            views_count: post.views_count || 0,
             hashtags: post.hashtags || [],
-            category: post.spaces?.category || 'Général',
-            author: {
+            author_id: post.profiles?.id || '',
+            profiles: {
+              id: post.profiles?.id || '',
               username: post.profiles?.username || 'Utilisateur',
-              profilePicture: post.profiles?.profile_picture_url || '',
-              isVerified: post.profiles?.is_verified || false,
+              profile_picture_url: post.profiles?.profile_picture_url || '',
+              is_verified: post.profiles?.is_verified || false,
             },
-            space: {
-              name: post.spaces?.name || 'Général',
-              id: post.spaces?.id || 'general',
-            }
+            spaces: post.spaces ? {
+              id: post.spaces.id || 'general',
+              name: post.spaces.name || 'Général',
+              category: post.spaces.categories ? post.spaces.categories.join(", ") : '',
+            } : undefined,
+            post_media: []
           })),
         spaces: (data.spaces || []).map((space: any) => ({
           id: space.id,
