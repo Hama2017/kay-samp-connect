@@ -15,7 +15,7 @@ import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { CoverImageUpload } from "@/components/CoverImageUpload";
-import { SpaceBadge } from "@/components/SpaceBadge";
+import { SpaceCard } from "@/components/SpaceCard";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Profile() {
@@ -201,55 +201,10 @@ export default function Profile() {
             ) : userSpaces.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
                 {userSpaces.map((space) => (
-                  <Card 
-                    key={space.id} 
-                    className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
-                    onClick={() => navigate(`/space/${space.id}`)}
-                  >
-                    <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
-                      <div className="flex items-start justify-between gap-2 sm:gap-3">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Hash className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                              <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
-                                {space.name}
-                              </h3>
-                              {space.is_verified && (
-                                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
-                                  ✓
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                              <div className="flex flex-wrap gap-1">
-                                {space.categories && space.categories.map((category) => (
-                                  <Badge key={category} variant="outline" className="text-xs flex-shrink-0">
-                                    {category}
-                                  </Badge>
-                                ))}
-                              </div>
-                              <span className="hidden sm:inline">•</span>
-                              <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                <span>{space.subscribers_count}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                        {space.description || "Aucune description disponible"}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <SpaceCard
+                    key={space.id}
+                    space={space}
+                  />
                 ))}
                 
                 {spacesHasMore && (

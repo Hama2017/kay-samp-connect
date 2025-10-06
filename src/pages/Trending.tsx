@@ -12,6 +12,7 @@ import { useTopContributors } from "@/hooks/useTopContributors";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostActions } from "@/components/PostActions";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
+import { SpaceCard } from "@/components/SpaceCard";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data for trending
@@ -325,75 +326,22 @@ export default function Trending() {
 
         <TabsContent value="spaces" className="space-y-4">
           {topSpaces.map((space, index) => (
-            <Card 
-              key={space.id} 
-              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
-              onClick={() => navigate(`/space/${space.id}`)}
-            >
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <Badge 
-                      variant={index === 0 ? "default" : "secondary"}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? "bg-gradient-primary" : ""
-                      }`}
-                    >
-                      {index + 1}
-                    </Badge>
-                  </div>
-                  
-                  <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Hash className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-foreground">
-                        {space.name}
-                      </h3>
-                      {space.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
-                        </Badge>
-                      )}
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Users className="h-3 w-3" />
-                        <span>{space.subscribers_count}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1 text-sm text-muted-foreground">
-                      {space.categories.map((category) => (
-                        <Badge key={category} variant="outline" className="text-xs">
-                          {category}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div>
-                        <div className="text-sm font-semibold text-primary">
-                          {space.posts_count}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Posts
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-primary">
-                          {space.subscribers_count}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Actifs
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={space.id} className="relative">
+              {/* Badge position absolu en haut à droite */}
+              <div className="absolute top-4 right-4 z-10">
+                <Badge 
+                  variant={index === 0 ? "default" : "secondary"}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                    index === 0 ? "bg-gradient-primary" : ""
+                  }`}
+                >
+                  {index + 1}
+                </Badge>
+              </div>
+              <SpaceCard
+                space={space}
+              />
+            </div>
           ))}
         </TabsContent>
 
