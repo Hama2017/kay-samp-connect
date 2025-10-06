@@ -1,15 +1,13 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Hash, Plus, MessageCircle, ChevronUp, ChevronDown, Eye, TrendingUp, Clock, Flame, Settings } from "lucide-react";
+import { ArrowLeft, Users, Hash, Plus, MessageCircle, TrendingUp, Clock, Flame, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSpaces } from "@/hooks/useSpaces";
 import { usePosts } from "@/hooks/usePosts";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { PostActions } from "@/components/PostActions";
-import { PostModal } from "@/components/PostModal";
+import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { SpaceBadge } from '@/components/SpaceBadge';
 import { canUserPostInSpace } from '@/utils/spacePermissions';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,7 +25,6 @@ export default function SpaceDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("recent");
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const [hasAcceptedInvitation, setHasAcceptedInvitation] = useState(false);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
@@ -112,11 +109,7 @@ export default function SpaceDetail() {
     await votePost(postId, voteType);
   }, [votePost]);
 
-  const handlePostClick = useCallback((postId: string) => {
-    setSelectedPostId(postId);
-  }, []);
-
-  console.log('SpaceDetail render', { 
+  console.log('SpaceDetail render', {
     spacesLength: spaces.length, 
     postsLength: posts.length, 
     spacePostsLength: spacePosts.length,
@@ -309,10 +302,8 @@ export default function SpaceDetail() {
       {/* Rules section */}
       {space.rules && space.rules.length > 0 && (
         <Card className="mb-6">
-          <CardHeader>
-            <h3 className="font-semibold">Règles de l'espace</h3>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Règles de l'espace</h3>
             <ul className="space-y-2">
               {space.rules.map((rule, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
@@ -378,59 +369,15 @@ export default function SpaceDetail() {
         </div>
         
         {sortedPosts.length > 0 ? (
-          sortedPosts.map((post) => (
-            <Card 
-              key={post.id} 
-              className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
-              onClick={() => handlePostClick(post.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.profiles?.profile_picture_url} />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                      {post.profiles?.username?.substring(0, 2).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-sm">@{post.profiles?.username || "Utilisateur"}</span>
-                      {post.profiles?.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
-                        </Badge>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(post.created_at)}
-                      </span>
-                    </div>
-                    
-                    <p className="text-foreground leading-relaxed mb-3">
-                      {post.content}
-                    </p>
-
-                    {post.hashtags && post.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {post.hashtags.map((tag) => (
-                          <span key={tag} className="text-sm text-primary">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <PostActions 
-                        post={post}
-                        onVote={handleVote}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+          <InfinitePostsList
+            posts={sortedPosts}
+            onLoadMore={async () => {}}
+            onVote={handleVote}
+            onIncrementViews={async () => {}}
+            onPostClick={(post) => navigate(`/post/${post.id}`)}
+            hasMore={false}
+            isLoading={false}
+          />
         ) : (
           <div className="text-center py-12">
             <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -441,13 +388,6 @@ export default function SpaceDetail() {
           </div>
         )}
       </div>
-
-      {/* Modal de post */}
-      <PostModal
-        postId={selectedPostId}
-        isOpen={!!selectedPostId}
-        onClose={() => setSelectedPostId(null)}
-      />
     </div>
   );
 }
