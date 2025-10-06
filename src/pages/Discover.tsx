@@ -11,51 +11,6 @@ import { useSpaces } from "@/hooks/useSpaces";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { useCategories } from "@/hooks/useCategories";
 
-// Mock data for popular spaces
-const mockSpaces = [
-  {
-    id: "space_001",
-    name: "Lions du Sénégal 🦁",
-    description: "Tout sur l'équipe nationale de football",
-    category: "Sport",
-    subscribersCount: 1247,
-    isVerified: true,
-    lastActivity: "2024-03-15T09:15:00Z",
-    isSubscribed: true,
-  },
-  {
-    id: "space_002",
-    name: "Pod et Marichou Fan Club",
-    description: "Discussions sur la série sénégalaise",
-    category: "Culture & Musique",
-    subscribersCount: 892,
-    isVerified: false,
-    lastActivity: "2024-03-15T08:30:00Z",
-    isSubscribed: false,
-  },
-  {
-    id: "space_003",
-    name: "Cuisine Sénégalaise",
-    description: "Recettes traditionnelles et modernes du Sénégal",
-    category: "Cuisine",
-    subscribersCount: 634,
-    isVerified: true,
-    lastActivity: "2024-03-15T07:45:00Z",
-    isSubscribed: true,
-  },
-  {
-    id: "space_004",
-    name: "Tech Dakar",
-    description: "Technologie et innovation au Sénégal",
-    category: "Technologie",
-    subscribersCount: 453,
-    isVerified: false,
-    lastActivity: "2024-03-15T06:20:00Z",
-    isSubscribed: false,
-  },
-];
-
-
 
 const sortOptions = [
   { value: "popular", label: "Plus populaires" },
@@ -190,6 +145,16 @@ export default function Discover() {
               onClick={() => navigate(`/space/${space.id}`)}
             >
               <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+              <div className="mb-2">     
+                 {space.is_verified && (
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                            Officiel ✓
+                          </Badge>
+                        )}
+                        {space.badge && (
+                          <SpaceBadge badge={space.badge} className="text-xs flex-shrink-0" />
+                        )}
+                </div>
                 <div className="flex items-start justify-between gap-2 sm:gap-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
@@ -201,24 +166,10 @@ export default function Discover() {
                         <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
                           {space.name}
                         </h3>
-                        {space.is_verified && (
-                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
-                            ✓
-                          </Badge>
-                        )}
-                        {space.badge && (
-                          <SpaceBadge badge={space.badge} className="text-xs flex-shrink-0" />
-                        )}
                       </div>
                       
                       <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <div className="flex flex-wrap gap-1">
-                          {space.categories && space.categories.map((category) => (
-                            <Badge key={category} variant="outline" className="text-xs flex-shrink-0">
-                              {category}
-                            </Badge>
-                          ))}
-                        </div>
+                     
                         <span className="hidden sm:inline">•</span>
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
@@ -226,6 +177,8 @@ export default function Discover() {
                         </div>
                       </div>
                     </div>
+
+                    
                   </div>
                   
                   <Button
@@ -243,10 +196,20 @@ export default function Discover() {
               </CardHeader>
               
               <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
-                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                
+                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed mb-2">
                   {space.description || "Aucune description disponible"}
                 </p>
+
+                   <div className="flex flex-wrap gap-1">
+                          {space.categories && space.categories.map((category) => (
+                            <Badge key={category} variant="outline" className="text-xs flex-shrink-0">
+                              {category}
+                            </Badge>
+                          ))}
+                        </div>
               </CardContent>
+
             </Card>
           ))
         )}

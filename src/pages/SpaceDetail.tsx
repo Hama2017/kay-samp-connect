@@ -210,89 +210,100 @@ export default function SpaceDetail() {
           </div>
         )}
         
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-              <Hash className="h-8 w-8 text-primary-foreground" />
-            </div>
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold">{space.name}</h2>
-                {space.is_verified && (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    ✓ Certifié
-                  </Badge>
-                )}
-                {space.badge && (
-                  <SpaceBadge badge={space.badge} />
-                )}
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-            <div className="flex flex-wrap gap-2">
-              {space.categories.map((category) => (
-                <Badge key={category} variant="outline">{category}</Badge>
-              ))}
-            </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>{space.subscribers_count} membres</span>
-                </div>
-              </div>
-              
-              <p className="text-muted-foreground leading-relaxed">
-                {space.description}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex gap-3">
-            {user && space.creator_id !== user.id && (
-              <Button
-                variant={space.is_subscribed ? "outline" : "default"}
-                className="flex-1"
-                onClick={handleSubscriptionToggle}
-              >
-                {space.is_subscribed ? "Abonné" : "S'abonner"}
-              </Button>
-            )}
-            
-            {(() => {
-              const { canPost, message } = canUserPostInSpace(
-                space, 
-                user?.id, 
-                false, 
-                hasAcceptedInvitation
-              );
-              
-              return (
-                <div className="flex gap-2">
-                  {user && space.creator_id === user.id && (
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate(`/space/${spaceId}/admin`)}
-                      className="gap-2"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Administrer
-                    </Button>
-                  )}
-                  {canPost && (
-                    <Button 
-                      variant="default" 
-                      onClick={() => navigate(`/create/${spaceId}`)}
-                      className="gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Créer un post
-                    </Button>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
-        </CardContent>
+      <CardContent className="p-6">
+        <div className="mb-3"> 
+             {space.is_verified && (
+          <Badge variant="secondary" className="bg-primary/10 text-primary">
+            ✓ Officiel
+          </Badge>
+        )}
+        {space.badge && <SpaceBadge badge={space.badge} />}
+        </div>
+  <div className="flex items-start gap-4 mb-6">
+    <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+      <Hash className="h-8 w-8 text-primary-foreground" />
+    </div>
+
+    <div className="flex-1">
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-2xl font-bold">{space.name}</h2>
+      </div>
+
+      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+        <div className="flex items-center gap-1">
+          <Users className="h-4 w-4" />
+          <span>{space.subscribers_count} membres</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Description */}
+  {space.description && (
+    <p className="text-muted-foreground leading-relaxed mb-3">
+      {space.description}
+    </p>
+  )}
+
+  {/* Categories */}
+  {space.categories.length > 0 && (
+    <div className="flex flex-wrap gap-2 mb-5">
+      {space.categories.map((category) => (
+        <Badge key={category} variant="outline">
+          {category}
+        </Badge>
+      ))}
+    </div>
+  )}
+
+  {/* Buttons */}
+  <div className="flex flex-wrap gap-3">
+    {user && space.creator_id !== user.id && (
+      <Button
+        variant={space.is_subscribed ? "outline" : "default"}
+        className="flex-1"
+        onClick={handleSubscriptionToggle}
+      >
+        {space.is_subscribed ? "Abonné" : "S'abonner"}
+      </Button>
+    )}
+
+    {(() => {
+      const { canPost } = canUserPostInSpace(
+        space, 
+        user?.id, 
+        false, 
+        hasAcceptedInvitation
+      );
+
+      return (
+        <div className="flex gap-2">
+          {user && space.creator_id === user.id && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/space/${spaceId}/admin`)}
+              className="gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Administrer
+            </Button>
+          )}
+          {canPost && (
+            <Button
+              variant="default"
+              onClick={() => navigate(`/create/${spaceId}`)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Créer un post
+            </Button>
+          )}
+        </div>
+      );
+    })()}
+  </div>
+</CardContent>
+
       </Card>
 
       {/* Rules section */}

@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Award, CheckCircle, Calendar } from 'lucide-react';
 
 interface SpaceBadgeProps {
-  badge: 'kaaysamp' | 'factcheck' | 'evenement';
+  badge: 'kaaysamp' | 'factcheck' | 'evenement' | 'official';
   className?: string;
 }
 
@@ -23,6 +23,11 @@ export function SpaceBadge({ badge, className }: SpaceBadgeProps) {
       label: 'Événement',
       icon: Calendar,
       className: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0'
+    },
+    official: {
+      label: 'officiel',
+      icon: Calendar,
+      className: 'bg-gradient-to-r from-purple-500 to-green-500 text-white border-0'
     }
   };
 

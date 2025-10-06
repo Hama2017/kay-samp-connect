@@ -19,7 +19,7 @@ export function AppLayout() {
         <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         {/* CONTENU PRINCIPAL AVEC PADDING TOP */}
-        <main className="pt-16 pb-16 min-h-screen">
+        <main className="pt-16 pb-16 min-h-screen mt-13">
           <Outlet />
         </main>
 
