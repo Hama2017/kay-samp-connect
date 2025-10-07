@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import logo from "@/assets/kaaysamp-logo.png";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
@@ -172,7 +173,7 @@ export default function VerifyOTP() {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
             <img 
-              src="/src/assets/kaaysamp-logo.png" 
+              src={logo} 
               alt="KaaySamp" 
               className="relative h-24 w-24 object-contain"
             />
