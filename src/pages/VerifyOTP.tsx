@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, ArrowLeft, RefreshCw, AlertCircle } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import logo from "@/assets/kaaysamp-logo.png";
+import { AuthLayout } from "@/components/common/AuthLayout";
+import { LoadingButton } from "@/components/common/LoadingButton";
+import { ErrorAlert } from "@/components/common/ErrorAlert";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
@@ -181,40 +182,21 @@ export default function VerifyOTP() {
   if (!phone) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="w-full max-w-md space-y-8 animate-fade-in">
-        {/* Logo Section */}
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-            <img 
-              src={logo} 
-              alt="KaaySamp" 
-              className="relative h-24 w-24 object-contain"
-            />
-          </div>
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Vérification
-            </h1>
-            <div className="space-y-1">
-              <p className="text-muted-foreground text-base">
-                Code envoyé au
-              </p>
-              <p className="font-semibold text-foreground text-lg tracking-wider">{phone}</p>
-            </div>
+    <AuthLayout showLogo={false}>
+      <div className="flex flex-col items-center space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Vérification
+          </h1>
+          <div className="space-y-1">
+            <p className="text-muted-foreground text-base">Code envoyé au</p>
+            <p className="font-semibold text-foreground text-lg tracking-wider">{phone}</p>
           </div>
         </div>
 
-        {/* Form Card */}
-        <Card className="border-2 backdrop-blur-sm bg-card/50 shadow-2xl">
-        <CardContent className="pt-6 space-y-6">
-          {error && (
-            <Alert variant="destructive" className="animate-scale-in">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        <Card className="w-full border-2 backdrop-blur-sm bg-card/50 shadow-2xl">
+          <CardContent className="pt-6 space-y-6">
+            <ErrorAlert message={error} className="animate-scale-in" />
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-center">
@@ -238,20 +220,15 @@ export default function VerifyOTP() {
               </InputOTP>
             </div>
 
-            <Button 
+            <LoadingButton 
               type="submit" 
               className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" 
-              disabled={isLoading || otp.length !== 6}
+              disabled={otp.length !== 6}
+              isLoading={isLoading}
+              loadingText="Vérification..."
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Vérification...
-                </>
-              ) : (
-                'Vérifier'
-              )}
-            </Button>
+              Vérifier
+            </LoadingButton>
           </form>
 
           <div className="space-y-3">
@@ -287,6 +264,6 @@ export default function VerifyOTP() {
         </CardContent>
       </Card>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

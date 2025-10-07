@@ -3,11 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowRight, AlertCircle, CheckCircle, Sparkles } from "lucide-react";
+import { Loader2, ArrowRight, CheckCircle, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { AuthLayout } from "@/components/common/AuthLayout";
+import { LoadingButton } from "@/components/common/LoadingButton";
+import { ErrorAlert } from "@/components/common/ErrorAlert";
+import logo from "@/assets/kaaysamp-logo.png";
 
 export default function ProfileCompletion() {
   const [step, setStep] = useState<'name' | 'username'>('name');
@@ -24,7 +27,7 @@ export default function ProfileCompletion() {
 
   const { userId } = location.state || {};
 
-  // Vérifier la disponibilité du username en temps réel
+  // Vérifier la disponibilité du username
   useEffect(() => {
     const checkUsername = async () => {
       if (!username || username.length < 3 || step !== 'username') {
@@ -113,7 +116,6 @@ export default function ProfileCompletion() {
     setIsLoading(true);
 
     try {
-      // 🔥 CRÉER LE PROFIL COMPLET
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ 
@@ -130,14 +132,11 @@ export default function ProfileCompletion() {
         description: `Bienvenue ${fullName} (@${username})`,
       });
 
-      // 🔥 MARQUER L'ONBOARDING COMME TERMINÉ
       const userOnboardingKey = `onboarding_completed_${userId}`;
       localStorage.setItem(userOnboardingKey, 'true');
       localStorage.setItem('onboarding_completed', 'true');
 
       await updateUserProfile();
-      
-      // 🔥 REDIRIGER VERS L'ONBOARDING APP (carousel)
       navigate('/app-onboarding', { replace: true });
 
     } catch (error: any) {
@@ -154,13 +153,13 @@ export default function ProfileCompletion() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-hero">
-      <Card className="w-full max-w-md shadow-lg">
+    <AuthLayout showLogo={false}>
+      <Card className="w-full shadow-lg">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="relative">
               <img 
-                src="/src/assets/kaaysamp-logo.png" 
+                src={logo}
                 alt="KaaySamp" 
                 className="h-20 w-20 rounded-full object-cover ring-4 ring-primary/20"
               />
@@ -181,12 +180,7 @@ export default function ProfileCompletion() {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <ErrorAlert message={error} />
 
           {step === 'name' ? (
             <form onSubmit={handleNameSubmit} className="space-y-6">
@@ -200,7 +194,6 @@ export default function ProfileCompletion() {
                     setError(null);
                   }}
                   className="h-14 text-lg text-center"
-                  disabled={isLoading}
                   autoFocus
                   maxLength={50}
                 />
@@ -212,7 +205,7 @@ export default function ProfileCompletion() {
               <Button 
                 type="submit" 
                 className="w-full h-12 text-lg font-semibold" 
-                disabled={isLoading || !fullName.trim()}
+                disabled={!fullName.trim()}
               >
                 Suivant
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -245,7 +238,7 @@ export default function ProfileCompletion() {
                     <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                   )}
                   {!isChecking && isAvailable === false && (
-                    <AlertCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />
+                    <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />
                   )}
                 </div>
                 
@@ -261,7 +254,7 @@ export default function ProfileCompletion() {
                   )}
                   {isAvailable === false && (
                     <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
+                      <CheckCircle className="h-3 w-3" />
                       Déjà pris
                     </p>
                   )}
@@ -269,23 +262,16 @@ export default function ProfileCompletion() {
               </div>
 
               <div className="space-y-3">
-                <Button 
+                <LoadingButton 
                   type="submit" 
                   className="w-full h-12 text-lg font-semibold" 
-                  disabled={isLoading || !username || !isAvailable}
+                  disabled={!username || !isAvailable}
+                  isLoading={isLoading}
+                  loadingText="Création..."
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Création...
-                    </>
-                  ) : (
-                    <>
-                      Continuer 🚀
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </Button>
+                  Continuer 🚀
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </LoadingButton>
 
                 <Button
                   type="button"
@@ -307,6 +293,6 @@ export default function ProfileCompletion() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }
