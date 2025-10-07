@@ -155,7 +155,25 @@ export default function ProfileCompletion() {
   return (
     <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
-        <CardHeader className="text-center space-y-2">
+        <CardHeader className="text-center space-y-2 relative">
+          <div className="absolute top-6 right-6 flex items-center gap-2">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+              step === 'name' 
+                ? 'bg-primary border-primary text-primary-foreground' 
+                : 'bg-primary/10 border-primary text-primary'
+            }`}>
+              <span className="text-sm font-semibold">1</span>
+            </div>
+            <div className={`w-8 h-0.5 ${step === 'name' ? 'bg-border' : 'bg-primary'}`} />
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+              step === 'username' 
+                ? 'bg-primary border-primary text-primary-foreground' 
+                : 'bg-background border-border text-muted-foreground'
+            }`}>
+              <span className="text-sm font-semibold">2</span>
+            </div>
+          </div>
+          
           <CardTitle className="text-2xl font-bold">
             {step === 'name' ? "Nom complet" : "Choisissez votre pseudo"}
           </CardTitle>
