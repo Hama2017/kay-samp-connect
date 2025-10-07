@@ -15,7 +15,7 @@ const onboardingSteps = [
   },
   {
     icon: MessageSquare,
-    title: "Partagez votre quotidien",
+    title: "Publiez des posts",
     description: "Tu as une info à partager ou un sujet qui te tient à cœur ? Crée ton post et fais-nous savoir ce que tu en penses !",
   },
   {
