@@ -207,7 +207,7 @@ export default function ProfileCompletion() {
 
               <div className="space-y-3">
                 <LoadingButton type="submit" className="w-full h-12 text-lg font-semibold" disabled={!username || !isAvailable} isLoading={isLoading} loadingText="Création...">
-                  Continuer 🚀
+                  Continuer
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </LoadingButton>
 
