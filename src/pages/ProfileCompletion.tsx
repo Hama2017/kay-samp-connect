@@ -149,6 +149,11 @@ export default function ProfileCompletion() {
             <CardTitle className="text-2xl font-bold">
               {step === 'name' ? "Nom d'affichage" : "Nom d'utilisateur"}
             </CardTitle>
+            {step === 'name' && (
+              <CardDescription className="text-sm text-muted-foreground">
+                C'est le nom que les autres verront sur votre profil
+              </CardDescription>
+            )}
             {step === 'username'}
           </div>
         </CardHeader>
