@@ -110,10 +110,7 @@ export default function ProfileCompletion() {
         updated_at: new Date().toISOString()
       }).eq('id', userId);
       if (updateError) throw updateError;
-      toast({
-        title: "Profil créé ! 🎉",
-        description: `Bienvenue ${fullName} (@${username})`
-      });
+      
       const userOnboardingKey = `onboarding_completed_${userId}`;
       localStorage.setItem(userOnboardingKey, 'true');
       localStorage.setItem('onboarding_completed', 'true');
