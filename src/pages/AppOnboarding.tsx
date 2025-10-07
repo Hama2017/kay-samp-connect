@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MessageSquare, Hash, ArrowRight, Check, Sparkles, Users } from "lucide-react";
+import { MessageSquare, Hash, ArrowRight, Check, Sparkles, Users, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/components/common/AuthLayout";
 import welcomeImage from "@/assets/onboarding-welcome.png";
@@ -59,6 +59,12 @@ export default function AppOnboarding() {
         localStorage.setItem(onboardingKey, 'true');
       }
       navigate('/', { replace: true });
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -172,6 +178,17 @@ export default function AppOnboarding() {
         <CardContent className="space-y-6">
           {/* Boutons */}
           <div className="space-y-3">
+            {currentStep > 0 && (
+              <Button 
+                onClick={handleBack}
+                variant="outline"
+                className="w-full h-14 text-base font-semibold"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Retour
+              </Button>
+            )}
+            
             <Button 
               onClick={handleNext}
               className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
