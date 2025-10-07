@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MessageSquare, Hash, ArrowRight, Check, Sparkles, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/components/common/AuthLayout";
+import welcomeImage from "@/assets/onboarding-welcome.png";
 
 const onboardingSteps = [
   {
@@ -74,18 +75,28 @@ export default function AppOnboarding() {
 
           {/* Icône et titre */}
           <div className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="relative">
-                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Icon className="w-10 h-10 text-primary" />
-                </div>
-                {currentStep === onboardingSteps.length - 1 && (
-                  <div className="absolute -top-1 -right-1 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                )}
+            {currentStep === 0 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={welcomeImage} 
+                  alt="Bienvenue" 
+                  className="w-64 h-64 object-contain"
+                />
               </div>
-            </div>
+            ) : (
+              <div className="flex justify-center">
+                <div className="relative">
+                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Icon className="w-10 h-10 text-primary" />
+                  </div>
+                  {currentStep === onboardingSteps.length - 1 && (
+                    <div className="absolute -top-1 -right-1 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <CardTitle className="text-2xl font-bold">
