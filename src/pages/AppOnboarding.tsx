@@ -10,6 +10,7 @@ import postsImage from "@/assets/onboarding-posts.png";
 import sampzoneImage from "@/assets/onboarding-sampzone.png";
 import newsImage from "@/assets/onboarding-news.png";
 import trendingImage from "@/assets/onboarding-trending.png";
+import finalImage from "@/assets/onboarding-final.png";
 
 const onboardingSteps = [
   {
@@ -41,6 +42,11 @@ const onboardingSteps = [
     icon: Sparkles,
     title: "Découvre ce qui buzz",
     description: "Explore les sujets qui font le buzz, les SAMP Zones les plus animées et les créateurs les plus influents. Tout ce qui compte, regroupé au même endroit. Loy khar kay ?",
+  },
+  {
+    icon: Check,
+    title: "Rangg mou gaw",
+    description: "Alors loy khar kay nio far nio samp ? Amoul arrêt, rang mooy gaw !",
   },
 ];
 
@@ -131,6 +137,14 @@ export default function AppOnboarding() {
                 <img 
                   src={trendingImage} 
                   alt="Découvre ce qui buzz" 
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            ) : currentStep === 5 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={finalImage} 
+                  alt="Rangg mou gaw" 
                   className="w-64 h-64 object-contain"
                 />
               </div>
