@@ -147,7 +147,7 @@ export default function ProfileCompletion() {
           
           <div className="text-center space-y-2">
             <CardTitle className="text-2xl font-bold">
-              {step === 'name' ? "Nom complet" : "Nom d'utilisateur"}
+              {step === 'name' ? "Nom utilisateur" : "Identifiant"}
             </CardTitle>
             {step === 'username'}
           </div>
