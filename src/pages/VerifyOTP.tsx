@@ -209,13 +209,13 @@ export default function VerifyOTP() {
                 }}
                 disabled={isLoading}
               >
-                <InputOTPGroup className="gap-2">
-                  <InputOTPSlot index={0} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
-                  <InputOTPSlot index={1} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
-                  <InputOTPSlot index={2} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
-                  <InputOTPSlot index={3} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
-                  <InputOTPSlot index={4} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
-                  <InputOTPSlot index={5} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                <InputOTPGroup className="gap-1.5">
+                  <InputOTPSlot index={0} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={1} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={2} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={3} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={4} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={5} className="w-12 h-14 text-xl font-semibold border-2 transition-all duration-200" />
                 </InputOTPGroup>
               </InputOTP>
             </div>
