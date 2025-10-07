@@ -154,6 +154,11 @@ export default function ProfileCompletion() {
                 C'est le nom que les autres verront sur votre profil
               </CardDescription>
             )}
+            {step === 'username' && (
+              <CardDescription className="text-sm text-muted-foreground">
+                Votre identifiant unique pour vous connecter
+              </CardDescription>
+            )}
             {step === 'username'}
           </div>
         </CardHeader>
@@ -182,7 +187,7 @@ export default function ProfileCompletion() {
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">
                     @
                   </span>
-                  <Input type="text" placeholder="votre_pseudo" value={username} onChange={e => {
+                  <Input type="text" placeholder="" value={username} onChange={e => {
                 setUsername(e.target.value.toLowerCase());
                 setError(null);
               }} className="pl-10 h-14 text-lg" disabled={isLoading} autoFocus maxLength={20} />
