@@ -40,6 +40,8 @@ export default function VerifyOTP() {
     e.preventDefault();
     setError(null);
     
+    console.log('🚀 [VerifyOTP] Début handleSubmit');
+    
     if (otp.length !== 6) {
       setError("Veuillez entrer le code à 6 chiffres.");
       return;
@@ -48,7 +50,7 @@ export default function VerifyOTP() {
     setIsLoading(true);
 
     try {
-      console.log('🔐 Vérification OTP pour:', phone);
+      console.log('🔐 [VerifyOTP] Vérification OTP pour:', phone);
       
       // 🔥 ÉTAPE 1: Vérifier l'OTP
       const { data, error } = await supabase.auth.verifyOtp({
@@ -58,24 +60,30 @@ export default function VerifyOTP() {
       });
 
       if (error) {
-        console.error('❌ Erreur vérification:', error);
+        console.error('❌ [VerifyOTP] Erreur vérification:', error);
         throw error;
       }
 
-      console.log('✅ OTP vérifié, user:', data.user);
+      console.log('✅ [VerifyOTP] OTP vérifié, user:', data.user?.id);
+      console.log('📋 [VerifyOTP] Session créée:', !!data.session);
 
       if (!data.user) {
         throw new Error("Erreur de connexion");
       }
 
+      // 🔥 ATTENDRE UN PEU POUR QUE LA SESSION SOIT BIEN ÉTABLIE
+      console.log('⏳ [VerifyOTP] Attente 500ms pour établir la session...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // 🔥 ÉTAPE 2: Vérifier si le profil existe et est complet
+      console.log('📋 [VerifyOTP] Récupération du profil...');
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id, username, full_name, phone')
         .eq('id', data.user.id)
         .single();
 
-      console.log('📋 Profil récupéré:', profile);
+      console.log('📋 [VerifyOTP] Profil récupéré:', profile);
 
       // 🔥 DÉTERMINER SI C'EST UN NOUVEAU USER
       const isNewUser = !profile || 
@@ -83,10 +91,16 @@ export default function VerifyOTP() {
                        profile.username.startsWith('user_') ||
                        !profile.full_name;
 
-      console.log('🆕 Nouveau user?', isNewUser);
+      console.log('🆕 [VerifyOTP] Nouveau user?', isNewUser);
+      console.log('🆕 [VerifyOTP] Profile details:', {
+        exists: !!profile,
+        username: profile?.username,
+        full_name: profile?.full_name
+      });
 
       if (isNewUser) {
         // NOUVEAU UTILISATEUR → Compléter le profil
+        console.log('➡️ [VerifyOTP] Redirection vers /profile-completion');
         toast({
           title: "Code vérifié ✅",
           description: "Créons votre profil !",
@@ -98,22 +112,27 @@ export default function VerifyOTP() {
         });
       } else {
         // UTILISATEUR EXISTANT → Connexion directe
+        console.log('✅ [VerifyOTP] Utilisateur existant, vérification onboarding...');
         // 🔥 VÉRIFIER SI ONBOARDING APP DÉJÀ FAIT
         const onboardingKey = `app_onboarding_completed_${data.user.id}`;
         const hasSeenOnboarding = localStorage.getItem(onboardingKey);
+        
+        console.log('📱 [VerifyOTP] Onboarding vu?', !!hasSeenOnboarding);
 
         if (!hasSeenOnboarding) {
           // Montrer le carousel de présentation
+          console.log('➡️ [VerifyOTP] Redirection vers /app-onboarding');
           navigate('/app-onboarding', { replace: true });
         } else {
           // Aller directement à l'accueil
           const redirectTo = from?.pathname || '/';
+          console.log('➡️ [VerifyOTP] Redirection vers:', redirectTo);
           navigate(redirectTo, { replace: true });
         }
       }
 
     } catch (error: any) {
-      console.error('❌ Erreur:', error);
+      console.error('❌ [VerifyOTP] Erreur:', error);
       
       let errorMessage = "Code invalide ou expiré.";
       
@@ -127,6 +146,7 @@ export default function VerifyOTP() {
       setOtp("");
     } finally {
       setIsLoading(false);
+      console.log('🏁 [VerifyOTP] Fin handleSubmit');
     }
   };
 

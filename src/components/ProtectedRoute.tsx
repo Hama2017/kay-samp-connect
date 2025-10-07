@@ -10,7 +10,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
+  console.log('🛡️ [ProtectedRoute] Vérification:', {
+    path: location.pathname,
+    isLoading,
+    hasUser: !!user,
+    userId: user?.id,
+    hasProfile: !!user?.profile,
+    username: user?.profile?.username,
+    full_name: user?.profile?.full_name
+  });
+
   if (isLoading) {
+    console.log('⏳ [ProtectedRoute] En cours de chargement...');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -22,6 +33,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
+    console.log('❌ [ProtectedRoute] Pas d\'utilisateur → redirection vers /auth');
     // Redirect to auth page with return url
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
@@ -32,9 +44,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   
   if (!skipOnboardingCheck) {
     if (!user.profile?.full_name || user.profile.username?.startsWith('user_')) {
+      console.log('🔄 [ProtectedRoute] Profil incomplet → redirection vers /profile-completion');
       return <Navigate to="/profile-completion" replace />;
     }
   }
 
+  console.log('✅ [ProtectedRoute] Accès autorisé');
   return <>{children}</>;
 }
