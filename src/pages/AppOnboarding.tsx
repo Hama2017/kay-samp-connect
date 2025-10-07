@@ -9,6 +9,7 @@ import welcomeImage from "@/assets/onboarding-welcome.png";
 import postsImage from "@/assets/onboarding-posts.png";
 import sampzoneImage from "@/assets/onboarding-sampzone.png";
 import newsImage from "@/assets/onboarding-news.png";
+import trendingImage from "@/assets/onboarding-trending.png";
 
 const onboardingSteps = [
   {
@@ -35,6 +36,11 @@ const onboardingSteps = [
     icon: Sparkles,
     title: "Ne rate plus rien",
     description: "Suis toute l'actualité du Sénégal en temps réel ! Commente, fais remonter les infos qui te plaisent ou descends celles qui t'intéressent moins. Tu peux même samper une info précise pour ne rien manquer. Alors loy khar ? Sampal gaw !",
+  },
+  {
+    icon: Sparkles,
+    title: "Découvre ce qui buzz",
+    description: "Explore les sujets qui font le buzz, les SAMP Zones les plus animées et les créateurs les plus influents. Tout ce qui compte, regroupé au même endroit. Loy khar kay ?",
   },
 ];
 
@@ -117,6 +123,14 @@ export default function AppOnboarding() {
                 <img 
                   src={newsImage} 
                   alt="Ne rate plus rien" 
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            ) : currentStep === 4 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={trendingImage} 
+                  alt="Découvre ce qui buzz" 
                   className="w-64 h-64 object-contain"
                 />
               </div>
