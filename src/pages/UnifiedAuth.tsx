@@ -102,12 +102,19 @@ export default function UnifiedAuth() {
                 <label className="text-sm font-semibold text-foreground/90">
                   Numéro de téléphone
                 </label>
-                <PhoneInput defaultCountry="sn" value={phone} onChange={value => {
-                setPhone(value);
-                setError(null);
-              }} disabled={isLoading} inputClassName="w-full h-12 text-base" countrySelectorStyleProps={{
-                buttonClassName: "border-input h-12"
-              }} />
+                <PhoneInput 
+                  defaultCountry="sn" 
+                  value={phone} 
+                  onChange={value => {
+                    setPhone(value);
+                    setError(null);
+                  }} 
+                  disabled={isLoading} 
+                  inputClassName="w-full !h-12 text-base"
+                  countrySelectorStyleProps={{
+                    buttonClassName: "!h-12 border-input"
+                  }} 
+                />
               </div>
 
               <Button type="submit" className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" disabled={isLoading}>
