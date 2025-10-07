@@ -11,7 +11,7 @@ const onboardingSteps = [
   {
     icon: Users,
     title: "Bienvenue sur KaaySamp",
-    description: "Connectez-vous avec la diaspora sénégalaise et découvrez l'actualité qui vous ressemble",
+    description: "Envie de parler d'un sujet, débattre ou juste suivre toute l'actualité du Sénégal ? Loy khar kay gñu SAMP  😎 ",
   },
   {
     icon: MessageSquare,
