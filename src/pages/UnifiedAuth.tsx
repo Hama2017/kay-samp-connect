@@ -98,10 +98,7 @@ export default function UnifiedAuth() {
               </Alert>}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-foreground/90">
-                  Numéro de téléphone
-                </label>
+              <div>
                 <PhoneInput 
                   defaultCountry="sn" 
                   value={phone} 
@@ -109,15 +106,17 @@ export default function UnifiedAuth() {
                     setPhone(value);
                     setError(null);
                   }} 
-                  disabled={isLoading} 
-                  inputClassName="w-full !h-12 text-base"
+                  disabled={isLoading}
+                  placeholder="Entrez votre numéro"
+                  inputClassName="!w-full !h-14 !text-base !bg-background !border-input !rounded-lg !transition-all !duration-200 focus:!ring-2 focus:!ring-primary focus:!border-primary"
                   countrySelectorStyleProps={{
-                    buttonClassName: "!h-12 border-input"
-                  }} 
+                    buttonClassName: "!h-14 !border-input !rounded-l-lg !bg-background hover:!bg-accent !transition-all !duration-200",
+                    buttonContentWrapperClassName: "!p-2"
+                  }}
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" disabled={isLoading}>
+              <Button type="submit" className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" disabled={isLoading}>
                 {isLoading ? <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Envoi en cours...
