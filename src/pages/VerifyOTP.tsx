@@ -181,10 +181,12 @@ export default function VerifyOTP() {
             <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Vérification
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Code envoyé au<br />
-              <span className="font-semibold text-foreground">{phone}</span>
-            </p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground text-base">
+                Code envoyé au
+              </p>
+              <p className="font-semibold text-foreground text-lg tracking-wider">{phone}</p>
+            </div>
           </div>
         </div>
 
