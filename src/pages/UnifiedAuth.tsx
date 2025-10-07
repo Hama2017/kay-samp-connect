@@ -45,10 +45,6 @@ export default function UnifiedAuth() {
 
       /*  console.log('✅ OTP envoyé:', data); */
 
-      toast({
-        title: "Code envoyé ✅",
-        description: "Vérifiez vos SMS"
-      });
       navigate('/verify-otp', {
         state: {
           phone: phone,
