@@ -6,6 +6,7 @@ import { MessageSquare, Hash, ArrowRight, Check, Sparkles, Users } from "lucide-
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/components/common/AuthLayout";
 import welcomeImage from "@/assets/onboarding-welcome.png";
+import postsImage from "@/assets/onboarding-posts.png";
 
 const onboardingSteps = [
   {
@@ -80,6 +81,14 @@ export default function AppOnboarding() {
                 <img 
                   src={welcomeImage} 
                   alt="Bienvenue" 
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            ) : currentStep === 1 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={postsImage} 
+                  alt="Publiez des posts" 
                   className="w-64 h-64 object-contain"
                 />
               </div>
