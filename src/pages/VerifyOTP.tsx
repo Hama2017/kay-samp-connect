@@ -102,10 +102,6 @@ export default function VerifyOTP() {
       if (isNewUser) {
         // NOUVEAU UTILISATEUR → Compléter le profil
         console.log('➡️ [VerifyOTP] Redirection vers /profile-completion');
-        toast({
-          title: "Code vérifié ✅",
-          description: "Créons votre profil !",
-        });
         
         navigate('/profile-completion', { 
           replace: true,
