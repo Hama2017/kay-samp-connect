@@ -133,10 +133,6 @@ export default function UnifiedAuth() {
                     buttonClassName: "border-input h-12"
                   }}
                 />
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <span className="text-primary">•</span>
-                  Format international requis
-                </p>
               </div>
 
               <Button 
