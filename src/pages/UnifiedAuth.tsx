@@ -35,16 +35,16 @@ export default function UnifiedAuth() {
     try {
       console.log('📱 Envoi OTP à:', phone);
 
-      /*   const { data, error } = await supabase.auth.signInWithOtp({
-          phone: phone,
-        }); */
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: phone,
+      });
 
       if (error) {
         console.error('❌ Erreur:', error);
         throw error;
       }
 
-      /*  console.log('✅ OTP envoyé:', data); */
+      console.log('✅ OTP envoyé:', data);
 
       navigate('/verify-otp', {
         state: {
