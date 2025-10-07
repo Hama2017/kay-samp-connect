@@ -8,6 +8,7 @@ import { AuthLayout } from "@/components/common/AuthLayout";
 import welcomeImage from "@/assets/onboarding-welcome.png";
 import postsImage from "@/assets/onboarding-posts.png";
 import sampzoneImage from "@/assets/onboarding-sampzone.png";
+import newsImage from "@/assets/onboarding-news.png";
 
 const onboardingSteps = [
   {
@@ -29,6 +30,11 @@ const onboardingSteps = [
     icon: Users,
     title: "SAMP Zone",
     description: "Crée ou rejoins une SAMP Zone ! Ce sont des espaces communautaires autour de sujets qui te passionnent : football, séries, sport... Discute avec ceux qui partagent tes intérêts !",
+  },
+  {
+    icon: Sparkles,
+    title: "Ne rate plus rien",
+    description: "Suis toute l'actualité du Sénégal en temps réel ! Commente, fais remonter les infos qui te plaisent ou descends celles qui t'intéressent moins. Tu peux même samper une info précise pour ne rien manquer. Alors loy khar ? Sampal gaw !",
   },
 ];
 
@@ -103,6 +109,14 @@ export default function AppOnboarding() {
                 <img 
                   src={sampzoneImage} 
                   alt="SAMP Zone" 
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            ) : currentStep === 3 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={newsImage} 
+                  alt="Ne rate plus rien" 
                   className="w-64 h-64 object-contain"
                 />
               </div>
