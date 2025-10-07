@@ -40,8 +40,8 @@ const onboardingSteps = [
   },
   {
     icon: Check,
-    title: "Rangg mou gaw",
-    description: "Alors loy khar kay nio far nio samp ? Amoul arrêt, rang mooy gaw !",
+    title: "Rejoins-nous maintenant !",
+    description: "Alors prêt à samper ? Pas d'hésitation, rang mooy gaw ! Rejoins des milliers de Sénégalais dès maintenant !",
   },
 ];
 
