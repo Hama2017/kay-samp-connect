@@ -155,8 +155,8 @@ export default function ProfileCompletion() {
   return (
     <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
-        <CardHeader className="text-center space-y-2 relative">
-          <div className="absolute top-6 right-6 flex items-center gap-2">
+        <CardHeader className="space-y-6">
+          <div className="flex items-center justify-center gap-2 pt-2">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
               step === 'name' 
                 ? 'bg-primary border-primary text-primary-foreground' 
@@ -174,14 +174,16 @@ export default function ProfileCompletion() {
             </div>
           </div>
           
-          <CardTitle className="text-2xl font-bold">
-            {step === 'name' ? "Nom complet" : "Choisissez votre pseudo"}
-          </CardTitle>
-          {step === 'username' && (
-            <CardDescription className="text-sm">
-              Salut {fullName} 👋 Votre identifiant unique sur KaaySamp
-            </CardDescription>
-          )}
+          <div className="text-center space-y-2">
+            <CardTitle className="text-2xl font-bold">
+              {step === 'name' ? "Nom complet" : "Choisissez votre pseudo"}
+            </CardTitle>
+            {step === 'username' && (
+              <CardDescription className="text-sm">
+                Salut {fullName} 👋 Votre identifiant unique sur KaaySamp
+              </CardDescription>
+            )}
+          </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
