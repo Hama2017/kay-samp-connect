@@ -83,78 +83,95 @@ export default function UnifiedAuth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-hero">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
             <img 
               src="/src/assets/kaaysamp-logo.png" 
               alt="KaaySamp" 
-              className="h-20 w-20 object-contain"
+              className="relative h-24 w-24 object-contain"
             />
           </div>
-          <div>
-            <CardTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Bienvenue sur KaaySamp
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              Entrez votre numéro pour commencer
-            </CardDescription>
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              KaaySamp
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Connectez-vous en quelques secondes
+            </p>
           </div>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Numéro de téléphone
-              </label>
-              <PhoneInput
-                defaultCountry="sn"
-                value={phone}
-                onChange={(value) => {
-                  setPhone(value);
-                  setError(null);
-                }}
+        {/* Form Card */}
+        <Card className="border-2 backdrop-blur-sm bg-card/50 shadow-2xl">
+          <CardContent className="pt-6 space-y-6">
+            {error && (
+              <Alert variant="destructive" className="animate-scale-in">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground/90">
+                  Numéro de téléphone
+                </label>
+                <PhoneInput
+                  defaultCountry="sn"
+                  value={phone}
+                  onChange={(value) => {
+                    setPhone(value);
+                    setError(null);
+                  }}
+                  disabled={isLoading}
+                  inputClassName="w-full h-12 text-base"
+                  countrySelectorStyleProps={{
+                    buttonClassName: "border-input h-12"
+                  }}
+                />
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="text-primary">•</span>
+                  Format international requis
+                </p>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" 
                 disabled={isLoading}
-                inputClassName="w-full"
-                countrySelectorStyleProps={{
-                  buttonClassName: "border-input"
-                }}
-              />
-              <p className="text-xs text-muted-foreground">
-                Sélectionnez votre pays et entrez votre numéro
-              </p>
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    Continuer
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Security Info */}
+            <div className="pt-4 border-t space-y-3">
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
+                  🔒 Connexion sécurisée
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
+                  ⚡ Instantané
+                </div>
+              </div>
             </div>
-
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-lg font-semibold" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Envoi en cours...
-                </>
-              ) : (
-                <>
-                  Continuer
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </>
-              )}
-            </Button>
-          </form>
-
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
