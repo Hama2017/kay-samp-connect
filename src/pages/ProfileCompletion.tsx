@@ -156,16 +156,6 @@ export default function ProfileCompletion() {
     <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
         <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="relative">
-              <img 
-                src={logo}
-                alt="KaaySamp" 
-                className="h-20 w-20 rounded-full object-cover ring-4 ring-primary/20"
-              />
-              <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
-            </div>
-          </div>
           <div>
             <CardTitle className="text-3xl font-bold">
               {step === 'name' ? "Comment vous appelez-vous ?" : "Choisissez votre pseudo"}
