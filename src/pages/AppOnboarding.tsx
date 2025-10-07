@@ -24,11 +24,6 @@ const onboardingSteps = [
     description: "Tu as une info à partager ou un sujet qui te tient à cœur ? Crée ton post et fais-nous savoir ce que tu en penses !",
   },
   {
-    icon: Hash,
-    title: "Explorez les espaces",
-    description: "Rejoignez des communautés thématiques : Sport, Tech, Culture, Cuisine et bien plus encore",
-  },
-  {
     icon: Users,
     title: "SAMP Zone",
     description: "Crée ou rejoins une SAMP Zone ! Ce sont des espaces communautaires autour de sujets qui te passionnent : football, séries, sport... Discute avec ceux qui partagent tes intérêts !",
