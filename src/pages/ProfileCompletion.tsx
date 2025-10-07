@@ -155,26 +155,23 @@ export default function ProfileCompletion() {
   return (
     <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
-        <CardHeader className="text-center space-y-4">
-          <div>
-            <CardTitle className="text-3xl font-bold">
-              {step === 'name' ? "Comment vous appelez-vous ?" : "Choisissez votre pseudo"}
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              {step === 'name' 
-                ? "Votre nom complet (visible sur votre profil)"
-                : `Salut ${fullName} 👋 Votre identifiant unique sur KaaySamp`
-              }
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-2xl font-bold">
+            {step === 'name' ? "Nom complet" : "Choisissez votre pseudo"}
+          </CardTitle>
+          {step === 'username' && (
+            <CardDescription className="text-sm">
+              Salut {fullName} 👋 Votre identifiant unique sur KaaySamp
             </CardDescription>
-          </div>
+          )}
         </CardHeader>
         
         <CardContent className="space-y-6">
           <ErrorAlert message={error} />
 
           {step === 'name' ? (
-            <form onSubmit={handleNameSubmit} className="space-y-6">
-              <div className="space-y-3">
+            <form onSubmit={handleNameSubmit} className="space-y-5">
+              <div className="space-y-2">
                 <Input
                   type="text"
                   placeholder="Mamadou Diallo 🇸🇳"
@@ -183,23 +180,25 @@ export default function ProfileCompletion() {
                     setFullName(e.target.value);
                     setError(null);
                   }}
-                  className="h-14 text-lg text-center"
+                  className="h-14 text-base"
                   autoFocus
                   maxLength={50}
                 />
                 <p className="text-xs text-muted-foreground text-center">
-                  Utilisez votre vrai nom, un surnom ou même des emojis ! 🎨✨
+                  Utilisez votre nom, un surnom ou même des emojis
                 </p>
               </div>
 
-              <Button 
+              <LoadingButton 
                 type="submit" 
-                className="w-full h-12 text-lg font-semibold" 
+                className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" 
                 disabled={!fullName.trim()}
+                isLoading={isLoading}
+                loadingText="Validation..."
               >
                 Suivant
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              </LoadingButton>
             </form>
           ) : (
             <form onSubmit={handleUsernameSubmit} className="space-y-6">
