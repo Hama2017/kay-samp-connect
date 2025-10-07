@@ -276,11 +276,6 @@ export default function ProfileCompletion() {
             </form>
           )}
 
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">
-              Étape {step === 'name' ? '1' : '2'}/2 • Vous pourrez tout modifier dans les paramètres
-            </p>
-          </div>
         </CardContent>
       </Card>
     </AuthLayout>
