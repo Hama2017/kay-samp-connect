@@ -18,9 +18,11 @@ export function AppLayout() {
         {/* SIDEBAR */}
         <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        {/* CONTENU PRINCIPAL AVEC PADDING TOP */}
-        <main className="pt-16 pb-16 min-h-screen mt-13">
-          <Outlet />
+        {/* CONTENU PRINCIPAL - Responsive avec safe areas iPhone */}
+        <main className="pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] min-h-screen">
+          <div className="w-full h-full">
+            <Outlet />
+          </div>
         </main>
 
         {/* NAVIGATION BOTTOM FIXE */}

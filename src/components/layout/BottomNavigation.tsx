@@ -14,8 +14,8 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md supports-[backdrop-filter]:bg-[hsl(var(--background))] bg-[hsl(var(--background))] before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[env(safe-area-inset-bottom)] before:bg-[hsl(var(--background))]">
-  <div className="flex items-center justify-around h-[6.5rem] px-2 max-w-screen-sm mx-auto pb-[calc(env(safe-area-inset-bottom)+4px)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md supports-[backdrop-filter]:bg-background/95 bg-background pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around h-16 px-2 max-w-screen-sm mx-auto safe-area-left safe-area-right">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
