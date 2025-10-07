@@ -81,7 +81,7 @@ export default function UnifiedAuth() {
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               KaaySamp
             </h1>
-            <p className="text-muted-foreground text-sm">Rejoins-nous pour suivre toute l'actualité du Sénégal</p>
+            <p className="text-muted-foreground text-sm">Rejoins-nous pour suivre l'actualité, discuter et débattre.</p>
           </div>
         </div>
 
@@ -95,21 +95,13 @@ export default function UnifiedAuth() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <PhoneInput 
-                  defaultCountry="sn" 
-                  value={phone} 
-                  onChange={value => {
-                    setPhone(value);
-                    setError(null);
-                  }} 
-                  disabled={isLoading}
-                  placeholder="Entrez votre numéro"
-                  inputClassName="!w-full !h-14 !text-base !text-foreground !bg-background !border-input !rounded-r-lg !transition-all !duration-200 focus:!ring-2 focus:!ring-primary focus:!border-primary placeholder:!text-muted-foreground"
-                  countrySelectorStyleProps={{
-                    buttonClassName: "!h-14 !border-input !rounded-l-lg !bg-background hover:!bg-accent !transition-all !duration-200",
-                    buttonContentWrapperClassName: "!p-2"
-                  }}
-                />
+                <PhoneInput defaultCountry="sn" value={phone} onChange={value => {
+                setPhone(value);
+                setError(null);
+              }} disabled={isLoading} placeholder="Entrez votre numéro" inputClassName="!w-full !h-14 !text-base !text-foreground !bg-background !border-input !rounded-r-lg !transition-all !duration-200 focus:!ring-2 focus:!ring-primary focus:!border-primary placeholder:!text-muted-foreground" countrySelectorStyleProps={{
+                buttonClassName: "!h-14 !border-input !rounded-l-lg !bg-background hover:!bg-accent !transition-all !duration-200",
+                buttonContentWrapperClassName: "!p-2"
+              }} />
               </div>
 
               <Button type="submit" className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" disabled={isLoading}>
