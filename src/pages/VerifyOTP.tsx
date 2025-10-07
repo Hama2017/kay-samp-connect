@@ -165,30 +165,34 @@ export default function VerifyOTP() {
   if (!phone) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-hero">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
             <img 
               src="/src/assets/kaaysamp-logo.png" 
               alt="KaaySamp" 
-              className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/20"
+              className="relative h-24 w-24 object-contain"
             />
           </div>
-          <div>
-            <CardTitle className="text-2xl font-bold">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Vérification
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
+            </h1>
+            <p className="text-muted-foreground text-sm">
               Code envoyé au<br />
               <span className="font-semibold text-foreground">{phone}</span>
-            </CardDescription>
+            </p>
           </div>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
+        </div>
+
+        {/* Form Card */}
+        <Card className="border-2 backdrop-blur-sm bg-card/50 shadow-2xl">
+        <CardContent className="pt-6 space-y-6">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-scale-in">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -205,20 +209,20 @@ export default function VerifyOTP() {
                 }}
                 disabled={isLoading}
               >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
-                  <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
-                  <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
-                  <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
-                  <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
-                  <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
+                <InputOTPGroup className="gap-2">
+                  <InputOTPSlot index={0} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={1} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={2} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={3} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={4} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
+                  <InputOTPSlot index={5} className="w-14 h-14 text-xl font-semibold border-2 transition-all duration-200" />
                 </InputOTPGroup>
               </InputOTP>
             </div>
 
             <Button 
               type="submit" 
-              className="w-full h-12 text-lg font-semibold" 
+              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" 
               disabled={isLoading || otp.length !== 6}
             >
               {isLoading ? (
@@ -238,7 +242,7 @@ export default function VerifyOTP() {
                 variant="ghost"
                 onClick={handleResend}
                 disabled={!canResend || isLoading}
-                className="text-sm"
+                className="text-sm hover:bg-accent/50 transition-colors"
               >
                 {canResend ? (
                   <>
@@ -255,7 +259,7 @@ export default function VerifyOTP() {
               <Button
                 variant="link"
                 onClick={() => navigate('/auth')}
-                className="text-sm text-muted-foreground"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Changer de numéro
@@ -264,6 +268,7 @@ export default function VerifyOTP() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
