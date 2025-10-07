@@ -157,18 +157,6 @@ export default function UnifiedAuth() {
                 )}
               </Button>
             </form>
-
-            {/* Security Info */}
-            <div className="pt-4 border-t space-y-3">
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
-                  🔒 Connexion sécurisée
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
-                  ⚡ Instantané
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
