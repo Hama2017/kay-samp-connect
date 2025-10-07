@@ -14,13 +14,16 @@ import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Camera, LogOut, Shield, Eye, Settings as SettingsIcon, Users, Palette } from "lucide-react";
+import { ArrowLeft, Camera, LogOut, Shield, Eye, Trash2, Palette } from "lucide-react";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Settings() {
   const { user, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const [profileData, setProfileData] = useState({
     bio: user?.profile?.bio || ""
@@ -98,6 +101,32 @@ export default function Settings() {
       description: "À bientôt sur KaaySamp !"
     });
     navigate("/login");
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('delete-account');
+      
+      if (error) throw error;
+
+      toast({
+        title: "Compte supprimé",
+        description: "Votre compte a été supprimé définitivement"
+      });
+      
+      // Sign out and redirect
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer votre compte. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
   if (!user) return null;
@@ -341,6 +370,27 @@ export default function Settings() {
                       }
                     />
                   </div>
+
+                  <div className="pt-6 border-t">
+                    <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+                      <h4 className="font-medium text-destructive mb-2 flex items-center gap-2">
+                        <Trash2 className="h-4 w-4" />
+                        Supprimer mon compte
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        La suppression de votre compte est définitive et irréversible. 
+                        Toutes vos données, posts, commentaires et espaces seront supprimés.
+                      </p>
+                      <Button 
+                        variant="destructive" 
+                        onClick={() => setDeleteDialogOpen(true)}
+                        className="gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Supprimer mon compte
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -404,6 +454,12 @@ export default function Settings() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <DeleteAccountDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteAccount}
+      />
     </div>
   );
 }
