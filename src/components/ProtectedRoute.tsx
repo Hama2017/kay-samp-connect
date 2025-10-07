@@ -26,10 +26,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if user needs onboarding (skip for onboarding pages)
-  if (!location.pathname.startsWith('/onboarding')) {
+  // Check if user needs profile completion (skip for auth/onboarding pages)
+  const skipOnboardingCheck = location.pathname.startsWith('/profile-completion') || 
+                              location.pathname.startsWith('/app-onboarding');
+  
+  if (!skipOnboardingCheck) {
     if (!user.profile?.full_name || user.profile.username?.startsWith('user_')) {
-      return <Navigate to="/onboarding/name" replace />;
+      return <Navigate to="/profile-completion" replace />;
     }
   }
 

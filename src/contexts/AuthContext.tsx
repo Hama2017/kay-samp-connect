@@ -86,7 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('🔐 Auth state changed:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
@@ -98,12 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ...session.user,
                 profile: profile || undefined
               });
+              setIsLoading(false);
             } catch (error) {
               console.error('Error in auth state change:', error);
-            } finally {
+              setUser({ ...session.user, profile: undefined });
               setIsLoading(false);
             }
-          }, 100); // Augmenter le délai pour éviter les conflits
+          }, 0);
         } else {
           setUser(null);
           setIsLoading(false);
