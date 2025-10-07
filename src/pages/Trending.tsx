@@ -196,17 +196,17 @@ export default function Trending() {
 
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="posts" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
-            Top Posts
+          <TabsTrigger value="posts" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
+            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm truncate">Posts</span>
           </TabsTrigger>
-          <TabsTrigger value="spaces" className="flex items-center gap-2">
-            <Hash className="h-4 w-4" />
-            Top Espaces
+          <TabsTrigger value="spaces" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
+            <Hash className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm truncate">Espaces</span>
           </TabsTrigger>
-          <TabsTrigger value="contributors" className="flex items-center gap-2">
-            <Crown className="h-4 w-4" />
-            Top Contributeurs
+          <TabsTrigger value="contributors" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
+            <Crown className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm truncate">Contributeurs</span>
           </TabsTrigger>
         </TabsList>
 
