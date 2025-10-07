@@ -108,7 +108,7 @@ export default function UnifiedAuth() {
                   }} 
                   disabled={isLoading}
                   placeholder="Entrez votre numéro"
-                  inputClassName="!w-full !h-14 !text-base !bg-background !border-input !rounded-lg !transition-all !duration-200 focus:!ring-2 focus:!ring-primary focus:!border-primary"
+                  inputClassName="!w-full !h-14 !text-base !text-foreground !bg-background !border-input !rounded-r-lg !transition-all !duration-200 focus:!ring-2 focus:!ring-primary focus:!border-primary placeholder:!text-muted-foreground"
                   countrySelectorStyleProps={{
                     buttonClassName: "!h-14 !border-input !rounded-l-lg !bg-background hover:!bg-accent !transition-all !duration-200",
                     buttonContentWrapperClassName: "!p-2"
