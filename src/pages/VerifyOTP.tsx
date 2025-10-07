@@ -98,11 +98,6 @@ export default function VerifyOTP() {
         });
       } else {
         // UTILISATEUR EXISTANT → Connexion directe
-        toast({
-          title: "Connexion réussie ✅",
-          description: `Content de vous revoir ${profile.full_name || '@' + profile.username} !`,
-        });
-
         // 🔥 VÉRIFIER SI ONBOARDING APP DÉJÀ FAIT
         const onboardingKey = `app_onboarding_completed_${data.user.id}`;
         const hasSeenOnboarding = localStorage.getItem(onboardingKey);
