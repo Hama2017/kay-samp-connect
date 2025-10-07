@@ -18,12 +18,14 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider
-    attribute="class"
-    defaultTheme="system"
-    enableSystem
-    disableTransitionOnChange
-  >
-    <App />
-  </ThemeProvider>
+  <React.StrictMode>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
 );
