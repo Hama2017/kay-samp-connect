@@ -90,7 +90,7 @@ export default function UnifiedAuth() {
             <img 
               src="/src/assets/kaaysamp-logo.png" 
               alt="KaaySamp" 
-              className="h-20 w-20 rounded-full object-cover ring-4 ring-primary/20"
+              className="h-20 w-20 object-contain"
             />
           </div>
           <div>
