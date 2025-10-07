@@ -10,17 +10,17 @@ const onboardingSteps = [
   {
     icon: Users,
     title: "Bienvenue sur KaaySamp",
-    description: "Votre réseau social pour connecter la diaspora sénégalaise et partager votre culture",
+    description: "Connectez-vous avec la diaspora sénégalaise et découvrez l'actualité qui vous ressemble",
   },
   {
     icon: MessageSquare,
-    title: "Partagez vos moments",
-    description: "Publiez des photos, vidéos et pensées avec votre communauté",
+    title: "Partagez votre quotidien",
+    description: "Publiez des photos, vidéos, GIFs et vos pensées. Utilisez les hashtags pour toucher plus de monde",
   },
   {
     icon: Hash,
-    title: "Rejoignez des espaces",
-    description: "Découvrez des communautés autour de vos passions et centres d'intérêt",
+    title: "Explorez les espaces",
+    description: "Rejoignez des communautés thématiques : Sport, Tech, Culture, Cuisine et bien plus encore",
   },
 ];
 
