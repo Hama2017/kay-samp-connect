@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/components/common/AuthLayout";
 import welcomeImage from "@/assets/onboarding-welcome.png";
 import postsImage from "@/assets/onboarding-posts.png";
+import sampzoneImage from "@/assets/onboarding-sampzone.png";
 
 const onboardingSteps = [
   {
@@ -23,6 +24,11 @@ const onboardingSteps = [
     icon: Hash,
     title: "Explorez les espaces",
     description: "Rejoignez des communautés thématiques : Sport, Tech, Culture, Cuisine et bien plus encore",
+  },
+  {
+    icon: Users,
+    title: "SAMP Zone",
+    description: "Crée ou rejoins une SAMP Zone ! Ce sont des espaces communautaires autour de sujets qui te passionnent : football, séries, sport... Discute avec ceux qui partagent tes intérêts !",
   },
 ];
 
@@ -89,6 +95,14 @@ export default function AppOnboarding() {
                 <img 
                   src={postsImage} 
                   alt="Publiez des posts" 
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+            ) : currentStep === 2 ? (
+              <div className="flex justify-center mb-2">
+                <img 
+                  src={sampzoneImage} 
+                  alt="SAMP Zone" 
                   className="w-64 h-64 object-contain"
                 />
               </div>
