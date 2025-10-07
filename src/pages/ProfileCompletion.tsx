@@ -149,16 +149,10 @@ export default function ProfileCompletion() {
             <CardTitle className="text-2xl font-bold">
               {step === 'name' ? "Nom d'affichage" : "Nom d'utilisateur"}
             </CardTitle>
-            {step === 'name' && (
-              <CardDescription className="text-sm text-muted-foreground">
+            {step === 'name' && <CardDescription className="text-sm text-muted-foreground">
                 C'est le nom que les autres verront sur votre profil
-              </CardDescription>
-            )}
-            {step === 'username' && (
-              <CardDescription className="text-sm text-muted-foreground">
-                Votre identifiant unique pour vous connecter
-              </CardDescription>
-            )}
+              </CardDescription>}
+            {step === 'username' && <CardDescription className="text-sm text-muted-foreground">Votre identifiant unique</CardDescription>}
             {step === 'username'}
           </div>
         </CardHeader>
