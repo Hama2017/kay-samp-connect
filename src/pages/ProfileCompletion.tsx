@@ -194,7 +194,7 @@ export default function ProfileCompletion() {
               <div className="space-y-2">
                 <Input
                   type="text"
-                  placeholder="Votre nom"
+                  placeholder="NanditeBii😎"
                   value={fullName}
                   onChange={(e) => {
                     setFullName(e.target.value);
