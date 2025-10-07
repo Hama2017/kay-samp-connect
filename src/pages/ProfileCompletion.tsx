@@ -31,6 +31,13 @@ export default function ProfileCompletion() {
     userId
   } = location.state || {};
 
+  // Redirection si pas de userId
+  useEffect(() => {
+    if (!userId) {
+      navigate('/auth', { replace: true });
+    }
+  }, [userId, navigate]);
+
   // Vérifier la disponibilité du username
   useEffect(() => {
     const checkUsername = async () => {
@@ -125,10 +132,11 @@ export default function ProfileCompletion() {
       setIsLoading(false);
     }
   };
+
   if (!userId) {
-    navigate('/auth');
     return null;
   }
+
   return <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
         <CardHeader className="space-y-6">
