@@ -45,7 +45,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (!skipOnboardingCheck) {
     if (!user.profile?.full_name || user.profile.username?.startsWith('user_')) {
       console.log('🔄 [ProtectedRoute] Profil incomplet → redirection vers /profile-completion');
-      return <Navigate to="/profile-completion" state={{ userId: user.id }} replace />;
+      return <Navigate to="/profile-completion" replace />;
     }
   }
 
