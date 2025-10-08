@@ -64,8 +64,36 @@ export default function VerifyOTPLogin() {
 
       console.log('✅ [VerifyOTPLogin] Connexion réussie');
 
+      if (!data.user) {
+        throw new Error("Erreur de connexion");
+      }
+
       // Attendre que la session soit établie
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Vérifier si le profil est complété
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_profile_completed')
+        .eq('id', data.user.id)
+        .single();
+
+      console.log('📋 [VerifyOTPLogin] Profil:', profile);
+
+      if (!profile?.is_profile_completed) {
+        console.log('⚠️ [VerifyOTPLogin] Profil incomplet, redirection vers profile-completion');
+        toast({
+          title: "Bienvenue !",
+          description: "Complète ton profil pour continuer",
+        });
+        navigate('/profile-completion', { state: { userId: data.user.id }, replace: true });
+        return;
+      }
+
+      toast({
+        title: "Connexion réussie !",
+        description: "Bienvenue sur KaaySamp ! 🎉",
+      });
 
       // Rediriger vers Home
       navigate('/', { replace: true });
