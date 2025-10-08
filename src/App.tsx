@@ -20,8 +20,10 @@ import NotFound from "./pages/NotFound";
 import SpaceDetail from "./pages/SpaceDetail";
 import SpaceAdmin from "./pages/SpaceAdmin";
 import UnifiedAuth from "@/pages/UnifiedAuth";
-import VerifyOTP from "@/pages/VerifyOTP";
-import ProfileCompletion from "@/pages/ProfileCompletion";
+import Login from "@/pages/Login";
+import SignUp from "@/pages/SignUp";
+import VerifyOTPLogin from "@/pages/VerifyOTPLogin";
+import VerifyOTPSignup from "@/pages/VerifyOTPSignup";
 import AppOnboarding from "@/pages/AppOnboarding";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
@@ -45,23 +47,24 @@ function App() {
           <BrowserRouter>
             <PageTracker />
             <Routes>
-              {/* 🔥 AUTHENTIFICATION - Route unique par téléphone */}
+              {/* 🔥 AUTHENTIFICATION */}
               <Route path="/auth" element={<UnifiedAuth />} />
-              <Route path="/verify-otp" element={<VerifyOTP />} />
-              
-              {/* 🔥 COMPLÉTION PROFIL - Page unique pour nom + username */}
-              <Route path="/profile-completion" element={<ProfileCompletion />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/verify-otp-login" element={<VerifyOTPLogin />} />
+              <Route path="/verify-otp-signup" element={<VerifyOTPSignup />} />
               
               {/* 🔥 ONBOARDING APP - Carousel de présentation */}
               <Route path="/app-onboarding" element={<AppOnboarding />} />
               
-              {/* 🔥 REDIRECTIONS - Anciennes routes → Nouvelle route auth */}
-              <Route path="/login" element={<Navigate to="/auth" replace />} />
-              <Route path="/register" element={<Navigate to="/auth" replace />} />
-              <Route path="/phone-login" element={<Navigate to="/auth" replace />} />
+              {/* 🔥 REDIRECTIONS - Anciennes routes */}
+              <Route path="/verify-otp" element={<Navigate to="/login" replace />} />
+              <Route path="/profile-completion" element={<Navigate to="/signup" replace />} />
+              <Route path="/register" element={<Navigate to="/signup" replace />} />
+              <Route path="/phone-login" element={<Navigate to="/login" replace />} />
               <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
-              <Route path="/onboarding/name" element={<Navigate to="/profile-completion" replace />} />
-              <Route path="/onboarding/username" element={<Navigate to="/profile-completion" replace />} />
+              <Route path="/onboarding/name" element={<Navigate to="/signup" replace />} />
+              <Route path="/onboarding/username" element={<Navigate to="/signup" replace />} />
               
               {/* Routes protégées avec layout */}
               <Route path="/" element={
