@@ -118,11 +118,16 @@ export default function ProfileCompletion() {
       }).eq('id', userId);
       if (updateError) throw updateError;
       
+      console.log('✅ [ProfileCompletion] Profil mis à jour avec succès');
+      
       // Mise à jour du contexte d'authentification
       await updateUserProfile();
       
-      // Petit délai pour s'assurer que le contexte est mis à jour
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Délai plus long pour s'assurer que le contexte est complètement mis à jour
+      console.log('⏳ [ProfileCompletion] Attente 1000ms pour mise à jour contexte...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('➡️ [ProfileCompletion] Navigation vers /app-onboarding');
       
       // Redirection vers l'onboarding de l'app (sans marquer comme complété)
       navigate('/app-onboarding', {
