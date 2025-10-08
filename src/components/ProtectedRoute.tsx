@@ -38,14 +38,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if user needs to complete signup (skip for auth/onboarding pages)
-  const skipOnboardingCheck = location.pathname.startsWith('/signup') || 
+  // Check if user needs profile completion (skip for auth/onboarding pages)
+  const skipOnboardingCheck = location.pathname.startsWith('/profile-completion') || 
                               location.pathname.startsWith('/app-onboarding');
   
   if (!skipOnboardingCheck) {
     if (!user.profile?.full_name || user.profile.username?.startsWith('user_')) {
-      console.log('🔄 [ProtectedRoute] Profil incomplet → redirection vers /signup');
-      return <Navigate to="/signup" replace />;
+      console.log('🔄 [ProtectedRoute] Profil incomplet → redirection vers /profile-completion');
+      return <Navigate to="/profile-completion" state={{ userId: user.id }} replace />;
     }
   }
 

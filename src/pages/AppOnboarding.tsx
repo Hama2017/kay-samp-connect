@@ -40,8 +40,8 @@ const onboardingSteps = [
   },
   {
     icon: Check,
-    title: "Tout est prêt !",
-    description: "Ton compte a été créé avec succès ! Tu peux maintenant profiter de toutes les fonctionnalités de KaaySamp. Rang mooy gaw ! 🎉",
+    title: "Rejoins-nous maintenant !",
+    description: "Alors prêt à samper ? Pas d'hésitation, rang mooy gaw ! Rejoins des milliers de Sénégalais dès maintenant !",
   },
 ];
 
