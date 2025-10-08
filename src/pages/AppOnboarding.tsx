@@ -41,7 +41,7 @@ const onboardingSteps = [
   {
     icon: Check,
     title: "Tout est prêt !",
-    description: "Maintenant, connecte-toi avec ton numéro pour compléter ton profil et profiter de toutes les fonctionnalités ! 🎉",
+    description: "Ton compte a été créé avec succès ! Tu peux maintenant profiter de toutes les fonctionnalités de KaaySamp. Rang mooy gaw ! 🎉",
   },
 ];
 
@@ -58,8 +58,7 @@ export default function AppOnboarding() {
         const onboardingKey = `app_onboarding_completed_${user.id}`;
         localStorage.setItem(onboardingKey, 'true');
       }
-      console.log('✅ [AppOnboarding] Onboarding terminé, redirection vers login');
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 

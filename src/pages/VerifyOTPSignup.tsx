@@ -20,7 +20,7 @@ export default function VerifyOTPSignup() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { phone } = location.state || {};
+  const { phone, username, fullName, bio } = location.state || {};
 
   useEffect(() => {
     if (countdown > 0) {
@@ -32,10 +32,10 @@ export default function VerifyOTPSignup() {
   }, [countdown]);
 
   useEffect(() => {
-    if (!phone) {
+    if (!phone || !username || !fullName) {
       navigate('/signup');
     }
-  }, [phone, navigate]);
+  }, [phone, username, fullName, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,16 +62,33 @@ export default function VerifyOTPSignup() {
         throw error;
       }
 
-      console.log('✅ [VerifyOTPSignup] OTP vérifié, profil minimal créé automatiquement');
+      console.log('✅ [VerifyOTPSignup] OTP vérifié');
 
       if (!data.user) {
         throw new Error("Erreur de création de compte");
       }
 
-      toast({
-        title: "Numéro vérifié !",
-        description: "Bienvenue sur KaaySamp ! 🎉",
-      });
+      // Attendre que la session soit établie
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Mettre à jour le profil avec les infos
+      console.log('📝 [VerifyOTPSignup] Mise à jour du profil');
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          username: username,
+          full_name: fullName,
+          bio: bio || null,
+          phone: phone
+        })
+        .eq('id', data.user.id);
+
+      if (updateError) {
+        console.error('❌ [VerifyOTPSignup] Erreur mise à jour:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ [VerifyOTPSignup] Compte créé avec succès');
 
       // Rediriger vers onboarding
       navigate('/app-onboarding', { replace: true });
@@ -122,7 +139,7 @@ export default function VerifyOTPSignup() {
     }
   };
 
-  if (!phone) return null;
+  if (!phone || !username || !fullName) return null;
 
   return (
     <AuthLayout showLogo={false}>

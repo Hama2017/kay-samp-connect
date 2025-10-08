@@ -18,7 +18,6 @@ interface Profile {
   profile_visible: boolean;
   show_email: boolean;
   show_followers: boolean;
-  is_profile_completed: boolean;
 }
 
 interface AuthUser extends User {

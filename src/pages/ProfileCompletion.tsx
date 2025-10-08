@@ -114,21 +114,25 @@ export default function ProfileCompletion() {
       } = await supabase.from('profiles').update({
         full_name: fullName.trim(),
         username: username.toLowerCase(),
-        is_profile_completed: true,
         updated_at: new Date().toISOString()
       }).eq('id', userId);
       if (updateError) throw updateError;
       
-      console.log('✅ [ProfileCompletion] Profil complété avec succès');
+      console.log('✅ [ProfileCompletion] Profil mis à jour avec succès');
       
-      toast({
-        title: "Profil complété !",
-        description: "Bienvenue sur KaaySamp ! 🎉"
-      });
+      // Mise à jour du contexte d'authentification
+      await updateUserProfile();
       
-      // Redirection vers la page d'accueil
-      navigate('/', {
-        replace: true
+      // Délai plus long pour s'assurer que le contexte est complètement mis à jour
+      console.log('⏳ [ProfileCompletion] Attente 1000ms pour mise à jour contexte...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('➡️ [ProfileCompletion] Navigation vers /app-onboarding');
+      
+      // Redirection vers l'onboarding de l'app (sans marquer comme complété)
+      navigate('/app-onboarding', {
+        replace: true,
+        state: { fromProfileCompletion: true }
       });
     } catch (error: any) {
       console.error('Erreur:', error);

@@ -566,7 +566,6 @@ export type Database = {
           following_count: number | null
           full_name: string | null
           id: string
-          is_profile_completed: boolean
           is_verified: boolean | null
           phone: string | null
           profile_picture_url: string | null
@@ -584,7 +583,6 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id: string
-          is_profile_completed?: boolean
           is_verified?: boolean | null
           phone?: string | null
           profile_picture_url?: string | null
@@ -602,7 +600,6 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id?: string
-          is_profile_completed?: boolean
           is_verified?: boolean | null
           phone?: string | null
           profile_picture_url?: string | null
