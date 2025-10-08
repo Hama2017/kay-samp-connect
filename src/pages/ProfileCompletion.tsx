@@ -118,12 +118,16 @@ export default function ProfileCompletion() {
       }).eq('id', userId);
       if (updateError) throw updateError;
       
-      const userOnboardingKey = `onboarding_completed_${userId}`;
-      localStorage.setItem(userOnboardingKey, 'true');
-      localStorage.setItem('onboarding_completed', 'true');
+      // Mise à jour du contexte d'authentification
       await updateUserProfile();
+      
+      // Petit délai pour s'assurer que le contexte est mis à jour
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Redirection vers l'onboarding de l'app (sans marquer comme complété)
       navigate('/app-onboarding', {
-        replace: true
+        replace: true,
+        state: { fromProfileCompletion: true }
       });
     } catch (error: any) {
       console.error('Erreur:', error);
