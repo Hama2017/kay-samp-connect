@@ -172,7 +172,7 @@ All colors MUST be HSL. */
 
   .navbar-mobile {
     position: fixed;
-    top: 0;
+    top: env(safe-area-inset-top);
     left: 0;
     right: 0;
     z-index: 50;
@@ -181,7 +181,6 @@ All colors MUST be HSL. */
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid hsl(var(--border));
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-    padding-top: env(safe-area-inset-top);
   }
 
   .bottom-nav-mobile {
@@ -198,6 +197,34 @@ All colors MUST be HSL. */
     padding-bottom: env(safe-area-inset-bottom);
   }
   
+  /* Safe area fills */
+  .safe-area-top-fill {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background-color: hsl(var(--background));
+    z-index: 100;
+  }
+  
+  .safe-area-bottom-fill {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-bottom);
+    background-color: hsl(var(--background));
+    z-index: 100;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 
   .btn-mobile {
     min-height: 44px; /* iOS minimum touch target */
