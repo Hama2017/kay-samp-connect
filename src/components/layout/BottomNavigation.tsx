@@ -14,9 +14,9 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-    <>
-      <nav className="bottom-nav-mobile">
-        <div className="flex justify-around items-center py-2 safe-area-bottom">
+    <nav className="bottom-nav-mobile">
+      <div className="bottom-nav-content">
+        <div className="flex justify-around items-center py-2">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
@@ -73,7 +73,8 @@ export function BottomNavigation() {
       );
     })}
         </div>
-      </nav>
-    </>
+      </div>
+      <div className="h-[env(safe-area-inset-bottom)] bg-background" />
+    </nav>
   );
 }
