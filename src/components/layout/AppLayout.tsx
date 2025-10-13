@@ -10,8 +10,7 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="mobile-container bg-background text-foreground">
-        
+      <div className="mobile-container">
         {/* Header fixe en haut */}
         <AppHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -19,10 +18,9 @@ export function AppLayout() {
         <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         {/* Contenu principal scrollable */}
-     <main className="content-mobile overflow-y-auto">
-  <Outlet />
-</main>
-
+        <main className="content-mobile">
+          <Outlet />
+        </main>
 
         {/* Bottom nav fixe */}
         <BottomNavigation />
