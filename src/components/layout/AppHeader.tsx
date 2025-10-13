@@ -26,13 +26,10 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   return (
     <>
       {/* Safe area fill au-dessus du header */}
-      <div 
-        className="fixed top-0 left-0 right-0 bg-background z-[100]" 
-        style={{ height: 'env(safe-area-inset-top)' }}
-      />
+      <div className="safe-area-top-fill" />
       
-      <header className="navbar-mobile z-[99]">
-        <div className="flex items-center justify-between px-4 py-2">
+      <header className="navbar-mobile">
+        <div className="flex items-center justify-between px-4 py-2 safe-area-top">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center gap-3">
           <Button 

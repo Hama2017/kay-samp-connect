@@ -15,8 +15,8 @@ const navigationItems = [
 export function BottomNavigation() {
   return (
     <>
-      <nav className="bottom-nav-mobile z-[99]">
-        <div className="flex justify-around items-center py-2">
+      <nav className="bottom-nav-mobile">
+        <div className="flex justify-around items-center py-2 safe-area-bottom">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
@@ -76,10 +76,7 @@ export function BottomNavigation() {
       </nav>
       
       {/* Safe area fill en dessous du bottom nav */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 bg-background z-[100]" 
-        style={{ height: 'env(safe-area-inset-bottom)' }}
-      />
+      <div className="safe-area-bottom-fill" />
     </>
   );
 }
