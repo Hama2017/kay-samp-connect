@@ -185,7 +185,7 @@ All colors MUST be HSL. */
 
   .bottom-nav-mobile {
     position: fixed;
-    bottom: env(safe-area-inset-bottom);
+    bottom: 0;
     left: 0;
     right: 0;
     z-index: 50;
@@ -194,6 +194,7 @@ All colors MUST be HSL. */
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid hsl(var(--border));
     box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   
   /* Safe area fills */

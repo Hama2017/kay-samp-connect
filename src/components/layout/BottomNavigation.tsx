@@ -74,9 +74,6 @@ export function BottomNavigation() {
     })}
         </div>
       </nav>
-      
-      {/* Safe area fill en dessous du bottom nav */}
-      <div className="safe-area-bottom-fill" />
     </>
   );
 }
