@@ -14,9 +14,8 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-    <>
-      <nav className="bottom-nav-mobile">
-        <div className="flex justify-around items-center py-2 safe-area-bottom">
+    <nav className="bottom-nav-mobile">
+      <div className="flex justify-around items-center py-2">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
@@ -72,8 +71,7 @@ export function BottomNavigation() {
         </NavLink>
       );
     })}
-        </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
