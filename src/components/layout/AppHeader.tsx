@@ -25,8 +25,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   
   return (
     <header className="navbar-mobile">
-      <div className="navbar-content">
-        <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center gap-3">
           <Button 
@@ -114,7 +113,6 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
 
 
         </div>
-      </div>
       </div>
     </header>
   );
