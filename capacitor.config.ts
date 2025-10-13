@@ -5,15 +5,15 @@ const config: CapacitorConfig = {
   appName: 'KaaySamp',
   webDir: 'dist',
   server: {
-    url: 'http://192.168.1.124:8080', // ← ton serveur local
+    url: 'http://192.168.1.124:8080',
     cleartext: true
   },
   ios: {
-    contentInset: 'always',
-    backgroundColor: '#ffffff'
+    contentInset: 'never', // Désactive les insets automatiques
+    backgroundColor: '#0a1628' // Couleur dark mode du design system
   },
   android: {
-    backgroundColor: '#ffffff'
+    backgroundColor: '#0a1628'
   }
 };
 
