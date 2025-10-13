@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'KaaySamp',
   webDir: 'dist',
   server: {
-    url: 'https://f0d266d3-11b2-4338-a868-e07b1e2aa7d3.lovableproject.com?forceHideBadge=true',
+    url: 'http://192.168.1.124:8080', // ← ton serveur local
     cleartext: true
   },
   ios: {

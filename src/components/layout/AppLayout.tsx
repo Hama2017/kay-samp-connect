@@ -10,22 +10,21 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full bg-background">
+      <div className="mobile-container bg-background text-foreground">
         
-        {/* HEADER FIXE */}
+        {/* Header fixe en haut */}
         <AppHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        {/* CONTENU PRINCIPAL - Responsive avec safe areas iPhone */}
-        <main className="pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] min-h-screen">
-          <div className="w-full h-full">
-            <Outlet />
-          </div>
-        </main>
+        {/* Contenu principal scrollable */}
+     <main className="content-mobile overflow-y-auto">
+  <Outlet />
+</main>
 
-        {/* NAVIGATION BOTTOM FIXE */}
+
+        {/* Bottom nav fixe */}
         <BottomNavigation />
       </div>
     </SidebarProvider>

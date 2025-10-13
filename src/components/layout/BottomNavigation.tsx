@@ -14,8 +14,8 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md supports-[backdrop-filter]:bg-background/95 bg-background pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-16 px-2 max-w-screen-sm mx-auto safe-area-left safe-area-right">
+        <nav className="bottom-nav-mobile bg-background border-t shadow-sm safe-area-bottom">
+      <div className="flex justify-around items-center py-2">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
