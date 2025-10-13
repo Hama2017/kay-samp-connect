@@ -14,8 +14,9 @@ const navigationItems = [
 
 export function BottomNavigation() {
   return (
-        <nav className="bottom-nav-mobile bg-background border-t shadow-sm safe-area-bottom">
-      <div className="flex justify-around items-center py-2">
+    <>
+      <nav className="bottom-nav-mobile">
+        <div className="flex justify-around items-center py-2">
     {navigationItems.map((item) => {
       const Icon = item.icon;
 
@@ -71,7 +72,11 @@ export function BottomNavigation() {
         </NavLink>
       );
     })}
-  </div>
-</nav>
+        </div>
+      </nav>
+      
+      {/* Safe area fill en dessous du bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 h-[env(safe-area-inset-bottom)] bg-background z-[60]" style={{ transform: 'translateY(100%)' }} />
+    </>
   );
 }

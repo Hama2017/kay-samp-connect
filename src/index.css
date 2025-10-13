@@ -161,47 +161,31 @@ All colors MUST be HSL. */
   }
 
   .navbar-mobile {
-    @apply fixed top-0 left-0 right-0;
-    z-index: 100;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     background-color: hsl(var(--background));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid hsl(var(--border));
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  }
-  
-  /* Safe area fill pour le header */
-  .navbar-mobile::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: env(safe-area-inset-top);
-    background-color: hsl(var(--background));
-    z-index: -1;
+    padding-top: env(safe-area-inset-top);
   }
 
   .bottom-nav-mobile {
-    @apply fixed bottom-0 left-0 right-0;
-    z-index: 100;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     background-color: hsl(var(--background));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid hsl(var(--border));
     box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.1);
-  }
-  
-  /* Safe area fill pour le bottom nav */
-  .bottom-nav-mobile::after {
-    content: '';
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: env(safe-area-inset-bottom);
-    background-color: hsl(var(--background));
-    z-index: -1;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .safe-area-top {

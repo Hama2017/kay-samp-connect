@@ -24,8 +24,12 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const { user, signOut } = useAuth();
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 safe-area-top navbar-mobile bg-background border-b shadow-sm">
-      <div className="flex items-center justify-between px-4 py-2">
+    <>
+      {/* Safe area fill au-dessus du header */}
+      <div className="fixed top-0 left-0 right-0 h-[env(safe-area-inset-top)] bg-background z-[60]" />
+      
+      <header className="navbar-mobile">
+        <div className="flex items-center justify-between px-4 py-2">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center gap-3">
           <Button 
@@ -114,6 +118,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
 
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
