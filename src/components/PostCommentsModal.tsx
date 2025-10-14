@@ -295,7 +295,7 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="h-[85vh] flex flex-col bg-background">
+      <DrawerContent className="max-h-[85vh] h-auto flex flex-col bg-background">
         {/* Header - Style TikTok */}
         <DrawerHeader className="flex-shrink-0 border-b border-border py-4 bg-background">
           <div className="flex items-center justify-center relative">
