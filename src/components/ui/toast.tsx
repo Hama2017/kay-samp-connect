@@ -14,7 +14,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 left-1/2 -translate-x-1/2 z-[100] flex max-h-screen w-[calc(100%-2rem)] max-w-[420px] flex-col gap-2 p-4 sm:top-4",
+      "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] flex max-h-screen w-[calc(100%-2rem)] max-w-[420px] flex-col gap-2 p-4",
       className,
     )}
     {...props}
@@ -23,12 +23,12 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 pr-12 shadow-xl backdrop-blur-sm transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 pr-12 shadow-2xl backdrop-blur-md transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:scale-out-95 data-[state=open]:scale-in-95",
   {
     variants: {
       variant: {
-        default: "border-border bg-background/95 text-foreground",
-        destructive: "border-destructive/30 bg-destructive/10 text-destructive",
+        default: "border-border/50 bg-background/80 text-foreground shadow-[0_0_40px_rgba(0,0,0,0.15)] dark:shadow-[0_0_40px_rgba(0,0,0,0.5)]",
+        destructive: "border-destructive/30 bg-destructive/10 text-destructive shadow-[0_0_40px_rgba(239,68,68,0.25)] dark:shadow-[0_0_40px_rgba(239,68,68,0.4)]",
       },
     },
     defaultVariants: {
