@@ -520,8 +520,8 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
           </ScrollArea>
         </div>
 
-        {/* Zone de saisie - Style TikTok */}
-        <div className="flex-shrink-0 bg-background border-t border-border p-4">
+        {/* Zone de saisie - Style TikTok - Toujours visible */}
+        <div className="flex-shrink-0 bg-background border-t border-border p-4 sticky bottom-0">
           {/* Indicateur de réponse */}
           {replyingTo && replyingToUsername && (
             <div className="mb-3 p-3 bg-muted rounded-lg">
