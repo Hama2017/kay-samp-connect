@@ -5,12 +5,12 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "relative w-full rounded-xl p-4 shadow-lg backdrop-blur-sm transition-all duration-300 [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-2px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
-        destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        default: "bg-background/95 text-foreground border border-border",
+        destructive: "bg-destructive/10 border border-destructive/30 text-destructive [&>svg]:text-destructive",
       },
     },
     defaultVariants: {
@@ -26,12 +26,19 @@ const Alert = React.forwardRef<
     onClose?: () => void;
   }
 >(({ className, variant, dismissible, onClose, children, ...props }, ref) => (
-  <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props}>
+  <div ref={ref} role="alert" className={cn(alertVariants({ variant }), dismissible && "pr-12", className)} {...props}>
     {children}
     {dismissible && onClose && (
       <button
         onClick={onClose}
-        className="absolute right-2 top-2 rounded-md p-1 hover:bg-accent transition-colors opacity-70 hover:opacity-100"
+        className={cn(
+          "absolute right-3 top-3 rounded-full p-1.5 transition-all duration-200",
+          "hover:scale-110 active:scale-95",
+          "focus:outline-none focus:ring-2 focus:ring-offset-2",
+          variant === "destructive" 
+            ? "bg-destructive/20 hover:bg-destructive/30 text-destructive focus:ring-destructive" 
+            : "bg-muted hover:bg-muted/80 text-muted-foreground focus:ring-primary"
+        )}
         aria-label="Fermer"
       >
         <X className="h-4 w-4" />
@@ -50,7 +57,7 @@ AlertTitle.displayName = "AlertTitle";
 
 const AlertDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("text-sm [&_p]:leading-relaxed", className)} {...props} />
+    <div ref={ref} className={cn("text-sm leading-relaxed [&_p]:leading-relaxed", className)} {...props} />
   ),
 );
 AlertDescription.displayName = "AlertDescription";
