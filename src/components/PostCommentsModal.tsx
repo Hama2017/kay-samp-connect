@@ -298,15 +298,24 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
       <DrawerContent className="h-[70vh] flex flex-col bg-background">
         {/* Header - Style TikTok */}
         <DrawerHeader className="flex-shrink-0 border-b border-border py-4 bg-background">
-          <div className="flex items-center justify-center relative">
-            <DrawerTitle className="text-lg font-semibold text-foreground text-center">
-              {post.comments_count} commentaires
-            </DrawerTitle>
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarImage src={post.profiles.profile_picture_url || ""} />
+                <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
+                  {post.profiles.username?.substring(0, 2).toUpperCase() || "??"}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold text-base text-foreground">{post.profiles.username}</p>
+                <p className="text-sm text-muted-foreground">{post.comments_count} commentaires</p>
+              </div>
+            </div>
             <DrawerClose asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-0 h-8 w-8 hover:bg-accent rounded-full"
+                className="h-8 w-8 hover:bg-accent rounded-full"
               >
                 <X className="h-5 w-5" />
               </Button>
