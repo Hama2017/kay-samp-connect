@@ -118,6 +118,17 @@ All colors MUST be HSL. */
    * {
     @apply border-border;
   }
+  
+  /* Masquer les scrollbars sur tous les navigateurs */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE et Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari et Opera */
+  }
+  
   html, body {
     @apply bg-background text-foreground font-sans;
     margin: 0;
