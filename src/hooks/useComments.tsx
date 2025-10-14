@@ -174,11 +174,6 @@ export function useComments() {
         }
       }
 
-      toast({
-        title: "Commentaire ajouté !",
-        description: "Votre commentaire a été publié",
-      });
-
       // Refresh comments from the beginning
       setCurrentPage(1);
       setHasMore(true);
