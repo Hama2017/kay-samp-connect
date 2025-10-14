@@ -597,10 +597,10 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowGifSelector(true)}
-                    className="h-8 px-0 text-muted-foreground hover:text-foreground"
+                    className="flex items-center gap-1 h-8 px-2"
                     disabled={isSubmitting}
                   >
-                    <Image className="h-5 w-5" />
+                    <Image className="h-4 w-4" />
                     <span className="text-xs">GIF</span>
                   </Button>
                   
