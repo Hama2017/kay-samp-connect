@@ -108,10 +108,6 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                   <ThemeToggle />
                 </div>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="text-destructive">
-                Se déconnecter
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu> 
 
