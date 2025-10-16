@@ -14,6 +14,7 @@ import { SpaceCard } from "@/components/SpaceCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpacesPaginated } from "@/hooks/useSpacesPaginated";
+import defaultCover from "@/assets/default-cover.png";
 
 export default function UserProfile() {
   const { username } = useParams();
@@ -165,17 +166,13 @@ useEffect(() => {
         Retour
       </Button>
 
-      {coverImageUrl ? (
-        <div className="w-full h-48 rounded-t-lg overflow-hidden mb-0">
-          <img 
-            src={coverImageUrl} 
-            alt="Couverture" 
-            className="w-full h-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="w-full h-48 bg-gradient-primary rounded-t-lg mb-0" />
-      )}
+      <div className="w-full h-48 rounded-t-lg overflow-hidden mb-0">
+        <img 
+          src={coverImageUrl || defaultCover} 
+          alt="Couverture" 
+          className="w-full h-full object-cover"
+        />
+      </div>
 
       <Card className="rounded-t-none border-t-0">
         <CardHeader className="pb-0">

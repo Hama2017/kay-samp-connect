@@ -17,6 +17,7 @@ import { AvatarUpload } from "@/components/AvatarUpload";
 import { CoverImageUpload } from "@/components/CoverImageUpload";
 import { SpaceCard } from "@/components/SpaceCard";
 import { supabase } from "@/integrations/supabase/client";
+import defaultCover from "@/assets/default-cover.png";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -72,7 +73,7 @@ export default function Profile() {
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden">
       {/* Cover Image */}
       <CoverImageUpload 
-        currentCoverUrl={coverImageUrl}
+        currentCoverUrl={coverImageUrl || defaultCover}
         onUploadComplete={(url) => setCoverImageUrl(url)}
       />
       
