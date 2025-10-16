@@ -41,7 +41,7 @@ useEffect(() => {
     try {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, username, bio, profile_picture_url, cover_image_url, is_verified, followers_count, following_count, created_at, updated_at, profile_visible')
         .eq('username', username)
         .single();
         

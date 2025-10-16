@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import GifSelector from '@/components/GifSelector';
+import { sanitizeContent } from '@/utils/contentSanitizer';
 
 interface PostModalProps {
   postId: string | null;
@@ -188,7 +189,7 @@ export function PostModal({ postId, isOpen, onClose }: PostModalProps) {
                   <div 
                     className="text-foreground leading-relaxed break-all whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{
-                      __html: post.content.replace(/#(\w+)/g, '<span style="color: hsl(var(--primary)); font-weight: 600;">#$1</span>')
+                      __html: sanitizeContent(post.content)
                     }}
                   />
                   

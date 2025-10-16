@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
+import { sanitizeContent } from "@/utils/contentSanitizer";
 
 interface Post {
   id: string;
@@ -234,7 +235,7 @@ export function InfinitePostsList({
               <div 
                 className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
                 dangerouslySetInnerHTML={{
-                  __html: getDisplayContent(post).replace(/#(\w+)/g, '<span style="color: #1f9463; font-weight: 600;">#$1</span>')
+                  __html: sanitizeContent(getDisplayContent(post))
                 }}
               />
               

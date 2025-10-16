@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { PostCommentsModal } from '@/components/PostCommentsModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRealBookmarks } from '@/hooks/useRealBookmarks';
+import { sanitizeContent } from '@/utils/contentSanitizer';
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -189,7 +190,7 @@ export default function PostDetail() {
           <div 
             className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
             dangerouslySetInnerHTML={{
-              __html: post.content.replace(/#(\w+)/g, '<span style="color: #1f9463; font-weight: 600;">#$1</span>')
+              __html: sanitizeContent(post.content)
             }}
           />
           
