@@ -360,7 +360,6 @@ export default function Settings() {
                       </Button>
                     </div>
                   </div>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
