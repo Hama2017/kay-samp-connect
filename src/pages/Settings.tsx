@@ -320,59 +320,10 @@ export default function Settings() {
                   <Eye className="h-5 w-5" />
                   Confidentialité et sécurité
                 </CardTitle>
-                <CardDescription>
-                  Contrôlez qui peut voir vos informations
-                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Profil visible</p>
-                      <p className="text-sm text-muted-foreground">
-                        Votre profil est visible par tous
-                      </p>
-                    </div>
-                    <Switch
-                      checked={privacy.profileVisible}
-                      onCheckedChange={(checked) => 
-                        handlePrivacyUpdate('profileVisible', checked)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Afficher l'email</p>
-                      <p className="text-sm text-muted-foreground">
-                        Votre email est visible sur votre profil
-                      </p>
-                    </div>
-                    <Switch
-                      checked={privacy.showEmail}
-                      onCheckedChange={(checked) => 
-                        handlePrivacyUpdate('showEmail', checked)
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Afficher les abonnés</p>
-                      <p className="text-sm text-muted-foreground">
-                        La liste de vos abonnés est visible
-                      </p>
-                    </div>
-                    <Switch
-                      checked={privacy.showFollowers}
-                      onCheckedChange={(checked) => 
-                        handlePrivacyUpdate('showFollowers', checked)
-                      }
-                    />
-                  </div>
-
-                  <div className="pt-6 border-t">
-                    <div className="p-4 border rounded-lg bg-muted/50 mb-4">
+                  <div className="p-4 border rounded-lg bg-muted/50 mb-4">
                       <h4 className="font-medium mb-2 flex items-center gap-2">
                         <LogOut className="h-4 w-4" />
                         Déconnexion
