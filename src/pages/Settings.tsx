@@ -372,6 +372,24 @@ export default function Settings() {
                   </div>
 
                   <div className="pt-6 border-t">
+                    <div className="p-4 border rounded-lg bg-muted/50 mb-4">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <LogOut className="h-4 w-4" />
+                        Déconnexion
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Déconnectez-vous de votre compte KaaySamp
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleLogout}
+                        className="gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Se déconnecter
+                      </Button>
+                    </div>
+
                     <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
                       <h4 className="font-medium text-destructive mb-2 flex items-center gap-2">
                         <Trash2 className="h-4 w-4" />
