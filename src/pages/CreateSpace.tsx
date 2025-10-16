@@ -57,7 +57,7 @@ export default function CreateSpace() {
         
         for (const user of formData.invitedUsers) {
           try {
-            await sendInvitation(spaceData.id, user.id, `Vous êtes invité à rejoindre l'espace "${formData.name}"`);
+            await sendInvitation(spaceData.id, user.id, `Vous êtes invité à rejoindre la SAMP Zone "${formData.name}"`);
             successCount++;
             console.log('Invitation sent successfully to:', user.username);
           } catch (error) {
@@ -67,16 +67,16 @@ export default function CreateSpace() {
         }
         
         if (successCount > 0) {
-          toast({
-            title: "Invitations envoyées",
-            description: `${successCount} invitation(s) envoyée(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`,
-          });
+      toast({
+        title: "Invitations envoyées",
+        description: `${successCount} invitation(s) envoyée(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`,
+      });
         }
       }
       
       toast({
-        title: "Espace créé !",
-        description: `L'espace "${formData.name}" a été créé avec succès`,
+        title: "SAMP Zone créée !",
+        description: `La SAMP Zone "${formData.name}" a été créée avec succès`,
       });
       
       navigate(`/space/${spaceData.id}`);
@@ -89,13 +89,13 @@ export default function CreateSpace() {
       if (isDuplicateName) {
         toast({
           title: "Nom déjà utilisé",
-          description: `Un espace "${formData.name}" existe déjà. Veuillez choisir un autre nom.`,
+          description: `Une SAMP Zone "${formData.name}" existe déjà. Veuillez choisir un autre nom.`,
           variant: "destructive",
         });
       } else {
         toast({
           title: "Erreur",
-          description: "Impossible de créer l'espace. Réessayez plus tard.",
+          description: "Impossible de créer la SAMP Zone. Réessayez plus tard.",
           variant: "destructive",
         });
       }
@@ -119,7 +119,7 @@ export default function CreateSpace() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Créer un espace
+            Créer une SAMP Zone
           </h1>
           <p className="text-muted-foreground">
             Crée ta propre communauté thématique
@@ -129,7 +129,7 @@ export default function CreateSpace() {
 
       <Card className="animate-fade-in-up">
         <CardHeader>
-          <CardTitle className="text-foreground">Informations de l'espace</CardTitle>
+          <CardTitle className="text-foreground">Informations de la SAMP Zone</CardTitle>
         </CardHeader>
         
         <CardContent>
@@ -137,7 +137,7 @@ export default function CreateSpace() {
             {/* Space name */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
-                Nom de l'espace <span className="text-destructive">*</span>
+                Nom de la SAMP Zone <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"
@@ -155,7 +155,7 @@ export default function CreateSpace() {
               </Label>
               <Textarea
                 id="description"
-                placeholder="Décris le thème et l'objectif de ton espace..."
+                placeholder="Décris le thème et l'objectif de ta SAMP Zone..."
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 className="min-h-[100px] border-primary/20 focus:border-primary/40"
@@ -287,7 +287,7 @@ export default function CreateSpace() {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? "Création..." : "Créer l'espace"}
+                {isLoading ? "Création..." : "Créer la SAMP Zone"}
               </Button>
             </div>
           </form>

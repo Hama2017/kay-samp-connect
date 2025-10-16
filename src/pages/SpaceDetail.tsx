@@ -151,13 +151,13 @@ export default function SpaceDetail() {
 
   // NOW we can have conditional returns after all hooks
   if (spacesLoading || postsLoading) {
-    return <LoadingSpinner size="lg" text="Chargement de l'espace..." />;
+    return <LoadingSpinner size="lg" text="Chargement de la SAMP Zone..." />;
   }
 
   if (!space) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-2xl text-center">
-        <h1 className="text-2xl font-bold mb-4">Espace introuvable</h1>
+        <h1 className="text-2xl font-bold mb-4">SAMP Zone introuvable</h1>
         <Button onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
@@ -178,7 +178,7 @@ export default function SpaceDetail() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold">Espace</h1>
+        <h1 className="text-xl font-bold">SAMP Zone</h1>
       </div>
 
       {/* Space header */}
@@ -303,7 +303,7 @@ export default function SpaceDetail() {
       {space.rules && space.rules.length > 0 && (
         <Card className="mb-6">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Règles de l'espace</h3>
+            <h3 className="font-semibold mb-4">Règles de la SAMP Zone</h3>
             <ul className="space-y-2">
               {space.rules.map((rule, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
@@ -381,9 +381,9 @@ export default function SpaceDetail() {
         ) : (
           <div className="text-center py-12">
             <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Aucun post dans cet espace</h3>
+            <h3 className="text-lg font-semibold mb-2">Aucun post dans cette SAMP Zone</h3>
             <p className="text-muted-foreground">
-              Soyez le premier à publier dans cet espace !
+              Soyez le premier à publier dans cette SAMP Zone !
             </p>
           </div>
         )}

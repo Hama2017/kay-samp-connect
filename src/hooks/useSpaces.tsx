@@ -168,8 +168,8 @@ export function useSpaces() {
       }
 
       toast({
-        title: "Espace créé !",
-        description: `L'espace "${spaceData.name}" a été créé avec succès`,
+        title: "SAMP Zone créée !",
+        description: `La SAMP Zone "${spaceData.name}" a été créée avec succès`,
       });
 
       // Refresh spaces
@@ -186,13 +186,13 @@ export function useSpaces() {
       if (isDuplicateName) {
         toast({
           title: "Nom déjà utilisé",
-          description: "Un espace avec ce nom existe déjà dans cette catégorie. Choisissez un autre nom.",
+          description: "Une SAMP Zone avec ce nom existe déjà dans cette catégorie. Choisissez un autre nom.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Erreur",
-          description: "Impossible de créer l'espace",
+          description: "Impossible de créer la SAMP Zone",
           variant: "destructive",
         });
       }
@@ -226,13 +226,13 @@ export function useSpaces() {
 
       toast({
         title: "Abonné !",
-        description: "Vous êtes maintenant abonné à cet espace",
+        description: "Vous êtes maintenant abonné à cette SAMP Zone",
       });
     } catch (err: any) {
       console.error('Error subscribing to space:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de s'abonner à l'espace",
+        description: "Impossible de s'abonner à la SAMP Zone",
         variant: "destructive",
       });
     }
@@ -261,13 +261,13 @@ export function useSpaces() {
 
       toast({
         title: "Désabonné",
-        description: "Vous n'êtes plus abonné à cet espace",
+        description: "Vous n'êtes plus abonné à cette SAMP Zone",
       });
     } catch (err: any) {
       console.error('Error unsubscribing from space:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de se désabonner de l'espace",
+        description: "Impossible de se désabonner de la SAMP Zone",
         variant: "destructive",
       });
     }

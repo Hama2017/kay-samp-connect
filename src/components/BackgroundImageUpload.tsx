@@ -112,7 +112,7 @@ export function BackgroundImageUpload({
             <div className="relative group">
               <img
                 src={currentImageUrl}
-                alt="Image de fond de l'espace"
+                alt="Image de fond de la SAMP Zone"
                 className="w-full h-48 object-cover"
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

@@ -91,7 +91,7 @@ export function SpaceInvitationNotifications() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Invitations d'espaces
+              Invitations de SAMP Zones
               {invitations.length > 0 && (
                 <Badge variant="secondary">
                   {invitations.length}

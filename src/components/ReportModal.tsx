@@ -41,8 +41,8 @@ const reportReasons = {
   ],
   space: [
     { id: 'inappropriate', label: 'Contenu inapproprié' },
-    { id: 'hate', label: 'Espace de discours de haine' },
-    { id: 'spam', label: 'Espace de spam' },
+    { id: 'hate', label: 'SAMP Zone de discours de haine' },
+    { id: 'spam', label: 'SAMP Zone de spam' },
     { id: 'misinformation', label: 'Propagation de désinformation' },
     { id: 'other', label: 'Autre' }
   ]
@@ -94,7 +94,7 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
             <Flag className="h-5 w-5" />
             Signaler {contentType === 'post' ? 'ce post' : 
                      contentType === 'comment' ? 'ce commentaire' :
-                     contentType === 'user' ? 'cet utilisateur' : 'cet espace'}
+                     contentType === 'user' ? 'cet utilisateur' : 'cette SAMP Zone'}
           </DialogTitle>
         </DialogHeader>
         

@@ -42,7 +42,7 @@ export function BottomNavigation() {
               <DropdownMenuItem asChild>
                 <NavLink to="/create-space" className="flex items-center gap-2 w-full">
                   <Users className="h-4 w-4" />
-                  Créer un espace
+                  Créer une SAMP Zone
                 </NavLink>
               </DropdownMenuItem>
             </DropdownMenuContent>

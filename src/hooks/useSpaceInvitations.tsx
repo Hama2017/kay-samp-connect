@@ -103,8 +103,8 @@ export function useSpaceInvitations() {
         .insert({
           user_id: invitedUserId,
           type: 'space_invitation',
-          title: 'Nouvelle invitation d\'espace',
-          message: `Vous avez été invité à rejoindre un espace${message ? `: ${message}` : ''}`,
+          title: 'Nouvelle invitation de SAMP Zone',
+          message: `Vous avez été invité à rejoindre une SAMP Zone${message ? `: ${message}` : ''}`,
           related_space_id: spaceId,
           related_invitation_id: invitationData.id,
           actor_id: user.id
@@ -124,7 +124,7 @@ export function useSpaceInvitations() {
       if (err.code === '23505') {
         toast({
           title: "Invitation déjà envoyée",
-          description: "Cet utilisateur a déjà été invité à cet espace",
+          description: "Cet utilisateur a déjà été invité à cette SAMP Zone",
           variant: "destructive",
         });
       } else {
@@ -181,7 +181,7 @@ export function useSpaceInvitations() {
       toast({
         title: response === 'accepted' ? "Invitation acceptée !" : "Invitation refusée",
         description: response === 'accepted' 
-          ? `Vous avez rejoint l'espace "${data.spaces?.name}"` 
+          ? `Vous avez rejoint la SAMP Zone "${data.spaces?.name}"` 
           : "L'invitation a été refusée",
       });
 

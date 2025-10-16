@@ -139,7 +139,7 @@ export default function SpaceAdmin() {
       if (formData.whoCanPublish === 'invitation' && selectedNewUsers.length > 0) {
         for (const user of selectedNewUsers) {
           try {
-            await sendInvitation(spaceId, user.id, `Vous êtes invité à rejoindre l'espace "${formData.name}"`);
+            await sendInvitation(spaceId, user.id, `Vous êtes invité à rejoindre la SAMP Zone "${formData.name}"`);
           } catch (error) {
             console.error('Error sending invitation to:', user.username, error);
           }
@@ -149,7 +149,7 @@ export default function SpaceAdmin() {
       }
       
       setIsEditing(false);
-      toast.success("Espace mis à jour avec succès");
+      toast.success("SAMP Zone mise à jour avec succès");
     } catch (error) {
       console.error("Error updating space:", error);
       toast.error("Erreur lors de la mise à jour");
@@ -188,7 +188,7 @@ export default function SpaceAdmin() {
       
       // Recharger la liste des abonnés après suppression
       await fetchSubscribers(spaceId!);
-      toast.success(`@${username} a été retiré de l'espace`);
+      toast.success(`@${username} a été retiré de la SAMP Zone`);
     } catch (error) {
       console.error('Error removing subscriber:', error);
       toast.error("Erreur lors de la suppression de l'abonné");
@@ -202,7 +202,7 @@ export default function SpaceAdmin() {
     try {
       await deleteSpace(spaceId);
       navigate("/");
-      toast.success("Espace supprimé avec succès");
+      toast.success("SAMP Zone supprimée avec succès");
     } catch (error) {
       console.error("Error deleting space:", error);
       toast.error("Erreur lors de la suppression");
@@ -250,7 +250,7 @@ export default function SpaceAdmin() {
           </Button>
           <div className="flex items-center gap-3">
             <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Administration de l'espace</h1>
+            <h1 className="text-2xl font-bold">Administration de la SAMP Zone</h1>
           </div>
         </div>
 
@@ -258,7 +258,7 @@ export default function SpaceAdmin() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Informations de l'espace</span>
+              <span>Informations de la SAMP Zone</span>
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(!isEditing)}
@@ -273,11 +273,11 @@ export default function SpaceAdmin() {
             {isEditing ? (
               <>
                 <div>
-                  <label className="text-sm font-medium">Nom de l'espace</label>
+                  <label className="text-sm font-medium">Nom de la SAMP Zone</label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Nom de l'espace"
+                    placeholder="Nom de la SAMP Zone"
                   />
                 </div>
                 <div>
@@ -285,7 +285,7 @@ export default function SpaceAdmin() {
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Description de l'espace"
+                    placeholder="Description de la SAMP Zone"
                     rows={3}
                   />
                 </div>
@@ -490,7 +490,7 @@ export default function SpaceAdmin() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Retirer l'invitation ?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Voulez-vous vraiment retirer l'invitation de @{user.username} ? Cette personne ne pourra plus publier dans cet espace.
+                              Voulez-vous vraiment retirer l'invitation de @{user.username} ? Cette personne ne pourra plus publier dans cette SAMP Zone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -598,20 +598,20 @@ export default function SpaceAdmin() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              La suppression de l'espace est irréversible. Tous les posts associés seront également supprimés.
+              La suppression de la SAMP Zone est irréversible. Tous les posts associés seront également supprimés.
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={isDeleting}>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {isDeleting ? "Suppression..." : "Supprimer l'espace"}
+                  {isDeleting ? "Suppression..." : "Supprimer la SAMP Zone"}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action supprimera définitivement l'espace "{space?.name}" et tous les posts associés. 
+                    Cette action supprimera définitivement la SAMP Zone "{space?.name}" et tous les posts associés. 
                     Cette action est irréversible.
                     
                     <div className="mt-4 space-y-2">

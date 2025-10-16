@@ -39,7 +39,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
       <div className="fixed left-0 top-0 z-50 h-full w-80 max-w-[85vw] bg-card border-r shadow-xl animate-slide-in-right md:static md:animate-none safe-area-top">
         {/* Header with safe area */}
         <div className="flex items-center justify-between p-4 border-b h-16 md:mt-0">
-          <h2 className="font-semibold text-foreground">Mes Espaces</h2>
+          <h2 className="font-semibold text-foreground">Mes SAMP Zones</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -109,9 +109,9 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Hash className="h-8 w-8 text-primary/50" />
                 </div>
-                <p className="font-medium mb-2">Aucun espace abonné</p>
+                <p className="font-medium mb-2">Aucune SAMP Zone abonnée</p>
                 <p className="text-sm leading-relaxed">
-                  Explorez et abonnez-vous à des espaces pour les voir ici
+                  Explorez et abonnez-vous à des SAMP Zones pour les voir ici
                 </p>
               </div>
             )}

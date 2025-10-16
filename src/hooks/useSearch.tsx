@@ -90,7 +90,7 @@ export function useSearch() {
           })),
         spaces: (data.spaces || []).map((space: any) => ({
           id: space.id,
-          name: space.name || 'Espace',
+          name: space.name || 'SAMP Zone',
           description: space.description || '',
           category: space.categories ? space.categories.join(", ") : "",
           subscribersCount: space.subscribers_count || 0,
