@@ -74,11 +74,17 @@ export function usePostDetail(postId: string) {
 
       setPost(data);
       
-      // Incrémenter les vues
-      await supabase
-        .from('posts')
-        .update({ views_count: (data.views_count || 0) + 1 })
-        .eq('id', postId);
+      // Incrémenter les vues uniquement si l'utilisateur n'a pas déjà vu ce post
+      if (user) {
+        const { error: viewError } = await supabase.rpc('increment_post_view_if_new', {
+          p_post_id: postId,
+          p_user_id: user.id
+        });
+
+        if (viewError) {
+          console.error('Error updating view count:', viewError);
+        }
+      }
 
     } catch (err: any) {
       console.error('Error fetching post:', err);
