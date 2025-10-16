@@ -31,7 +31,7 @@ export default function CreateSpace() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || formData.categories.length === 0) {
+    if (!formData.name || formData.categories.length === 0) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires et choisir au moins une catégorie",
@@ -151,7 +151,7 @@ export default function CreateSpace() {
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">
-                Description <span className="text-destructive">*</span>
+                Description
               </Label>
               <Textarea
                 id="description"
@@ -249,13 +249,6 @@ export default function CreateSpace() {
                   </Label>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="verified_only" id="verified-users" />
-                  <Label htmlFor="verified-users" className="text-sm">
-                    Utilisateurs vérifiés seulement
-                  </Label>
-                </div>
-
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="invitation" id="invitation-only" />
                   <Label htmlFor="invitation-only" className="text-sm">
