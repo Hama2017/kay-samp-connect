@@ -162,7 +162,7 @@ export default function CreatePost() {
       // Extract hashtags from content
       const hashtags = formData.content.match(/#\w+/g) || [];
       
-      await createPost({
+      const newPost = await createPost({
         content: formData.content,
         space_id: spaceId,
         hashtags,
@@ -170,11 +170,9 @@ export default function CreatePost() {
         media_files: formData.selectedFiles.length > 0 ? formData.selectedFiles : undefined
       });
 
-      // Rediriger vers l'espace ou l'accueil
-      if (isInSpace) {
-        navigate(`/space/${spaceId}`);
-      } else {
-        navigate("/");
+      // Rediriger vers le post créé
+      if (newPost?.id) {
+        navigate(`/post/${newPost.id}`);
       }
     } catch (error) {
       console.error('Error creating post:', error);
