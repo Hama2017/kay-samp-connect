@@ -121,7 +121,7 @@ export default function PostDetail() {
       </div>
 
       {/* Post avec le même style que InfinitePostsList */}
-      <Card className="hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden border border-gray-200">
+      <Card className="hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden border-0">
         <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
