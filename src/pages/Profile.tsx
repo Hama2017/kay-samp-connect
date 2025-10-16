@@ -120,7 +120,7 @@ export default function Profile() {
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span className="text-xs text-muted-foreground">
-                    Rejoint le {new Date(user.profile?.created_at || new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                    Rejoint en {new Date(user.profile?.created_at || new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                   </span>
                 </div>
                 {user.profile?.show_email && user.email && (
