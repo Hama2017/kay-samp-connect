@@ -167,11 +167,6 @@ export function useSpaces() {
         // Don't throw here, space creation was successful
       }
 
-      toast({
-        title: "SAMP Zone créée !",
-        description: `La SAMP Zone "${spaceData.name}" a été créée avec succès`,
-      });
-
       // Refresh spaces
       fetchSpaces();
       return data;

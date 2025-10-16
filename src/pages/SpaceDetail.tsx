@@ -28,6 +28,7 @@ export default function SpaceDetail() {
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const [hasAcceptedInvitation, setHasAcceptedInvitation] = useState(false);
   const [localSpace, setLocalSpace] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
@@ -149,6 +150,7 @@ export default function SpaceDetail() {
       
       // Si la SAMP Zone n'est pas dans le cache, on la charge directement
       if (!spaces.find(s => s.id === spaceId)) {
+        setIsLoading(true);
         const { data, error } = await supabase
           .from('spaces')
           .select('*, profiles(id, username, profile_picture_url)')
@@ -169,6 +171,7 @@ export default function SpaceDetail() {
             is_subscribed: !!subscription
           });
         }
+        setIsLoading(false);
       }
       
       fetchPosts({ space_id: spaceId });
@@ -178,7 +181,9 @@ export default function SpaceDetail() {
   }, [spaceId, user?.id, spaces]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // NOW we can have conditional returns after all hooks
-  if (spacesLoading || postsLoading) {
+  const isActuallyLoading = (spacesLoading || postsLoading || isLoading) && !space;
+  
+  if (isActuallyLoading) {
     return <LoadingSpinner size="lg" text="Chargement de la SAMP Zone..." />;
   }
 
