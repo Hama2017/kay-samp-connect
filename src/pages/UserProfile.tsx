@@ -268,10 +268,6 @@ useEffect(() => {
                 <p className="text-sm text-muted-foreground">Abonnés</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{followingCount}</p>
-                <p className="text-sm text-muted-foreground">Abonnements</p>
-              </div>
-              <div className="text-center">
                 <p className="text-xl font-bold">{userPosts.length}</p>
                 <p className="text-sm text-muted-foreground">Posts</p>
               </div>
