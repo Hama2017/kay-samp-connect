@@ -76,14 +76,19 @@ export function usePostDetail(postId: string) {
       
       // Incrémenter les vues uniquement si l'utilisateur n'a pas déjà vu ce post
       if (user) {
-        const { error: viewError } = await supabase.rpc('increment_post_view_if_new', {
+        console.log('Tentative d\'incrémentation des vues pour post:', postId, 'user:', user.id);
+        const { data: viewResult, error: viewError } = await supabase.rpc('increment_post_view_if_new', {
           p_post_id: postId,
           p_user_id: user.id
         });
 
         if (viewError) {
-          console.error('Error updating view count:', viewError);
+          console.error('❌ Erreur lors de l\'incrémentation des vues:', viewError);
+        } else {
+          console.log('✅ Résultat incrémentation:', viewResult);
         }
+      } else {
+        console.log('⚠️ Pas d\'utilisateur connecté, vues non incrémentées');
       }
 
     } catch (err: any) {
