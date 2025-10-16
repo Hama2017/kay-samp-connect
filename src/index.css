@@ -121,12 +121,18 @@ All colors MUST be HSL. */
   
   /* Masquer les scrollbars sur tous les navigateurs */
   * {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE et Edge */
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE et Edge */
   }
   
   *::-webkit-scrollbar {
-    display: none; /* Chrome, Safari et Opera */
+    display: none !important; /* Chrome, Safari et Opera */
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  body, html {
+    overflow-x: hidden !important;
   }
   
   html, body {
@@ -173,12 +179,18 @@ All colors MUST be HSL. */
   .content-mobile {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     padding: 0 1rem;
     padding-top: calc(56px + env(safe-area-inset-top));
     padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .content-mobile::-webkit-scrollbar {
+    display: none !important;
   }
 
   .navbar-mobile {
