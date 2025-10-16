@@ -177,10 +177,10 @@ export default function PostDetail() {
                 e.stopPropagation();
                 handleBookmarkToggle();
               }}
-              className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full transition-colors border-0 ${
+              className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full transition-colors ${
                 bookmarked
-                  ? "bg-[#1f9463] hover:bg-[#43ca92] text-white"
-                  : "hover:bg-[#1f9463]/10 hover:text-[#1f9463]"
+                  ? "bg-[#1f9463] hover:bg-[#43ca92] text-white border border-[#1f9463]"
+                  : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border border-[#1f9463]/30 hover:border-[#1f9463]"
               }`}
             >
               {bookmarked ? "Sampna" : "DemaySamp"}
