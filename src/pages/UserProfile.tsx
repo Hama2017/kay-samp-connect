@@ -280,7 +280,7 @@ useEffect(() => {
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{userSpaces.length}</p>
-                <p className="text-sm text-muted-foreground">Espaces</p>
+                <p className="text-sm text-muted-foreground">SAMP Zones</p>
               </div>
             </div>
           </div>
@@ -291,7 +291,7 @@ useEffect(() => {
         <Tabs defaultValue="posts">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="spaces">Espaces</TabsTrigger>
+            <TabsTrigger value="spaces">SAMP Zones</TabsTrigger>
           </TabsList>
           
           <TabsContent value="posts" className="space-y-4 mt-6">
@@ -320,7 +320,7 @@ useEffect(() => {
             {spacesLoading && userSpaces.length === 0 ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Chargement des espaces...</p>
+                <p className="text-muted-foreground">Chargement des SAMP Zones...</p>
               </div>
             ) : userSpaces.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
@@ -352,9 +352,9 @@ useEffect(() => {
             ) : (
               <div className="text-center py-12">
                 <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun espace créé</h3>
+                <h3 className="text-lg font-semibold mb-2">Aucune SAMP Zone créée</h3>
                 <p className="text-muted-foreground">
-                  @{userProfile.username} n'a pas encore créé d'espaces
+                  @{userProfile.username} n'a pas encore créé de SAMP Zones
                 </p>
               </div>
             )}
