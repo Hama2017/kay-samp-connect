@@ -55,7 +55,7 @@ export default function Discover() {
       {/* Header */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-          Découvrir
+          SAMP Zones
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground px-2">
           Trouve des SAMP Zones qui t'intéressent
