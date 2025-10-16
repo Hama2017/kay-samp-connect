@@ -347,19 +347,36 @@ export function usePosts() {
   }, [user, fetchPosts, currentFilters]);
 
   const incrementViews = useCallback(async (postId: string) => {
+    // Ne compter la vue que si l'utilisateur est connecté
+    if (!user) {
+      console.log('⚠️ Pas d\'utilisateur connecté, vues non incrémentées');
+      return;
+    }
+
     try {
-      await supabase.rpc('increment_post_views', { post_id: postId });
-      
-      // Update local state
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, views_count: post.views_count + 1 }
-          : post
-      ));
+      // Utiliser increment_post_view_if_new pour garantir l'unicité par utilisateur
+      const { data: wasNewView, error } = await supabase.rpc('increment_post_view_if_new', {
+        p_post_id: postId,
+        p_user_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors de l\'incrémentation des vues:', error);
+        return;
+      }
+
+      // Mettre à jour l'état local seulement si c'était une nouvelle vue
+      if (wasNewView) {
+        setPosts(prev => prev.map(post => 
+          post.id === postId 
+            ? { ...post, views_count: post.views_count + 1 }
+            : post
+        ));
+      }
     } catch (err) {
       console.error('Error incrementing views:', err);
     }
-  }, []);
+  }, [user]);
 
   return {
     posts,
