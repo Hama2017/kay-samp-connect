@@ -135,12 +135,10 @@ export default function Profile() {
             
             {/* Stats */}
             <div className="flex gap-6">
-              {user.profile?.show_followers !== false && (
-                <div className="text-center">
-                  <p className="text-xl font-bold">{user.profile?.followers_count || 0}</p>
-                  <p className="text-sm text-muted-foreground">Abonnés</p>
-                </div>
-              )}
+              <div className="text-center">
+                <p className="text-xl font-bold">{user.profile?.followers_count || 0}</p>
+                <p className="text-sm text-muted-foreground">Abonnés</p>
+              </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{userPosts.length}</p>
                 <p className="text-sm text-muted-foreground">Posts</p>
