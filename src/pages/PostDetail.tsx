@@ -97,7 +97,7 @@ export default function PostDetail() {
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden animate-fade-in-up">
       {/* Header avec bouton retour */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center mb-6">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -105,19 +105,8 @@ export default function PostDetail() {
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Retour</span>
+          <span>Retour</span>
         </Button>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            <Share className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">Partager</span>
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Flag className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">Signaler</span>
-          </Button>
-        </div>
       </div>
 
       {/* Post avec le même style que InfinitePostsList */}
