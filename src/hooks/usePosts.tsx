@@ -257,11 +257,6 @@ export function usePosts() {
         }
       }
 
-      toast({
-        title: "Post créé !",
-        description: "Votre post a été publié avec succès",
-      });
-
       // Refresh posts
       fetchPosts(currentFilters);
       return data;
