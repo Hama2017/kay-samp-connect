@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { icon: Home, label: "Accueil", path: "/" },
-  { icon: Search, label: "Découvrir", path: "/discover" },
+  { icon: Search, label: "SAMP Zones", path: "/discover" },
   { icon: Plus, label: "Créer", path: "/create", isSpecial: true },
   { icon: TrendingUp, label: "Tendances", path: "/trending" },
   { icon: User, label: "Profil", path: "/profile" },
