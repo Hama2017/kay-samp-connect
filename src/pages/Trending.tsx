@@ -14,6 +14,7 @@ import { PostActions } from "@/components/PostActions";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
 import { SpaceCard } from "@/components/SpaceCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmptyState } from "@/components/EmptyState";
 
 // Mock data for trending
 const mockTrendingData = {
@@ -211,138 +212,154 @@ export default function Trending() {
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
-          {topPosts.map((post, index) => (
-            <Card 
-              key={post.id} 
-              className="hover:shadow-lg transition-all duration-300 animate-fade-in-up relative"
-            >
-              {/* Badge position */}
-              <div className="absolute top-4 right-4 z-10">
-                <Badge 
-                  variant={index === 0 ? "default" : "secondary"}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                    index === 0 ? "bg-gradient-primary shadow-lg" : ""
-                  }`}
-                >
-                  {index + 1}
-                </Badge>
-              </div>
+          {topPosts.length === 0 ? (
+            <EmptyState
+              icon={Trophy}
+              title="Aucun post tendance"
+              description="Soyez le premier à créer du contenu populaire !"
+            />
+          ) : (
+            topPosts.map((post, index) => (
+              <Card 
+                key={post.id} 
+                className="hover:shadow-lg transition-all duration-300 animate-fade-in-up relative"
+              >
+                {/* Badge position */}
+                <div className="absolute top-4 right-4 z-10">
+                  <Badge 
+                    variant={index === 0 ? "default" : "secondary"}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                      index === 0 ? "bg-gradient-primary shadow-lg" : ""
+                    }`}
+                  >
+                    {index + 1}
+                  </Badge>
+                </div>
 
-              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <Avatar 
-                      className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (user?.profile?.username === post.profiles?.username) {
-                          navigate('/profile');
-                        } else {
-                          navigate(`/user/${post.profiles?.username}`);
-                        }
-                      }}
-                    >
-                      <AvatarImage src={post.profiles?.profile_picture_url} />
-                      <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
-                        {post.profiles?.username?.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <span 
-                          className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (user?.profile?.username === post.profiles?.username) {
-                              navigate('/profile');
-                            } else {
-                              navigate(`/user/${post.profiles?.username}`);
-                            }
-                          }}
-                        >
-                          @{post.profiles?.username || "Utilisateur"}
-                        </span>
-                        {post.profiles?.is_verified && (
-                          <BadgeCheck size={20} color="#329056ff" />
-                        )}
+                <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <Avatar 
+                        className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (user?.profile?.username === post.profiles?.username) {
+                            navigate('/profile');
+                          } else {
+                            navigate(`/user/${post.profiles?.username}`);
+                          }
+                        }}
+                      >
+                        <AvatarImage src={post.profiles?.profile_picture_url} />
+                        <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
+                          {post.profiles?.username?.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <span 
+                            className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (user?.profile?.username === post.profiles?.username) {
+                                navigate('/profile');
+                              } else {
+                                navigate(`/user/${post.profiles?.username}`);
+                              }
+                            }}
+                          >
+                            @{post.profiles?.username || "Utilisateur"}
+                          </span>
+                          {post.profiles?.is_verified && (
+                            <BadgeCheck size={20} color="#329056ff" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
-                      </p>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent 
-                className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6 cursor-pointer"
-                onClick={() => navigate(`/post/${post.id}`)}
-              >
-                {/* Titre si présent */}
-                {post.title && (
-                  <div className="text-lg font-bold text-foreground break-words mb-3">
-                    {post.title}
-                  </div>
-                )}
+                </CardHeader>
                 
-                {/* Contenu */}
-                <div 
-                  className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
-                  dangerouslySetInnerHTML={{
-                    __html: post.content.replace(/#(\w+)/g, '<span style="color: #1f9463; font-weight: 600;">#$1</span>')
-                  }}
-                />
-                
-                {/* Médias */}
-                {post.post_media && post.post_media.length > 0 && (
-                  <PostMediaDisplay 
-                    media={post.post_media} 
-                    maxHeight="max-h-[60vh]"
+                <CardContent 
+                  className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6 cursor-pointer"
+                  onClick={() => navigate(`/post/${post.id}`)}
+                >
+                  {/* Titre si présent */}
+                  {post.title && (
+                    <div className="text-lg font-bold text-foreground break-words mb-3">
+                      {post.title}
+                    </div>
+                  )}
+                  
+                  {/* Contenu */}
+                  <div 
+                    className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
+                    dangerouslySetInnerHTML={{
+                      __html: post.content.replace(/#(\w+)/g, '<span style="color: #1f9463; font-weight: 600;">#$1</span>')
+                    }}
                   />
-                )}
-                
-                {/* Hashtags */}
-                {post.hashtags && post.hashtags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {post.hashtags.map((tag, tagIndex) => (
-                      <span key={tagIndex} className="text-xs text-[#1f9463] hover:text-[#43ca92] cursor-pointer transition-colors">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Actions */}
-                <PostActions 
-                  post={post}
-                  onVote={votePost}
-                  onOpenComments={() => navigate(`/post/${post.id}`)}
-                />
-              </CardContent>
-            </Card>
-          ))}
+                  
+                  {/* Médias */}
+                  {post.post_media && post.post_media.length > 0 && (
+                    <PostMediaDisplay 
+                      media={post.post_media} 
+                      maxHeight="max-h-[60vh]"
+                    />
+                  )}
+                  
+                  {/* Hashtags */}
+                  {post.hashtags && post.hashtags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {post.hashtags.map((tag, tagIndex) => (
+                        <span key={tagIndex} className="text-xs text-[#1f9463] hover:text-[#43ca92] cursor-pointer transition-colors">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Actions */}
+                  <PostActions 
+                    post={post}
+                    onVote={votePost}
+                    onOpenComments={() => navigate(`/post/${post.id}`)}
+                  />
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="spaces" className="space-y-4">
-          {topSpaces.map((space, index) => (
-            <div key={space.id} className="relative">
-              {/* Badge position absolu en haut à droite */}
-              <div className="absolute top-4 right-4 z-10">
-                <Badge 
-                  variant={index === 0 ? "default" : "secondary"}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                    index === 0 ? "bg-gradient-primary" : ""
-                  }`}
-                >
-                  {index + 1}
-                </Badge>
+          {topSpaces.length === 0 ? (
+            <EmptyState
+              icon={Hash}
+              title="Aucune SAMP Zone tendance"
+              description="Créez ou rejoignez une SAMP Zone pour la voir apparaître ici !"
+            />
+          ) : (
+            topSpaces.map((space, index) => (
+              <div key={space.id} className="relative">
+                {/* Badge position absolu en haut à droite */}
+                <div className="absolute top-4 right-4 z-10">
+                  <Badge 
+                    variant={index === 0 ? "default" : "secondary"}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                      index === 0 ? "bg-gradient-primary" : ""
+                    }`}
+                  >
+                    {index + 1}
+                  </Badge>
+                </div>
+                <SpaceCard
+                  space={space}
+                />
               </div>
-              <SpaceCard
-                space={space}
-              />
-            </div>
-          ))}
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="contributors" className="space-y-4">
@@ -422,13 +439,11 @@ export default function Trending() {
           ))}
           
           {contributors.length === 0 && (
-            <div className="text-center py-12">
-              <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Aucun contributeur trouvé</h3>
-              <p className="text-muted-foreground">
-                Soyez le premier à contribuer !
-              </p>
-            </div>
+            <EmptyState
+              icon={Crown}
+              title="Aucun contributeur trouvé"
+              description="Soyez le premier à contribuer !"
+            />
           )}
         </TabsContent>
       </Tabs>
