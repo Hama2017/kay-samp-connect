@@ -27,11 +27,12 @@ export default function SpaceDetail() {
   const [selectedFilter, setSelectedFilter] = useState("recent");
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const [hasAcceptedInvitation, setHasAcceptedInvitation] = useState(false);
+  const [localSpace, setLocalSpace] = useState<any>(null);
   const { spaces, fetchSpaces, subscribeToSpace, unsubscribeFromSpace, isLoading: spacesLoading } = useSpaces();
   const { posts, fetchPosts, votePost, isLoading: postsLoading } = usePosts();
 
   // All useMemo hooks MUST be before any conditional returns
-  const space = spaces.find(s => s.id === spaceId);
+  const space = spaces.find(s => s.id === spaceId) || localSpace;
   const spacePosts = useMemo(() => {
     console.log('spacePosts useMemo called', { 
       postsLength: posts.length, 
@@ -143,11 +144,38 @@ export default function SpaceDetail() {
   }, [user?.id, spaceId]);
 
   useEffect(() => {
-    if (spaceId) {
-      fetchSpaces();
+    const loadSpaceData = async () => {
+      if (!spaceId) return;
+      
+      // Si la SAMP Zone n'est pas dans le cache, on la charge directement
+      if (!spaces.find(s => s.id === spaceId)) {
+        const { data, error } = await supabase
+          .from('spaces')
+          .select('*, profiles(id, username, profile_picture_url)')
+          .eq('id', spaceId)
+          .maybeSingle();
+        
+        if (data && !error) {
+          // Vérifier si l'utilisateur est abonné
+          const { data: subscription } = await supabase
+            .from('space_subscriptions')
+            .select('space_id')
+            .eq('user_id', user?.id || '')
+            .eq('space_id', spaceId)
+            .maybeSingle();
+          
+          setLocalSpace({
+            ...data,
+            is_subscribed: !!subscription
+          });
+        }
+      }
+      
       fetchPosts({ space_id: spaceId });
-    }
-  }, [spaceId]); // eslint-disable-line react-hooks/exhaustive-deps
+    };
+    
+    loadSpaceData();
+  }, [spaceId, user?.id, spaces]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // NOW we can have conditional returns after all hooks
   if (spacesLoading || postsLoading) {
