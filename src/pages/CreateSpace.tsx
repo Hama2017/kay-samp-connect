@@ -74,11 +74,6 @@ export default function CreateSpace() {
         }
       }
       
-      toast({
-        title: "SAMP Zone créée !",
-        description: `La SAMP Zone "${formData.name}" a été créée avec succès`,
-      });
-      
       navigate(`/space/${spaceData.id}`);
     } catch (error: any) {
       // Check if it's a duplicate name error
