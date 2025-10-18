@@ -100,14 +100,6 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
                 <Settings className="mr-2 h-4 w-4" />
                 Paramètres
               </DropdownMenuItem>
-              {/* Theme toggle in mobile dropdown */}
-             <div className="sm:hidden">
-                <DropdownMenuSeparator />
-                <div className="flex items-center justify-between p-2">
-                  <span className="text-sm">Thème</span>
-                  <ThemeToggle />
-                </div>
-              </div>
             </DropdownMenuContent>
           </DropdownMenu> 
 
