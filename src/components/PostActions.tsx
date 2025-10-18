@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown, MessageCircle, Eye, Bookmark, BookmarkCheck, Share2, ExternalLink } from "lucide-react";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
-import { useToast } from "@/hooks/use-toast";
+import { useNativeShare } from "@/hooks/useNativeShare";
 
 interface PostActionsProps {
   post: {
@@ -24,7 +24,7 @@ interface PostActionsProps {
 
 export function PostActions({ post, onVote, onOpenComments, hideCommentButton = false }: PostActionsProps) {
   const { isBookmarked, toggleBookmark } = useRealBookmarks();
-  const { toast } = useToast();
+  const { share } = useNativeShare();
   
   const bookmarked = isBookmarked(post.id, 'post');
 
@@ -47,34 +47,11 @@ export function PostActions({ post, onVote, onOpenComments, hideCommentButton = 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Post de @${post.profiles.username}`,
-          text: post.content.slice(0, 100) + '...',
-          url: window.location.origin + `/post/${post.id}`
-        });
-      } catch (error) {
-        // User cancelled sharing
-      }
-    } else {
-      // Fallback to clipboard
-      const shareText = `Découvre ce post de @${post.profiles.username} sur KaaySamp !\n\n"${post.content.slice(0, 100)}..."\n\n${window.location.origin}/post/${post.id}`;
-      
-      try {
-        await navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Lien copié !",
-          description: "Le lien du post a été copié dans le presse-papier",
-        });
-      } catch (error) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de copier le lien",
-          variant: "destructive",
-        });
-      }
-    }
+    await share({
+      title: `Post de @${post.profiles.username}`,
+      text: `Découvre ce post de @${post.profiles.username} sur KaaySamp !\n\n"${post.content.slice(0, 100)}..."`,
+      url: `${window.location.origin}/post/${post.id}`,
+    });
   };
 
   return (
