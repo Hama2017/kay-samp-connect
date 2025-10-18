@@ -113,11 +113,7 @@ export default function CreateSpace() {
       </div>
 
       <Card className="animate-fade-in-up">
-        <CardHeader>
-          <CardTitle className="text-foreground">Informations de la SAMP Zone</CardTitle>
-        </CardHeader>
-        
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Space name */}
             <div className="space-y-2">
