@@ -44,15 +44,17 @@ export function PostActions({ post, onVote, onOpenComments, hideCommentButton = 
     });
   };
 
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    await share({
-      title: `Post de @${post.profiles.username}`,
-      text: `Découvre ce post de @${post.profiles.username} sur KaaySamp !\n\n"${post.content.slice(0, 100)}..."`,
-      url: `${window.location.origin}/post/${post.id}`,
-    });
-  };
+const handleShare = async (e: React.MouseEvent) => {
+  e.stopPropagation();
+
+  await share({
+    title: `Post de @${post.profiles.username}`,
+    text: `Découvre ce post de @${post.profiles.username} sur KaaySamp !\n\n"${post.content.slice(0, 100)}..."`,
+    url: `${window.location.origin}/post/${post.id}`,
+    dialogTitle: 'Partager ce post',
+  });
+};
+
 
   return (
     <div className="flex items-center justify-between">

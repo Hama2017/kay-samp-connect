@@ -1,51 +1,33 @@
 import { Share } from '@capacitor/share';
-import { Capacitor } from '@capacitor/core';
-import { useToast } from '@/hooks/use-toast';
+
+interface ShareOptions {
+  title?: string;
+  text?: string;
+  url?: string;
+  dialogTitle?: string;
+}
 
 export function useNativeShare() {
-  const { toast } = useToast();
-
-  const share = async (data: {
-    title: string;
-    text: string;
-    url: string;
-  }) => {
+  const share = async (options: ShareOptions) => {
     try {
-      // Check if we're on a native platform
-      if (Capacitor.isNativePlatform()) {
-        await Share.share({
-          title: data.title,
-          text: data.text,
-          url: data.url,
-          dialogTitle: 'Partager',
-        });
-      } 
-      // Try Web Share API
-      else if (navigator.share) {
+      if (navigator.share) {
+        // Web Share API (texte + URL)
         await navigator.share({
-          title: data.title,
-          text: data.text,
-          url: data.url,
+          title: options.title,
+          text: options.text,
+          url: options.url,
         });
-      } 
-      // Fallback to clipboard
-      else {
-        const shareText = `${data.text}\n\n${data.url}`;
-        await navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Lien copié !",
-          description: "Le lien a été copié dans le presse-papier",
-        });
-      }
-    } catch (error: any) {
-      // User cancelled or error occurred
-      if (error?.message && !error.message.includes('cancel')) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de partager le contenu",
-          variant: "destructive",
+      } else {
+        // Capacitor Share (texte + URL)
+        await Share.share({
+          title: options.title,
+          text: options.text,
+          url: options.url,
+          dialogTitle: options.dialogTitle || 'Partager via',
         });
       }
+    } catch (error) {
+      console.error('Erreur lors du partage :', error);
     }
   };
 
