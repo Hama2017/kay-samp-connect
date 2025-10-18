@@ -31,10 +31,10 @@ export default function CreateSpace() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name) {
+    if (!formData.name || formData.categories.length === 0) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "Veuillez remplir tous les champs obligatoires et choisir au moins une catégorie",
         variant: "destructive",
       });
       return;
@@ -45,7 +45,7 @@ export default function CreateSpace() {
       const spaceData = await createSpace({
         name: formData.name,
         description: formData.description,
-        categories: ['Général'], // Catégorie par défaut
+        categories: formData.categories,
         who_can_publish: formData.whoCanPublish === 'invitation' ? ['invited'] : [formData.whoCanPublish],
       });
       
@@ -141,6 +141,57 @@ export default function CreateSpace() {
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 className="min-h-[100px] border-primary/20 focus:border-primary/40"
               />
+            </div>
+            {/* Categories */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                Catégories <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground block mt-1">
+                  Choisissez au moins une catégorie (plusieurs possibles)
+                </span>
+              </Label>
+              {categoriesLoading ? (
+                <div className="animate-pulse space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-12 bg-muted rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className={`
+                        flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-all
+                        ${formData.categories.includes(category.name) 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-input hover:border-primary/50 hover:bg-accent/50'
+                        }
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.categories.includes(category.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: [...prev.categories, category.name] 
+                            }));
+                          } else {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              categories: prev.categories.filter(c => c !== category.name) 
+                            }));
+                          }
+                        }}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium select-none">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Publishing permissions */}
