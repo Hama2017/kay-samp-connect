@@ -54,7 +54,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         </div>
 
         {/* Right side - Mobile Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           {/* Desktop Search */}
                 <Button 
             variant="ghost" 
