@@ -1,4 +1,4 @@
-import { Home, Search, Plus, TrendingUp, User, FileText, Users } from "lucide-react";
+import { Home, Hash, Plus, TrendingUp, User, FileText, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { icon: Home, label: "Accueil", path: "/" },
-  { icon: Search, label: "SAMP Zones", path: "/discover" },
+  { icon: Hash, label: "SAMP Zones", path: "/discover" },
   { icon: Plus, label: "Créer", path: "/create", isSpecial: true },
   { icon: TrendingUp, label: "Tendances", path: "/trending" },
   { icon: User, label: "Profil", path: "/profile" },
