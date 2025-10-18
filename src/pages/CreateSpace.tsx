@@ -102,24 +102,14 @@ export default function CreateSpace() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      {/* Header with back button */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="hover:bg-primary/5"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Créer une SAMP Zone
-          </h1>
-          <p className="text-muted-foreground">
-            Crée ta propre communauté thématique
-          </p>
-        </div>
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          Créer une SAMP Zone
+        </h1>
+        <p className="text-muted-foreground">
+          Crée ta propre communauté thématique
+        </p>
       </div>
 
       <Card className="animate-fade-in-up">
