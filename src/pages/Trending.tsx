@@ -370,72 +370,72 @@ export default function Trending() {
               className="hover:shadow-primary/10 hover:shadow-lg transition-all duration-300 animate-fade-in-up cursor-pointer"
               onClick={() => navigate(`/user/${contributor.username}`)}
             >
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <Badge 
-                      variant={index === 0 ? "default" : "secondary"}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? "bg-gradient-primary" : ""
-                      }`}
-                    >
-                      {index + 1}
-                    </Badge>
-                  </div>
-                  
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={contributor.profile_picture_url} />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                      {contributor.username.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold text-foreground">
-                        @{contributor.username}
-                      </div>
-                      {contributor.is_verified && (
-                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-                          ✓
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Score d'activité: {contributor.activity_score}
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div>
-                        <div className="text-sm font-semibold text-primary">
-                          {contributor.posts_count}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Posts
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-primary">
-                          {contributor.comments_count}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Comm.
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-primary">
-                          {contributor.votes_given}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Votes
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex-shrink-0">
+            <Badge 
+              variant={index === 0 ? "default" : "secondary"}
+              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm ${
+                index === 0 ? "bg-gradient-primary" : ""
+              }`}
+            >
+              {index + 1}
+            </Badge>
+          </div>
+          
+          <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+            <AvatarImage src={contributor.profile_picture_url} />
+            <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold text-xs sm:text-sm">
+              {contributor.username.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="font-semibold text-foreground text-sm sm:text-base truncate">
+                @{contributor.username}
+              </div>
+              {contributor.is_verified && (
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
+                  ✓
+                </Badge>
+              )}
+            </div>
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              Score: {contributor.activity_score}
+            </div>
+          </div>
+          
+          <div className="text-right flex-shrink-0">
+            <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
+              <div>
+                <div className="text-xs sm:text-sm font-semibold text-primary">
+                  {contributor.posts_count}
                 </div>
-              </CardContent>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                  Posts
+                </div>
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-semibold text-primary">
+                  {contributor.comments_count}
+                </div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                  Comm.
+                </div>
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-semibold text-primary">
+                  {contributor.votes_given}
+                </div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                  Votes
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
             </Card>
           ))}
           
