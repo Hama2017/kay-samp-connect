@@ -97,6 +97,19 @@ export default function PostDetail() {
 
   return (
     <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl overflow-hidden animate-fade-in-up">
+      {/* Header avec bouton retour */}
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Retour</span>
+        </Button>
+      </div>
+
       {/* Post avec le même style que InfinitePostsList */}
       <Card className="hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden border-0">
         <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
