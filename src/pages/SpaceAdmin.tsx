@@ -237,77 +237,81 @@ export default function SpaceAdmin() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-background pb-20 md:pb-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-3 -mx-4 px-4 sm:mx-0 sm:px-0 border-b sm:border-0">
           <Button 
             variant="ghost" 
-            size="icon" 
+            size="icon"
+            className="shrink-0"
             onClick={() => navigate(`/space/${spaceId}`)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-3">
-            <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Administration</h1>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-bold truncate">Administration</h1>
           </div>
         </div>
 
         {/* Space Info Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Informations</span>
+        <Card className="mb-4 sm:mb-6">
+          <CardHeader className="space-y-0 pb-3 sm:pb-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <span className="text-lg sm:text-xl">Informations</span>
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(!isEditing)}
                 disabled={isUpdating}
+                className="w-full sm:w-auto"
               >
                 <Edit3 className="h-4 w-4 mr-2" />
                 {isEditing ? "Annuler" : "Modifier"}
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 sm:space-y-5">
             {isEditing ? (
               <>
-                <div>
-                  <label className="text-sm font-medium">Nom de la SAMP Zone</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium block">Nom de la SAMP Zone</label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Nom de la SAMP Zone"
+                    className="w-full"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Description</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium block">Description</label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Description de la SAMP Zone"
-                    rows={3}
+                    rows={4}
+                    className="w-full resize-none"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Catégories</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium block">Catégories</label>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 min-h-[2rem]">
                     {formData.categories.map((category) => (
                       <Badge
                         key={category}
                         variant="secondary"
-                        className="cursor-pointer"
+                        className="cursor-pointer hover:bg-destructive/90 transition-colors text-xs sm:text-sm"
                         onClick={() => removeCategory(category)}
                       >
                         {category} ×
                       </Badge>
                     ))}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-input rounded-md bg-background text-sm"
+                      className="flex-1 px-3 py-2 border border-input rounded-md bg-background text-sm min-h-[2.5rem]"
                     >
                       <option value="">Sélectionner une catégorie</option>
                       {categories
@@ -316,45 +320,51 @@ export default function SpaceAdmin() {
                           <option key={cat.id} value={cat.name}>{cat.name}</option>
                         ))}
                     </select>
-                    <Button onClick={addCategory} disabled={!newCategory}>
-                      <Plus className="h-4 w-4" />
+                    <Button 
+                      onClick={addCategory} 
+                      disabled={!newCategory}
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Ajouter</span>
                     </Button>
                   </div>
                 </div>
                 
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium block">
                     Qui peut publier ? <span className="text-destructive">*</span>
                   </Label>
                   
                   <RadioGroup 
                     value={formData.whoCanPublish} 
                     onValueChange={(value) => setFormData(prev => ({ ...prev, whoCanPublish: value }))}
+                    className="gap-2 sm:gap-3"
                   >
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="creator_only" id="edit-creator-only" />
-                      <Label htmlFor="edit-creator-only" className="text-sm cursor-pointer">
+                      <Label htmlFor="edit-creator-only" className="text-sm cursor-pointer flex-1">
                         Moi seulement
                       </Label>
                     </div>
                     
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="subscribers" id="edit-all-subscribers" />
-                      <Label htmlFor="edit-all-subscribers" className="text-sm cursor-pointer">
+                      <Label htmlFor="edit-all-subscribers" className="text-sm cursor-pointer flex-1">
                         Tous les abonnés
                       </Label>
                     </div>
                     
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="verified_only" id="edit-verified-users" />
-                      <Label htmlFor="edit-verified-users" className="text-sm cursor-pointer">
+                      <Label htmlFor="edit-verified-users" className="text-sm cursor-pointer flex-1">
                         Utilisateurs vérifiés seulement
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="invitation" id="edit-invitation-only" />
-                      <Label htmlFor="edit-invitation-only" className="text-sm cursor-pointer">
+                      <Label htmlFor="edit-invitation-only" className="text-sm cursor-pointer flex-1">
                         Par invitation seulement
                       </Label>
                     </div>
@@ -363,54 +373,56 @@ export default function SpaceAdmin() {
 
                 {/* Afficher la gestion des invitations si mode invitation sélectionné */}
                 {formData.whoCanPublish === 'invitation' && (
-                  <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-                    <Label className="text-sm font-medium">
+                  <div className="p-3 sm:p-4 bg-muted/50 rounded-lg space-y-4">
+                    <Label className="text-sm font-medium block">
                       Utilisateurs invités ({invitedUsers.length})
                     </Label>
                     
                     {/* Liste des utilisateurs déjà invités */}
                     {invitedUsers.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground">Invitations en attente:</p>
-                        {invitedUsers.map((user) => (
-                          <div key={user.id} className="flex items-center justify-between py-2 px-3 bg-background rounded border">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={user.profile_picture_url} />
-                                <AvatarFallback className="text-xs">
-                                  {user.username?.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm">@{user.username}</span>
+                        <p className="text-xs text-muted-foreground">Invitations acceptées:</p>
+                        <div className="space-y-1.5">
+                          {invitedUsers.map((user) => (
+                            <div key={user.id} className="flex items-center justify-between py-2 px-3 bg-background rounded border hover:border-primary/50 transition-colors">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <Avatar className="h-7 w-7 shrink-0">
+                                  <AvatarImage src={user.profile_picture_url} />
+                                  <AvatarFallback className="text-xs">
+                                    {user.username?.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm truncate">@{user.username}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => user.invitation_id && handleRemoveInvitation(user.invitation_id, user.id)}
+                                className="text-destructive hover:text-destructive h-8 shrink-0 ml-2"
+                              >
+                                <UserMinus className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => user.invitation_id && handleRemoveInvitation(user.invitation_id, user.id)}
-                              className="text-destructive hover:text-destructive h-7"
-                            >
-                              Retirer
-                            </Button>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                     
                     {/* Ajouter de nouvelles invitations */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Inviter de nouveaux utilisateurs</Label>
+                      <Label className="text-sm font-medium block">Inviter de nouveaux utilisateurs</Label>
                       <UserSearchCombobox
                         selectedUsers={selectedNewUsers}
                         onUsersChange={setSelectedNewUsers}
-                        placeholder="Rechercher un utilisateur à inviter..."
+                        placeholder="Rechercher un utilisateur..."
                       />
                     </div>
                   </div>
                 )}
 
-                <div>
-                  <label className="text-sm font-medium">Image de fond</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium block">Image de fond</label>
                   <BackgroundImageUpload
                     currentImageUrl={formData.background_image_url}
                     onImageUploaded={(url) => setFormData({ ...formData, background_image_url: url })}
@@ -418,7 +430,11 @@ export default function SpaceAdmin() {
                   />
                 </div>
                 
-                <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
+                <Button 
+                  onClick={handleUpdate} 
+                  disabled={isUpdating} 
+                  className="w-full sm:text-base h-11"
+                >
                   {isUpdating ? "Mise à jour..." : "Sauvegarder les modifications"}
                 </Button>
               </>
@@ -458,46 +474,46 @@ export default function SpaceAdmin() {
 
         {/* Invited Users Card - Only show if space uses invitation system */}
         {space.who_can_publish?.[0] === 'invited' && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Membres invités ({invitedUsers.length})
+          <Card className="mb-4 sm:mb-6">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Users className="h-5 w-5 shrink-0" />
+                <span>Membres invités ({invitedUsers.length})</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {invitedUsers.length > 0 ? (
-                <div className="grid gap-3">
+                <div className="grid gap-2 sm:gap-3">
                   {invitedUsers.map((user) => (
-                    <div key={user.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                      <Avatar className="h-10 w-10">
+                    <div key={user.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
                         <AvatarImage src={user.profile_picture_url} />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs sm:text-sm">
                           {user.username?.charAt(0)?.toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium">@{user.username}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm sm:text-base truncate">@{user.username}</p>
                         <p className="text-xs text-muted-foreground">Membre contributeur</p>
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive shrink-0 h-9 w-9 p-0">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                           <AlertDialogHeader>
                             <AlertDialogTitle>Retirer l'invitation ?</AlertDialogTitle>
-                            <AlertDialogDescription>
+                            <AlertDialogDescription className="text-sm">
                               Voulez-vous vraiment retirer l'invitation de @{user.username} ? Cette personne ne pourra plus publier dans cette SAMP Zone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                            <AlertDialogCancel className="m-0 w-full sm:w-auto">Annuler</AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => user.invitation_id && handleRemoveInvitation(user.invitation_id, user.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                             >
                               Retirer
                             </AlertDialogAction>
@@ -508,73 +524,70 @@ export default function SpaceAdmin() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">Aucun membre invité pour le moment</p>
+                <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Aucun membre invité pour le moment</p>
               )}
             </CardContent>
           </Card>
         )}
 
         {/* Subscribers Card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Abonnés ({subscribers.length})
+        <Card className="mb-4 sm:mb-6">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Users className="h-5 w-5 shrink-0" />
+              <span>Abonnés ({subscribers.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {subscribersLoading ? (
-              <LoadingSpinner />
+              <div className="py-8">
+                <LoadingSpinner />
+              </div>
             ) : subscribers.length > 0 ? (
-              <div className="grid gap-3">
+              <div className="grid gap-2 sm:gap-3">
                 {subscribers.map((subscriber) => (
-                  <div key={subscriber.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <Avatar className="h-10 w-10">
+                  <div key={subscriber.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
                       <AvatarImage src={subscriber.profile_picture_url} />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-xs sm:text-sm">
                         {subscriber.username?.charAt(0)?.toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {subscriber.user_id === user?.id ? (
-                          <span className="text-primary">Moi</span>
-                        ) : (
-                          <span 
-                            className="hover:text-primary cursor-pointer transition-colors"
-                            onClick={() => navigate(`/user/${subscriber.username}`)}
-                          >
-                            @{subscriber.username}
-                          </span>
-                        )}
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/profile/${subscriber.username}`} className="hover:underline">
+                        <p className="font-medium text-sm sm:text-base truncate">@{subscriber.username}</p>
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        Abonné depuis {new Date(subscriber.subscribed_at).toLocaleDateString('fr-FR', { 
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
                       </p>
-                      {subscriber.full_name && (
-                        <p className="text-sm text-muted-foreground">{subscriber.full_name}</p>
-                      )}
                     </div>
-                    {subscriber.is_verified && (
-                      <Badge variant="secondary" className="text-xs">Vérifié</Badge>
-                    )}
-                    {subscriber.user_id !== user?.id && (
+                    {subscriber.id !== space.creator_id && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-destructive hover:text-destructive shrink-0 h-9 w-9 p-0"
+                          >
                             <UserMinus className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                           <AlertDialogHeader>
                             <AlertDialogTitle>Retirer cet abonné ?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir retirer @{subscriber.username} de cet espace ? 
-                              Cette action est irréversible.
+                            <AlertDialogDescription className="text-sm">
+                              Voulez-vous vraiment retirer @{subscriber.username} de cette SAMP Zone ? Cette action est irréversible.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleRemoveSubscriber(subscriber.user_id, subscriber.username)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                            <AlertDialogCancel className="m-0 w-full sm:w-auto">Annuler</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleRemoveSubscriber(subscriber.id, subscriber.username)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                             >
                               Retirer
                             </AlertDialogAction>
@@ -586,52 +599,63 @@ export default function SpaceAdmin() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-8">Aucun abonné pour le moment</p>
+              <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Aucun abonné pour le moment</p>
             )}
           </CardContent>
         </Card>
 
         {/* Danger Zone */}
         <Card className="border-destructive">
-          <CardHeader>
-            <CardTitle className="text-destructive">Zone de danger</CardTitle>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-destructive text-lg sm:text-xl">Zone de danger</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
               La suppression de la SAMP Zone est irréversible. Tous les posts associés seront également supprimés.
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" disabled={isDeleting}>
+                <Button 
+                  variant="destructive" 
+                  disabled={isDeleting}
+                  className="w-full sm:w-auto"
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
                   {isDeleting ? "Suppression..." : "Supprimer la SAMP Zone"}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Cette action supprimera définitivement la SAMP Zone "{space?.name}" et tous les posts associés. 
-                    Cette action est irréversible.
+                  <AlertDialogDescription className="space-y-4">
+                    <p className="text-sm">
+                      Cette action supprimera définitivement la SAMP Zone "{space?.name}" et tous les posts associés. 
+                      Cette action est irréversible.
+                    </p>
                     
-                    <div className="mt-4 space-y-2">
-                      <label className="text-sm font-medium">
-                        Pour confirmer, tapez <span className="font-mono bg-muted px-1 py-0.5 rounded">SUPPRIMER DÉFINITIVEMENT</span>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium block">
+                        Pour confirmer, tapez <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-xs">SUPPRIMER DÉFINITIVEMENT</span>
                       </label>
                       <Input
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder="Tapez SUPPRIMER DÉFINITIVEMENT"
-                        className="font-mono"
+                        className="font-mono text-sm"
                       />
                     </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Annuler</AlertDialogCancel>
+                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                  <AlertDialogCancel 
+                    onClick={() => setDeleteConfirmText("")}
+                    className="m-0 w-full sm:w-auto"
+                  >
+                    Annuler
+                  </AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleDelete} 
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                     disabled={deleteConfirmText !== "SUPPRIMER DÉFINITIVEMENT"}
                   >
                     Supprimer définitivement
