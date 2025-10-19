@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, MessageCircle, Eye, Bookmark, BookmarkCheck, Share2, ExternalLink } from "lucide-react";
+import { ChevronUp, ChevronDown, MessageCircle, BarChart, Bookmark, BookmarkCheck, Share2, ExternalLink } from "lucide-react";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { useNativeShare } from "@/hooks/useNativeShare";
 
@@ -138,7 +138,7 @@ const handleShare = async (e: React.MouseEvent) => {
       
       {/* Views count */}
       <div className="flex items-center gap-1 text-muted-foreground">
-        <Eye className="h-3 w-3" />
+        <BarChart className="h-3 w-3" />
         <span className="text-xs">{post.views_count}</span>
       </div>
     </div>
