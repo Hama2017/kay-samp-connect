@@ -156,16 +156,6 @@ export default function Search() {
                   </SelectContent>
                 </Select>
 
-                <Select value={filters.sortBy} onValueChange={(value) => handleFilterChange('sortBy', value)}>
-                  <SelectTrigger className="w-28 sm:w-36 h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Récent</SelectItem>
-                    <SelectItem value="popular">Populaire</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 {/* Search button for mobile */}
                 <Button type="submit" size="sm" className="sm:hidden">
                   <SearchIcon className="h-4 w-4" />
