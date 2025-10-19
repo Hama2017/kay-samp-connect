@@ -32,8 +32,8 @@ const Alert = React.forwardRef<
       <button
         onClick={onClose}
         className={cn(
-          "absolute right-2 top-2 sm:right-3 sm:top-3 rounded-full",
-          "p-1 flex items-center justify-center",
+          "absolute right-2 top-2 sm:right-3 sm:top-3",
+          "w-6 h-6 rounded-full flex items-center justify-center",
           "transition-all duration-200",
           "hover:scale-110 active:scale-95",
           "focus:outline-none focus:ring-2 focus:ring-offset-1",
