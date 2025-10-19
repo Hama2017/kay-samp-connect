@@ -30,7 +30,7 @@ interface Post {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
-  };
+  } | null;
   spaces?: {
     id: string;
     name: string;

@@ -19,7 +19,7 @@ export interface PostDetail {
     profile_picture_url?: string;
     is_verified: boolean;
     bio?: string;
-  };
+  } | null;
   spaces?: {
     id: string;
     name: string;
@@ -43,7 +43,7 @@ export interface PostDetail {
       username: string;
       profile_picture_url?: string;
       is_verified: boolean;
-    };
+    } | null;
     comment_media: Array<{
       id: string;
       media_type: string;

@@ -86,6 +86,18 @@ serve(async (req) => {
       );
     }
 
+    // Vérifier que le post a un profil valide
+    if (!post.profiles) {
+      console.error('Post without valid profile found:', postId);
+      return new Response(
+        JSON.stringify({ error: "Post data is incomplete" }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404 
+        }
+      );
+    }
+
     // Récupérer les commentaires avec leurs auteurs et médias
     const { data: comments, error: commentsError } = await supabaseClient
       .from('comments')
@@ -122,20 +134,22 @@ serve(async (req) => {
     const downVotes = post.post_votes?.filter(vote => vote.vote_type === 'down').length || 0;
     const currentUserVote = user ? post.post_votes?.find(vote => vote.user_id === user.id)?.vote_type : null;
 
-    // Calculer les votes des commentaires
-    const commentsWithVotes = (comments || []).map(comment => {
-      const commentUpVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'up').length || 0;
-      const commentDownVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'down').length || 0;
-      const currentUserCommentVote = user ? comment.comment_votes?.find(vote => vote.user_id === user.id)?.vote_type : null;
+    // Calculer les votes des commentaires et filtrer ceux sans profil
+    const commentsWithVotes = (comments || [])
+      .filter(comment => comment.profiles !== null)
+      .map(comment => {
+        const commentUpVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'up').length || 0;
+        const commentDownVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'down').length || 0;
+        const currentUserCommentVote = user ? comment.comment_votes?.find(vote => vote.user_id === user.id)?.vote_type : null;
 
-      return {
-        ...comment,
-        votes_up: commentUpVotes,
-        votes_down: commentDownVotes,
-        current_user_vote: currentUserCommentVote,
-        comment_media: comment.comment_media || []
-      };
-    });
+        return {
+          ...comment,
+          votes_up: commentUpVotes,
+          votes_down: commentDownVotes,
+          current_user_vote: currentUserCommentVote,
+          comment_media: comment.comment_media || []
+        };
+      });
 
     const result = {
       ...post,

@@ -24,7 +24,7 @@ export interface Post {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
-  };
+  } | null;
   spaces?: {
     id: string;
     name: string;
@@ -124,7 +124,8 @@ export function usePosts() {
 
       if (error) throw error;
 
-      const newPosts = data as Post[];
+      // Filtrer les posts sans profil (posts orphelins)
+      const newPosts = (data as Post[]).filter(post => post.profiles !== null);
       
       if (append) {
         setPosts(prev => [...prev, ...newPosts]);
