@@ -217,7 +217,7 @@ useEffect(() => {
                       ) : (
                         <>
                           <UserCheck className="h-4 w-4" />
-                          Se désabonner
+                          DamayBayi
                         </>
                       )}
                     </Button>
