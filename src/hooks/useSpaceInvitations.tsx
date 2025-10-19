@@ -85,7 +85,7 @@ export function useSpaceInvitations() {
         .select('id, status')
         .eq('space_id', spaceId)
         .eq('invited_user_id', invitedUserId)
-        .single();
+        .maybeSingle();
 
       let invitationData;
 
