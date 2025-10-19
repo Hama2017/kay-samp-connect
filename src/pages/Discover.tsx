@@ -15,7 +15,7 @@ const sortOptions = [
   { value: "popular", label: "Plus populaires" },
   { value: "discussed", label: "Plus discutés" },
   { value: "recent", label: "Plus récents" },
-  { value: "subscribers", label: "Plus de SAMPNA" },
+  { value: "subscribers", label: "Plus de SAMPKAT" },
 ];
 
 export default function Discover() {
