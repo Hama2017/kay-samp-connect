@@ -79,23 +79,75 @@ export function useSpaceInvitations() {
     console.log('Attempting to send invitation:', { spaceId, invitedUserId, message });
 
     try {
-      const { data: invitationData, error } = await supabase
+      // Vérifier s'il existe une invitation refusée
+      const { data: existingInvitation } = await supabase
         .from('space_invitations')
-        .insert({
-          space_id: spaceId,
-          inviter_id: user.id,
-          invited_user_id: invitedUserId,
-          message
-        })
-        .select()
+        .select('id, status')
+        .eq('space_id', spaceId)
+        .eq('invited_user_id', invitedUserId)
         .single();
 
-      if (error) {
-        console.error('Error inserting invitation:', error);
-        throw error;
+      let invitationData;
+
+      if (existingInvitation) {
+        // Si l'invitation a été refusée, la mettre à jour
+        if (existingInvitation.status === 'declined') {
+          const { data, error } = await supabase
+            .from('space_invitations')
+            .update({
+              status: 'pending',
+              inviter_id: user.id,
+              message,
+              invited_at: new Date().toISOString(),
+              responded_at: null
+            })
+            .eq('id', existingInvitation.id)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error updating invitation:', error);
+            throw error;
+          }
+          invitationData = data;
+        } else if (existingInvitation.status === 'pending') {
+          // Invitation déjà en attente
+          toast({
+            title: "Invitation déjà envoyée",
+            description: "Cet utilisateur a déjà une invitation en attente",
+            variant: "destructive",
+          });
+          throw new Error('Invitation already pending');
+        } else {
+          // Invitation déjà acceptée
+          toast({
+            title: "Déjà membre",
+            description: "Cet utilisateur fait déjà partie de cette SAMP Zone",
+            variant: "destructive",
+          });
+          throw new Error('User already member');
+        }
+      } else {
+        // Créer une nouvelle invitation
+        const { data, error } = await supabase
+          .from('space_invitations')
+          .insert({
+            space_id: spaceId,
+            inviter_id: user.id,
+            invited_user_id: invitedUserId,
+            message
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error inserting invitation:', error);
+          throw error;
+        }
+        invitationData = data;
       }
 
-      console.log('Invitation created:', invitationData);
+      console.log('Invitation created/updated:', invitationData);
 
       // Créer une notification pour l'utilisateur invité
       const { data: notificationData, error: notificationError } = await supabase
@@ -121,7 +173,10 @@ export function useSpaceInvitations() {
     } catch (err: any) {
       console.error('Error sending invitation:', err);
       
-      if (err.code === '23505') {
+      if (err.message === 'Invitation already pending' || err.message === 'User already member') {
+        // Message déjà affiché
+        throw err;
+      } else if (err.code === '23505') {
         toast({
           title: "Invitation déjà envoyée",
           description: "Cet utilisateur a déjà été invité à cette SAMP Zone",
