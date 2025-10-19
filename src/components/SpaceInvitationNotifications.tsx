@@ -94,9 +94,9 @@ export function SpaceInvitationNotifications() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[85vh] p-0">
-          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b">
-            <div className="flex items-center justify-between gap-6">
-              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b pr-12 sm:pr-14">
+            <div className="flex items-center justify-between gap-4">
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg flex-1">
                 <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Invitations de SAMP Zones</span>
                 <span className="sm:hidden">Invitations</span>
@@ -111,10 +111,10 @@ export function SpaceInvitationNotifications() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing || isLoading}
-                className="h-9 px-3 gap-2 flex-shrink-0"
+                className="h-8 px-2 sm:px-3 gap-1 sm:gap-2 flex-shrink-0"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span className="text-xs">Rafraîchir</span>
+                <span className="text-xs hidden sm:inline">Rafraîchir</span>
               </Button>
             </div>
           </DialogHeader>
