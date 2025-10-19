@@ -104,7 +104,7 @@ export default function Search() {
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-4xl animate-fade-in-up overflow-hidden">
         {/* Barre de recherche */}
-        <Card className="mb-6 shadow-warm">
+        <Card className="mb-6">
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="relative">
