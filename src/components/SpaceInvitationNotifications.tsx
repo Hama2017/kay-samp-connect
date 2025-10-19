@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Check, X, Bell, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useSpaceInvitations } from '@/hooks/useSpaceInvitations';
 import { formatDistanceToNow } from 'date-fns';
@@ -96,7 +95,7 @@ export function SpaceInvitationNotifications() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[85vh] p-0">
           <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Invitations de SAMP Zones</span>
@@ -112,9 +111,10 @@ export function SpaceInvitationNotifications() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing || isLoading}
-                className="h-8 w-8 p-0"
+                className="h-9 px-3 gap-2 flex-shrink-0"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="text-xs">Rafraîchir</span>
               </Button>
             </div>
           </DialogHeader>
@@ -137,16 +137,9 @@ export function SpaceInvitationNotifications() {
                   {invitations.map((invitation) => (
                     <div 
                       key={invitation.id}
-                      className="flex flex-col sm:flex-row items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex flex-col gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      <Avatar className="h-10 w-10 flex-shrink-0">
-                        <AvatarImage src={invitation.inviter_profile?.profile_picture_url} />
-                        <AvatarFallback>
-                          {invitation.inviter_profile?.username?.charAt(0).toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 min-w-0 space-y-2 w-full">
+                      <div className="space-y-2 w-full">
                         <div>
                           <p className="font-medium text-sm leading-relaxed">
                             <span className="text-primary">@{invitation.inviter_profile?.username}</span>
