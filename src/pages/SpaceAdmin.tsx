@@ -250,7 +250,7 @@ export default function SpaceAdmin() {
           </Button>
           <div className="flex items-center gap-3">
             <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Administration de la SAMP Zone</h1>
+            <h1 className="text-2xl font-bold">Administration</h1>
           </div>
         </div>
 
@@ -258,7 +258,7 @@ export default function SpaceAdmin() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Informations de la SAMP Zone</span>
+              <span>Informations</span>
               <Button
                 variant="outline"
                 onClick={() => setIsEditing(!isEditing)}
