@@ -167,8 +167,8 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
         className="h-48 bg-gradient-hero rounded-t-xl bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: `url(${currentImageUrl})` }}
       >
-        {/* Overlay avec boutons */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+        {/* Overlay avec boutons - Desktop hover */}
+        <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
           <Button
             variant="secondary"
             size="sm"
@@ -190,6 +190,38 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
             <Button
               variant="destructive"
               size="sm"
+              onClick={removeCoverImage}
+              disabled={isUploading}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Boutons toujours visibles - Mobile */}
+        <div className="md:hidden absolute bottom-3 right-3 flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="gap-2 shadow-lg"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <LoadingSpinner size="sm" />
+            ) : (
+              <>
+                <Camera className="h-4 w-4" />
+                Changer
+              </>
+            )}
+          </Button>
+          
+          {currentCoverUrl && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="shadow-lg"
               onClick={removeCoverImage}
               disabled={isUploading}
             >
