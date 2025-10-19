@@ -38,7 +38,7 @@ export default function ProfileCompletion() {
     }
   }, [userId, navigate]);
 
-  // Vérifier la disponibilité du username
+  // Vérifier la disponibilité du username en temps réel
   useEffect(() => {
     const checkUsername = async () => {
       if (!username || username.length < 3 || step !== 'username') {
@@ -52,22 +52,22 @@ export default function ProfileCompletion() {
       }
       setIsChecking(true);
       try {
-        // Vérifier avec eq() pour correspondance exacte case-insensitive
+        const trimmedUsername = username.trim().toLowerCase();
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
-          .eq('username', username.toLowerCase())
+          .eq('username', trimmedUsername)
           .maybeSingle();
         
         if (error) {
           console.error('Erreur check username:', error);
           setIsAvailable(null);
         } else if (data) {
-          // Username existe déjà
           setIsAvailable(false);
+          setError("Ce nom d'utilisateur est déjà pris");
         } else {
-          // Username disponible
           setIsAvailable(true);
+          setError(null);
         }
       } catch (error) {
         console.error('Erreur check:', error);
@@ -76,7 +76,7 @@ export default function ProfileCompletion() {
         setIsChecking(false);
       }
     };
-    const timer = setTimeout(checkUsername, 500);
+    const timer = setTimeout(checkUsername, 300);
     return () => clearTimeout(timer);
   }, [username, step]);
   const handleNameSubmit = (e: React.FormEvent) => {
@@ -248,7 +248,7 @@ export default function ProfileCompletion() {
               </div>
 
               <div className="space-y-3">
-                <LoadingButton type="submit" className="w-full h-12 text-lg font-semibold" disabled={!username || !isAvailable} isLoading={isLoading} loadingText="Création...">
+                <LoadingButton type="submit" className="w-full h-12 text-lg font-semibold" disabled={!username || isChecking || !isAvailable} isLoading={isLoading} loadingText="Création...">
                   Continuer
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </LoadingButton>
