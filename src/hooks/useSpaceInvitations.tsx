@@ -178,12 +178,13 @@ export function useSpaceInvitations() {
       // Supprimer l'invitation de la liste locale
       setInvitations(prev => prev.filter(inv => inv.id !== invitationId));
 
-      toast({
-        title: response === 'accepted' ? "Invitation acceptée !" : "Invitation refusée",
-        description: response === 'accepted' 
-          ? `Vous avez rejoint la SAMP Zone "${data.spaces?.name}"` 
-          : "L'invitation a été refusée",
-      });
+      // Afficher le toast uniquement si l'invitation a été acceptée
+      if (response === 'accepted' && data.spaces) {
+        toast({
+          title: "Invitation acceptée !",
+          description: `Vous avez rejoint la SAMP Zone "${data.spaces?.name}"`,
+        });
+      }
 
     } catch (err: any) {
       console.error('Error responding to invitation:', err);
