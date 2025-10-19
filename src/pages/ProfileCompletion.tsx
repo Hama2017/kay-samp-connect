@@ -116,7 +116,16 @@ export default function ProfileCompletion() {
         username: username.toLowerCase(),
         updated_at: new Date().toISOString()
       }).eq('id', userId);
-      if (updateError) throw updateError;
+      
+      if (updateError) {
+        // Gestion spécifique de l'erreur de username en double
+        if (updateError.code === '23505' || updateError.message.includes('profiles_username_unique')) {
+          setError("Ce nom d'utilisateur vient d'être pris. Choisissez-en un autre.");
+          setIsAvailable(false);
+          return;
+        }
+        throw updateError;
+      }
       
       // Mise à jour du contexte d'authentification
       await updateUserProfile();
