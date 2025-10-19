@@ -315,8 +315,11 @@ export default function PostMediaDisplay({
             className="relative w-full" 
             style={{ minHeight: '300px' }}
           >
-            {thumbnail && showBig && (
-              <div className="absolute inset-0 z-10 transition-opacity duration-300">
+            {thumbnail && (
+              <div className={cn(
+                "absolute inset-0 z-10 transition-opacity duration-300",
+                showBig ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}>
                 <img
                   src={thumbnail}
                   className={cn("rounded-lg w-full h-full object-cover", className)}
