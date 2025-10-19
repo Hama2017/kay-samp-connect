@@ -194,9 +194,9 @@ export function useAnalytics() {
       {
         id: '3',
         type: 'follow',
-        description: '3 nouveaux abonnés cette semaine',
+        description: '3 nouveaux SAMPNA cette semaine',
         timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        impact: '+3 abonnés'
+        impact: '+3 SAMPNA'
       }
     ];
   }, []);

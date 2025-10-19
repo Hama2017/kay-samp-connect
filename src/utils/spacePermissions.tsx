@@ -59,7 +59,7 @@ export function canUserPostInSpace(
     if (!space.is_subscribed) {
       return {
         canPost: false,
-        message: 'Abonnez-vous pour créer un post'
+        message: 'DemaySAMP pour créer un post'
       };
     }
   }
@@ -72,7 +72,7 @@ export function canUserPostInSpace(
 
 export function getPublishPermissionLabel(permission: string): string {
   const labels: Record<string, string> = {
-    'subscribers': 'Abonnés',
+    'subscribers': 'SAMPNA',
     'verified_only': 'Utilisateurs vérifiés seulement',
     'creator_only': 'Moi seulement'
   };

@@ -50,7 +50,7 @@ export function AnalyticsDashboard() {
       trend: '+8%'
     },
     {
-      title: 'Abonnés',
+      title: 'SAMPNA',
       value: userStats.totalFollowers,
       icon: Users,
       color: 'text-green-600',

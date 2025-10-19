@@ -53,7 +53,7 @@ export function useUserFollow(targetUserId: string) {
     if (!user?.id || !targetUserId || user.id === targetUserId) {
       toast({
         title: "Erreur",
-        description: "Impossible de s'abonner à ce compte",
+        description: "Impossible de DemaySAMP à ce compte",
         variant: "destructive"
       });
       return;
@@ -76,11 +76,11 @@ export function useUserFollow(targetUserId: string) {
         setFollowersCount(prev => Math.max(0, prev - 1));
 
         toast({
-          title: "Désabonné",
+          title: "DeSAMPNA",
           description: "Vous ne suivez plus cet utilisateur",
         });
       } else {
-        // S'abonner
+        // DemaySAMP
         const { error } = await supabase
           .from('user_follows')
           .insert({
@@ -94,7 +94,7 @@ export function useUserFollow(targetUserId: string) {
         setFollowersCount(prev => prev + 1);
 
         toast({
-          title: "Abonné !",
+          title: "SAMPNA !",
           description: "Vous suivez maintenant cet utilisateur",
         });
       }

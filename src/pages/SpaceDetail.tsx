@@ -158,7 +158,7 @@ export default function SpaceDetail() {
           .maybeSingle();
         
         if (data && !error) {
-          // Vérifier si l'utilisateur est abonné
+          // Vérifier si l'utilisateur est SAMPNA
           const { data: subscription } = await supabase
             .from('space_subscriptions')
             .select('space_id')
@@ -290,7 +290,7 @@ export default function SpaceDetail() {
         className="flex-1"
         onClick={handleSubscriptionToggle}
       >
-        {space.is_subscribed ? "Abonné" : "S'abonner"}
+        {space.is_subscribed ? "SAMPNA" : "DemaySAMP"}
       </Button>
     )}
 

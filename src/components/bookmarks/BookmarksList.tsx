@@ -104,7 +104,7 @@ function BookmarkItemCard({ bookmark, onRemove }: BookmarkItemCardProps) {
             {bookmark.metadata?.followers && (
               <span className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
-                {bookmark.metadata.followers} abonnés
+                {bookmark.metadata.followers} SAMPNA
               </span>
             )}
             {bookmark.metadata?.verified && (

@@ -137,7 +137,7 @@ export default function Profile() {
             <div className="flex gap-6">
               <div className="text-center">
                 <p className="text-xl font-bold">{user.profile?.followers_count || 0}</p>
-                <p className="text-sm text-muted-foreground">Abonnés</p>
+                <p className="text-sm text-muted-foreground">SAMPNA</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{userPosts.length}</p>

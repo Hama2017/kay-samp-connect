@@ -200,7 +200,7 @@ useEffect(() => {
                       ) : (
                         <>
                           <UserPlus className="h-4 w-4" />
-                          S'abonner
+                          DemaySAMP
                         </>
                       )}
                     </Button>
@@ -265,7 +265,7 @@ useEffect(() => {
             <div className="flex gap-6">
               <div className="text-center">
                 <p className="text-xl font-bold">{followersCount}</p>
-                <p className="text-sm text-muted-foreground">Abonnés</p>
+                <p className="text-sm text-muted-foreground">SAMPNA</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{userPosts.length}</p>

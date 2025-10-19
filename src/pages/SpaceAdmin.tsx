@@ -186,12 +186,12 @@ export default function SpaceAdmin() {
       
       if (error) throw error;
       
-      // Recharger la liste des abonnés après suppression
+      // Recharger la liste des SAMPNA après suppression
       await fetchSubscribers(spaceId!);
       toast.success(`@${username} a été retiré de la SAMP Zone`);
     } catch (error) {
       console.error('Error removing subscriber:', error);
-      toast.error("Erreur lors de la suppression de l'abonné");
+      toast.error("Erreur lors de la suppression du SAMPNA");
     }
   };
 
@@ -351,7 +351,7 @@ export default function SpaceAdmin() {
                     <div className="flex items-center space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="subscribers" id="edit-all-subscribers" />
                       <Label htmlFor="edit-all-subscribers" className="text-sm cursor-pointer flex-1">
-                        Tous les abonnés
+                        Tous les SAMPNA
                       </Label>
                     </div>
                     
@@ -458,13 +458,13 @@ export default function SpaceAdmin() {
                   <p className="text-sm font-medium mb-2">Qui peut publier:</p>
                   <Badge variant="outline">
                     {space.who_can_publish?.[0] === 'creator_only' && 'Moi seulement'}
-                    {space.who_can_publish?.[0] === 'subscribers' && 'Tous les abonnés'}
+                    {space.who_can_publish?.[0] === 'subscribers' && 'Tous les SAMPNA'}
                     {space.who_can_publish?.[0] === 'verified_only' && 'Utilisateurs vérifiés'}
                     {space.who_can_publish?.[0] === 'invited' && 'Par invitation'}
                   </Badge>
                 </div>
                 <div className="flex gap-4 text-sm text-muted-foreground">
-                  <span>{space.subscribers_count || 0} abonnés</span>
+                  <span>{space.subscribers_count || 0} SAMPNA</span>
                   <span>{space.posts_count || 0} publications</span>
                 </div>
               </>
@@ -535,7 +535,7 @@ export default function SpaceAdmin() {
           <CardHeader className="pb-3 sm:pb-6">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Users className="h-5 w-5 shrink-0" />
-              <span>Abonnés ({subscribers.filter(s => s.id !== space.creator_id).length})</span>
+              <span>SAMPNA ({subscribers.filter(s => s.id !== space.creator_id).length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -568,7 +568,7 @@ export default function SpaceAdmin() {
                       </AlertDialogTrigger>
                       <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Retirer cet abonné ?</AlertDialogTitle>
+                          <AlertDialogTitle>Retirer ce SAMPNA ?</AlertDialogTitle>
                           <AlertDialogDescription className="text-sm">
                             Voulez-vous vraiment retirer @{subscriber.username} de cette SAMP Zone ? Cette action est irréversible.
                           </AlertDialogDescription>
@@ -588,7 +588,7 @@ export default function SpaceAdmin() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Aucun abonné pour le moment</p>
+              <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm">Aucun SAMPNA pour le moment</p>
             )}
           </CardContent>
         </Card>

@@ -109,7 +109,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Hash className="h-8 w-8 text-primary/50" />
                 </div>
-                <p className="font-medium mb-2">Aucune SAMP Zone abonnée</p>
+                <p className="font-medium mb-2">Aucune SAMP Zone SAMPNA</p>
                 <p className="text-sm leading-relaxed">
                   Explorez et abonnez-vous à des SAMP Zones pour les voir ici
                 </p>

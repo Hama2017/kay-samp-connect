@@ -220,14 +220,14 @@ export function useSpaces() {
       );
     /*
       toast({
-        title: "Abonné !",
-        description: "Vous êtes maintenant abonné à cette SAMP Zone",
+        title: "SAMPNA !",
+        description: "Vous êtes maintenant SAMPNA à cette SAMP Zone",
       }); */
     } catch (err: any) {
       console.error('Error subscribing to space:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de s'abonner à la SAMP Zone",
+        description: "Impossible de DemaySAMP à la SAMP Zone",
         variant: "destructive",
       });
     }
@@ -256,8 +256,8 @@ export function useSpaces() {
 
           /*
       toast({
-        title: "Désabonné",
-        description: "Vous n'êtes plus abonné à cette SAMP Zone",
+        title: "DeSAMPNA",
+        description: "Vous n'êtes plus SAMPNA à cette SAMP Zone",
       });   */
     } catch (err: any) {
       console.error('Error unsubscribing from space:', err);

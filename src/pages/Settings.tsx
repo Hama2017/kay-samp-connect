@@ -406,7 +406,7 @@ export default function Settings() {
                 <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold">{user?.profile?.followers_count || 0}</p>
-                    <p className="text-sm text-muted-foreground">Abonnés</p>
+                    <p className="text-sm text-muted-foreground">SAMPNA</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold">{user?.profile?.following_count || 0}</p>

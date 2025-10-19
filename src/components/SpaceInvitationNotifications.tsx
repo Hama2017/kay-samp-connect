@@ -23,7 +23,7 @@ export function SpaceInvitationNotifications() {
   useEffect(() => {
     fetchMyInvitations();
     
-    // S'abonner aux nouvelles invitations en temps réel
+    // DemaySAMP aux nouvelles invitations en temps réel
     const channel = supabase
       .channel('space-invitations-changes')
       .on(

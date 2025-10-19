@@ -283,7 +283,7 @@ export default function Search() {
                                   </div>
                                   {user.bio && <p className="text-xs text-muted-foreground line-clamp-1">{user.bio}</p>}
                                   <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
-                                    <span>{user.followersCount} abonnés</span>
+                                    <span>{user.followersCount} SAMPNA</span>
                                     <span>•</span>
                                     <span>{user.followingCount} abonnements</span>
                                   </div>
@@ -378,7 +378,7 @@ export default function Search() {
                                 </div>
                                 {user.bio && <p className="text-sm text-muted-foreground">{user.bio}</p>}
                                 <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                  <span>{user.followersCount} abonnés</span>
+                                  <span>{user.followersCount} SAMPNA</span>
                                   <span>{user.followingCount} abonnements</span>
                                 </div>
                               </div>

@@ -214,7 +214,7 @@ export default function CreateSpace() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="subscribers" id="all-subscribers" />
                   <Label htmlFor="all-subscribers" className="text-sm">
-                    Tous les abonnés
+                    Tous les SAMPNA
                   </Label>
                 </div>
                 

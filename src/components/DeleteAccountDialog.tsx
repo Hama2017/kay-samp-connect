@@ -60,7 +60,7 @@ export function DeleteAccountDialog({ open, onOpenChange, onConfirm }: DeleteAcc
               <li>Tous vos posts et médias</li>
               <li>Tous vos commentaires et votes</li>
               <li>Toutes les SAMP Zones que vous avez créées</li>
-              <li>Vos abonnements et abonnés</li>
+              <li>Vos SAMPnements et SAMPNA</li>
               <li>Toutes vos données personnelles</li>
             </ul>
 
