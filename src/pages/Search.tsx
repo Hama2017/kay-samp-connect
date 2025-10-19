@@ -40,10 +40,10 @@ export default function Search() {
 
   // Initialiser la recherche depuis l'URL
   useEffect(() => {
-    const urlQuery = searchParams.get('q') || '';
-    const urlType = searchParams.get('type') as SearchFilters['type'] || 'all';
-    const urlCategory = searchParams.get('category') || 'Tous';
-    const urlSort = searchParams.get('sort') as SearchFilters['sortBy'] || 'relevance';
+  const urlQuery = searchParams.get('q') || '';
+  const urlType = searchParams.get('type') as SearchFilters['type'] || 'all';
+  const urlCategory = searchParams.get('category') || 'Tous';
+  const urlSort = searchParams.get('sort') as SearchFilters['sortBy'] || 'recent';
 
     setQuery(urlQuery);
     setLocalQuery(urlQuery);
@@ -60,7 +60,7 @@ export default function Search() {
     if (newQuery) params.set('q', newQuery);
     if (newFilters.type !== 'all') params.set('type', newFilters.type);
     if (newFilters.category !== 'Tous') params.set('category', newFilters.category);
-    if (newFilters.sortBy !== 'relevance') params.set('sort', newFilters.sortBy);
+    if (newFilters.sortBy !== 'recent') params.set('sort', newFilters.sortBy);
     
     setSearchParams(params);
   };
@@ -161,7 +161,6 @@ export default function Search() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="relevance">Pertinence</SelectItem>
                     <SelectItem value="recent">Récent</SelectItem>
                     <SelectItem value="popular">Populaire</SelectItem>
                   </SelectContent>
