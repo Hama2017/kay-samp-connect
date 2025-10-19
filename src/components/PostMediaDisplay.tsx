@@ -6,6 +6,7 @@ interface PostMedia {
   media_url: string;
   media_type: string;
   youtube_video_id?: string;
+  thumbnail_url?: string;
 }
 
 interface PostMediaDisplayProps {
@@ -187,8 +188,14 @@ export default function PostMediaDisplay({
 
   useEffect(() => {
     media.forEach(item => {
-      if (item.media_type === 'video' && !videoThumbnails[item.id]) {
-        extractVideoFrame(item.media_url, item.id);
+      if (item.media_type === 'video') {
+        // Si un thumbnail_url existe déjà dans la base de données, l'utiliser
+        if (item.thumbnail_url) {
+          setVideoThumbnails(prev => ({ ...prev, [item.id]: item.thumbnail_url! }));
+        } else if (!videoThumbnails[item.id]) {
+          // Sinon, extraire le frame à la volée (pour compatibilité avec anciennes vidéos)
+          extractVideoFrame(item.media_url, item.id);
+        }
       }
     });
   }, [media]);

@@ -30,6 +30,7 @@ export interface PostDetail {
     media_type: string;
     media_url: string;
     thumbnail_url?: string;
+    youtube_video_id?: string;
     media_order: number;
   }>;
   comments: Array<{

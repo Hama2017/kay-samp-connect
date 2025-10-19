@@ -55,6 +55,7 @@ serve(async (req) => {
           media_type,
           media_url,
           thumbnail_url,
+          youtube_video_id,
           media_order
         ),
         post_votes(

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { extractVideoThumbnail } from '@/utils/videoThumbnail';
 
 export interface Post {
   id: string;
@@ -35,6 +36,8 @@ export interface Post {
     media_url: string;
     media_type: string;
     media_order: number;
+    thumbnail_url?: string;
+    youtube_video_id?: string;
   }>;
 }
 
@@ -91,7 +94,9 @@ export function usePosts() {
             id,
             media_url,
             media_type,
-            media_order
+            media_order,
+            thumbnail_url,
+            youtube_video_id
           )
         `)
         .range((page - 1) * limit, page * limit - 1);
@@ -183,6 +188,8 @@ export function usePosts() {
           
           console.log('Traitement fichier:', file);
           
+          let thumbnailUrl = '';
+          
           // Vérifier si c'est une vidéo YouTube
           if (file.isYouTubeUrl) {
             mediaUrl = file.url;
@@ -222,6 +229,35 @@ export function usePosts() {
             // Determine media type
             if (file.type && file.type.startsWith('video/')) {
               mediaType = 'video';
+              
+              // Extraire et uploader le thumbnail de la vidéo
+              try {
+                console.log('Extraction du thumbnail de la vidéo...');
+                const thumbnailBlob = await extractVideoThumbnail(file);
+                const thumbnailFileName = `${user.id}/${data.id}_${i}_thumb_${Date.now()}.jpg`;
+                
+                // Upload du thumbnail
+                const { error: thumbUploadError } = await supabase.storage
+                  .from('post-media')
+                  .upload(thumbnailFileName, thumbnailBlob, {
+                    contentType: 'image/jpeg',
+                    cacheControl: '3600'
+                  });
+                
+                if (!thumbUploadError) {
+                  const { data: thumbUrlData } = supabase.storage
+                    .from('post-media')
+                    .getPublicUrl(thumbnailFileName);
+                  
+                  thumbnailUrl = thumbUrlData.publicUrl;
+                  console.log('Thumbnail uploadé:', thumbnailUrl);
+                } else {
+                  console.error('Erreur upload thumbnail:', thumbUploadError);
+                }
+              } catch (thumbnailError) {
+                console.error('Erreur extraction thumbnail:', thumbnailError);
+                // Continue sans thumbnail si l'extraction échoue
+              }
             } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
               mediaType = 'image'; // Les GIFs sont traités comme des images
             } else if (file.type && file.type.startsWith('image/')) {
@@ -229,7 +265,7 @@ export function usePosts() {
             }
           }
           
-          console.log('Insertion en base:', { postId: data.id, mediaUrl, mediaType, order: i, youtubeVideoId });
+          console.log('Insertion en base:', { postId: data.id, mediaUrl, mediaType, order: i, youtubeVideoId, thumbnailUrl });
 
           // Prepare media record for database
           const mediaRecord: any = {
@@ -242,6 +278,11 @@ export function usePosts() {
           // Add YouTube video ID if it's a YouTube video
           if (mediaType === 'youtube' && youtubeVideoId) {
             mediaRecord.youtube_video_id = youtubeVideoId;
+          }
+
+          // Add thumbnail URL if available
+          if (thumbnailUrl) {
+            mediaRecord.thumbnail_url = thumbnailUrl;
           }
 
           // Save media record to database
