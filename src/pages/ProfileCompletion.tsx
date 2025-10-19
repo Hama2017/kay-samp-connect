@@ -52,17 +52,26 @@ export default function ProfileCompletion() {
       }
       setIsChecking(true);
       try {
-        const {
-          data,
-          error
-        } = await supabase.from('profiles').select('username').ilike('username', username).single();
-        if (error && error.code === 'PGRST116') {
-          setIsAvailable(true);
+        // Vérifier avec eq() pour correspondance exacte case-insensitive
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username.toLowerCase())
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Erreur check username:', error);
+          setIsAvailable(null);
         } else if (data) {
+          // Username existe déjà
           setIsAvailable(false);
+        } else {
+          // Username disponible
+          setIsAvailable(true);
         }
       } catch (error) {
         console.error('Erreur check:', error);
+        setIsAvailable(null);
       } finally {
         setIsChecking(false);
       }
