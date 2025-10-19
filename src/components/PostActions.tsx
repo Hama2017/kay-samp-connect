@@ -126,14 +126,14 @@ const handleShare = async (e: React.MouseEvent) => {
         </Button> */}
 
         {/* Share button */}
-        <Button 
+        {/* <Button 
           variant="ghost" 
           size="sm" 
           className="h-8 px-2 text-muted-foreground hover:text-primary"
           onClick={handleShare}
         >
           <Share2 className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
       
       {/* Views count */}
