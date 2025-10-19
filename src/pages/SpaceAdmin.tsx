@@ -550,7 +550,7 @@ export default function SpaceAdmin() {
                     <Link to={`/profile/${subscriber.username}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
                         <AvatarImage src={subscriber.profile_picture_url} />
-                        <AvatarFallback className="text-xs sm:text-sm bg-green-500 text-white font-semibold">
+                        <AvatarFallback className="text-xs sm:text-sm bg-primary text-primary-foreground font-semibold">
                           {subscriber.username?.slice(0, 2).toUpperCase() || "US"}
                         </AvatarFallback>
                       </Avatar>
