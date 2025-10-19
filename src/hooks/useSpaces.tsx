@@ -218,11 +218,11 @@ export function useSpaces() {
             : space
         )
       );
-
+    /*
       toast({
         title: "Abonné !",
         description: "Vous êtes maintenant abonné à cette SAMP Zone",
-      });
+      }); */
     } catch (err: any) {
       console.error('Error subscribing to space:', err);
       toast({
@@ -254,10 +254,11 @@ export function useSpaces() {
         )
       );
 
+          /*
       toast({
         title: "Désabonné",
         description: "Vous n'êtes plus abonné à cette SAMP Zone",
-      });
+      });   */
     } catch (err: any) {
       console.error('Error unsubscribing from space:', err);
       toast({
