@@ -165,8 +165,8 @@ export function SpaceInvitationNotifications() {
                             onClick={() => handleAccept(invitation.id)}
                             className="bg-green-600 hover:bg-green-700 text-white flex-1 h-9"
                           >
-                            <Check className="h-3.5 w-3.5 sm:mr-1" />
-                            <span className="hidden sm:inline">Accepter</span>
+                            <Check className="h-3.5 w-3.5 mr-1" />
+                            Accepter
                           </Button>
                           <Button
                             size="sm"
@@ -174,8 +174,8 @@ export function SpaceInvitationNotifications() {
                             onClick={() => handleDecline(invitation.id)}
                             className="border-red-200 text-red-600 hover:bg-red-50 flex-1 h-9"
                           >
-                            <X className="h-3.5 w-3.5 sm:mr-1" />
-                            <span className="hidden sm:inline">Refuser</span>
+                            <X className="h-3.5 w-3.5 mr-1" />
+                            Refuser
                           </Button>
                         </div>
                       </div>
