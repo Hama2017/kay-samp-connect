@@ -158,7 +158,7 @@ export default function Profile() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="posts">Posts</TabsTrigger>
             <TabsTrigger value="spaces">SAMP Zones</TabsTrigger>
-            <TabsTrigger value="bookmarks">Favoris</TabsTrigger>
+            <TabsTrigger value="bookmarks">SAMP Post</TabsTrigger>
           </TabsList>
           
           {/* Posts Tab */}
