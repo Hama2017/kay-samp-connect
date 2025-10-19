@@ -170,9 +170,15 @@ export default function CreatePost() {
         media_files: formData.selectedFiles.length > 0 ? formData.selectedFiles : undefined
       });
 
-      // Rediriger vers le post créé
+      // Rediriger selon le contexte
       if (newPost?.id) {
-        navigate(`/post/${newPost.id}`);
+        if (spaceId) {
+          // Rediriger vers la SAMP Zone
+          navigate(`/space/${spaceId}`);
+        } else {
+          // Rediriger vers le profil de l'utilisateur
+          navigate(`/user/${user.profile?.username}`);
+        }
       }
     } catch (error) {
       console.error('Error creating post:', error);
