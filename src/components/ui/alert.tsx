@@ -33,8 +33,7 @@ const Alert = React.forwardRef<
         onClick={onClose}
         className={cn(
           "absolute right-2 top-2 sm:right-3 sm:top-3 rounded-full",
-          "p-1.5 sm:p-2 min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px]",
-          "flex items-center justify-center",
+          "p-1 flex items-center justify-center",
           "transition-all duration-200",
           "hover:scale-110 active:scale-95",
           "focus:outline-none focus:ring-2 focus:ring-offset-1",
@@ -44,7 +43,7 @@ const Alert = React.forwardRef<
         )}
         aria-label="Fermer"
       >
-        <X className="h-4 w-4 sm:h-5 sm:w-5" />
+        <X className="h-3.5 w-3.5" />
       </button>
     )}
   </div>
