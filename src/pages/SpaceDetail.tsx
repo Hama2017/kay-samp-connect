@@ -290,7 +290,7 @@ export default function SpaceDetail() {
         className="flex-1"
         onClick={handleSubscriptionToggle}
       >
-        {space.is_subscribed ? "SAMPNA" : "DemaySAMP"}
+        {space.is_subscribed ? "SAMPNA" : "DamaySAMP"}
       </Button>
     )}
 

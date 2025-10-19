@@ -216,7 +216,7 @@ export function useSpaceInvitations() {
 
       if (error) throw error;
 
-      // Si acceptée, DemaySAMP à l'espace
+      // Si acceptée, DamaySAMP à l'espace
       if (response === 'accepted' && data.spaces) {
         const { error: subscriptionError } = await supabase
           .from('space_subscriptions')

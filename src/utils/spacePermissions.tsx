@@ -59,7 +59,7 @@ export function canUserPostInSpace(
     if (!space.is_subscribed) {
       return {
         canPost: false,
-        message: 'DemaySAMP pour créer un post'
+        message: 'DamaySAMP pour créer un post'
       };
     }
   }

@@ -226,7 +226,7 @@ export function InfinitePostsList({
                       : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border-[#28313d] hover:border-[#1f9463]/30"
                   }`}
                 >
-                  {bookmarked ? "Sampna" : "DemaySamp"}
+                  {bookmarked ? "Sampna" : "DamaySamp"}
                 </Button>
               </div>
             </CardHeader>

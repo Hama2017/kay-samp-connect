@@ -53,7 +53,7 @@ export function useUserFollow(targetUserId: string) {
     if (!user?.id || !targetUserId || user.id === targetUserId) {
       toast({
         title: "Erreur",
-        description: "Impossible de DemaySAMP à ce compte",
+        description: "Impossible de DamaySAMP à ce compte",
         variant: "destructive"
       });
       return;
@@ -80,7 +80,7 @@ export function useUserFollow(targetUserId: string) {
           description: "Vous ne suivez plus cet utilisateur",
         });
       } else {
-        // DemaySAMP
+        // DamaySAMP
         const { error } = await supabase
           .from('user_follows')
           .insert({

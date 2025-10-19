@@ -173,7 +173,7 @@ export default function PostDetail() {
                   : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border border-[#1f9463]/30 hover:border-[#1f9463]"
               }`}
             >
-              {bookmarked ? "Sampna" : "DemaySamp"}
+              {bookmarked ? "Sampna" : "DamaySamp"}
             </Button>
           </div>
         </CardHeader>

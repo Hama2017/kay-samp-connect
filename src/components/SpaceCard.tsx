@@ -77,7 +77,7 @@ export function SpaceCard({ space, onSubscriptionToggle }: SpaceCardProps) {
               className="flex-shrink-0 text-xs sm:text-sm px-3 sm:px-4"
               onClick={handleSubscriptionClick}
             >
-              {space.is_subscribed ? "SAMPNA" : "DemaySAMP"}
+              {space.is_subscribed ? "SAMPNA" : "DamaySAMP"}
             </Button>
           )}
         </div>

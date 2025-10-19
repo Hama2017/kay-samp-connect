@@ -227,7 +227,7 @@ export function useSpaces() {
       console.error('Error subscribing to space:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de DemaySAMP à la SAMP Zone",
+        description: "Impossible de DamaySAMP à la SAMP Zone",
         variant: "destructive",
       });
     }
