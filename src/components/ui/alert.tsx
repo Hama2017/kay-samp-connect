@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-xl p-4 shadow-lg backdrop-blur-sm transition-all duration-300 [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-2px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4",
+  "relative w-full rounded-xl p-3 sm:p-4 shadow-lg backdrop-blur-sm transition-all duration-300 [&>svg~*]:pl-7 sm:[&>svg~*]:pl-8 [&>svg+div]:translate-y-[-2px] [&>svg]:absolute [&>svg]:left-3 sm:[&>svg]:left-4 [&>svg]:top-3 sm:[&>svg]:top-4",
   {
     variants: {
       variant: {
@@ -26,22 +26,25 @@ const Alert = React.forwardRef<
     onClose?: () => void;
   }
 >(({ className, variant, dismissible, onClose, children, ...props }, ref) => (
-  <div ref={ref} role="alert" className={cn(alertVariants({ variant }), dismissible && "pr-12", className)} {...props}>
+  <div ref={ref} role="alert" className={cn(alertVariants({ variant }), dismissible && "pr-10 sm:pr-12", className)} {...props}>
     {children}
     {dismissible && onClose && (
       <button
         onClick={onClose}
         className={cn(
-          "absolute right-3 top-3 rounded-full p-1.5 transition-all duration-200",
+          "absolute right-2 top-2 sm:right-3 sm:top-3 rounded-full",
+          "p-1.5 sm:p-2 min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px]",
+          "flex items-center justify-center",
+          "transition-all duration-200",
           "hover:scale-110 active:scale-95",
-          "focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "focus:outline-none focus:ring-2 focus:ring-offset-1",
           variant === "destructive" 
             ? "bg-destructive/20 hover:bg-destructive/30 text-destructive focus:ring-destructive" 
             : "bg-muted hover:bg-muted/80 text-muted-foreground focus:ring-primary"
         )}
         aria-label="Fermer"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 sm:h-5 sm:w-5" />
       </button>
     )}
   </div>
