@@ -172,6 +172,11 @@ export default function CreatePost() {
 
       // Rediriger selon le contexte
       if (newPost?.id) {
+        toast({
+          title: "Succès",
+          description: "Publication créée avec succès",
+        });
+        
         if (spaceId) {
           // Rediriger vers la SAMP Zone
           navigate(`/space/${spaceId}`);
