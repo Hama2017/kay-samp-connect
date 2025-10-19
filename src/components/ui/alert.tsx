@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { X } from "lucide-react";
+import { XCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -33,17 +33,16 @@ const Alert = React.forwardRef<
         onClick={onClose}
         className={cn(
           "absolute right-2 top-2 sm:right-3 sm:top-3",
-          "w-6 h-6 rounded-full flex items-center justify-center",
           "transition-all duration-200",
           "hover:scale-110 active:scale-95",
           "focus:outline-none focus:ring-2 focus:ring-offset-1",
           variant === "destructive" 
-            ? "bg-destructive/20 hover:bg-destructive/30 text-destructive focus:ring-destructive" 
-            : "bg-muted hover:bg-muted/80 text-muted-foreground focus:ring-primary"
+            ? "text-destructive focus:ring-destructive hover:text-destructive/80" 
+            : "text-muted-foreground focus:ring-primary hover:text-foreground"
         )}
         aria-label="Fermer"
       >
-        <X className="h-3.5 w-3.5" />
+        <XCircle className="h-5 w-5" />
       </button>
     )}
   </div>
