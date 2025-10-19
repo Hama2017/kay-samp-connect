@@ -258,7 +258,7 @@ export default function SpaceDetail() {
       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
         <div className="flex items-center gap-1">
           <Users className="h-4 w-4" />
-          <span>{space.subscribers_count} membres</span>
+          <span>{space.subscribers_count} SAMPKAT</span>
         </div>
       </div>
     </div>
