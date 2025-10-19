@@ -172,16 +172,16 @@ export function InfinitePostsList({
                     className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (user?.profile?.username === post.profiles.username) {
+                      if (post.profiles && user?.profile?.username === post.profiles.username) {
                         navigate('/profile');
-                      } else {
+                      } else if (post.profiles) {
                         navigate(`/user/${post.profiles.username}`);
                       }
                     }}
                   >
-                    <AvatarImage src={post.profiles.profile_picture_url} />
+                    <AvatarImage src={post.profiles?.profile_picture_url || undefined} />
                     <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
-                      {post.profiles.username.substring(0, 2).toUpperCase()}
+                      {post.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
                     </AvatarFallback>
                   </Avatar>
                   
@@ -191,16 +191,16 @@ export function InfinitePostsList({
                         className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (user?.profile?.username === post.profiles.username) {
+                          if (post.profiles && user?.profile?.username === post.profiles.username) {
                             navigate('/profile');
-                          } else {
+                          } else if (post.profiles) {
                             navigate(`/user/${post.profiles.username}`);
                           }
                         }}
                       >
-                        @{post.profiles.username} 
+                        @{post.profiles?.username || "Utilisateur"} 
                       </span>
-                      {post.profiles.is_verified && (
+                      {post.profiles?.is_verified && (
                         <>
                           <BadgeCheck size={20} color="#329056ff" />
                         </>
