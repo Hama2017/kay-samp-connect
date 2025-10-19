@@ -99,30 +99,45 @@ export default function ProfileCompletion() {
   const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!username.trim()) {
+    
+    const trimmedUsername = username.trim().toLowerCase();
+    
+    if (!trimmedUsername) {
       setError("Choisissez un nom d'utilisateur");
       return;
     }
     const regex = /^[a-zA-Z0-9_]{3,20}$/;
-    if (!regex.test(username)) {
+    if (!regex.test(trimmedUsername)) {
       setError("3-20 caractères (lettres, chiffres, _)");
       return;
     }
-    if (!isAvailable) {
-      setError("Ce nom d'utilisateur est déjà pris");
-      return;
-    }
+    
     if (!userId) {
       setError("Session invalide");
       return;
     }
+    
     setIsLoading(true);
     try {
+      // Double vérification avant la soumission
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', trimmedUsername)
+        .maybeSingle();
+      
+      if (existingUser) {
+        setError("Ce nom d'utilisateur est déjà pris");
+        setIsAvailable(false);
+        setIsLoading(false);
+        return;
+      }
+      
       const {
         error: updateError
       } = await supabase.from('profiles').update({
         full_name: fullName.trim(),
-        username: username.toLowerCase(),
+        username: trimmedUsername,
         updated_at: new Date().toISOString()
       }).eq('id', userId);
       
