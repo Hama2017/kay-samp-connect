@@ -535,7 +535,7 @@ export default function SpaceAdmin() {
           <CardHeader className="pb-3 sm:pb-6">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Users className="h-5 w-5 shrink-0" />
-              <span>Abonnés ({subscribers.length})</span>
+              <span>Abonnés ({subscribers.filter(s => s.id !== space.creator_id).length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -543,9 +543,9 @@ export default function SpaceAdmin() {
               <div className="py-8">
                 <LoadingSpinner />
               </div>
-            ) : subscribers.length > 0 ? (
+            ) : subscribers.filter(s => s.id !== space.creator_id).length > 0 ? (
               <div className="grid gap-2 sm:gap-3">
-                {subscribers.map((subscriber) => (
+                {subscribers.filter(s => s.id !== space.creator_id).map((subscriber) => (
                   <div key={subscriber.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                     <Link to={`/profile/${subscriber.username}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
@@ -556,36 +556,34 @@ export default function SpaceAdmin() {
                       </Avatar>
                       <p className="font-medium text-sm sm:text-base truncate hover:underline">@{subscriber.username}</p>
                     </Link>
-                    {subscriber.id !== space.creator_id && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-destructive hover:text-destructive shrink-0 h-9 w-9 p-0"
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-destructive hover:text-destructive shrink-0 h-9 w-9 p-0"
+                        >
+                          <UserMinus className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Retirer cet abonné ?</AlertDialogTitle>
+                          <AlertDialogDescription className="text-sm">
+                            Voulez-vous vraiment retirer @{subscriber.username} de cette SAMP Zone ? Cette action est irréversible.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                          <AlertDialogCancel className="m-0 w-full sm:w-auto">Annuler</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleRemoveSubscriber(subscriber.id, subscriber.username)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                           >
-                            <UserMinus className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Retirer cet abonné ?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-sm">
-                              Voulez-vous vraiment retirer @{subscriber.username} de cette SAMP Zone ? Cette action est irréversible.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                            <AlertDialogCancel className="m-0 w-full sm:w-auto">Annuler</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => handleRemoveSubscriber(subscriber.id, subscriber.username)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
-                            >
-                              Retirer
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
+                            Retirer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 ))}
               </div>
