@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>KaaySamp</string>
+	<string>KaaySamp</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,5 +45,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cette application a besoin d&apos;accéder à votre galerie pour choisir des photos et vidéos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Cette application utilise votre micro pour enregistrer des vidéos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cette application a besoin d&apos;accéder à votre caméra pour prendre des photos.</string>
 </dict>
 </plist>

@@ -235,10 +235,11 @@ export function useSpaceInvitations() {
 
       // Afficher le toast uniquement si l'invitation a été acceptée
       if (response === 'accepted' && data.spaces) {
+        /*
         toast({
           title: "Invitation acceptée !",
           description: `Vous avez rejoint la SAMP Zone "${data.spaces?.name}"`,
-        });
+        }); */
       }
 
     } catch (err: any) {
