@@ -44,15 +44,18 @@ export const useSpaceAdmin = () => {
 
       console.log('Fetched subscriptions data:', data);
 
-      const formattedSubscribers = data?.map(sub => ({
-        id: sub.profiles?.id || sub.user_id,
-        user_id: sub.user_id,
-        username: sub.profiles?.username || 'Utilisateur',
-        full_name: sub.profiles?.full_name,
-        profile_picture_url: sub.profiles?.profile_picture_url,
-        is_verified: sub.profiles?.is_verified,
-        subscribed_at: sub.subscribed_at
-      })) || [];
+      const formattedSubscribers = data?.map(sub => {
+        const profile = Array.isArray(sub.profiles) ? sub.profiles[0] : sub.profiles;
+        return {
+          id: sub.user_id,
+          user_id: sub.user_id,
+          username: profile?.username || 'Utilisateur',
+          full_name: profile?.full_name,
+          profile_picture_url: profile?.profile_picture_url,
+          is_verified: profile?.is_verified,
+          subscribed_at: sub.subscribed_at
+        };
+      }) || [];
 
       console.log('Formatted subscribers:', formattedSubscribers);
       setSubscribers(formattedSubscribers);

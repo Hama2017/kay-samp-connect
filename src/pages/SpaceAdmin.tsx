@@ -547,7 +547,7 @@ export default function SpaceAdmin() {
               <div className="grid gap-2 sm:gap-3">
                 {subscribers.filter(s => s.id !== space.creator_id).map((subscriber) => (
                   <div key={subscriber.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <Link to={`/profile/${subscriber.username}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <Link to={`/user/${subscriber.username}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
                         <AvatarImage src={subscriber.profile_picture_url} />
                         <AvatarFallback className="text-xs sm:text-sm bg-primary text-primary-foreground font-semibold">
