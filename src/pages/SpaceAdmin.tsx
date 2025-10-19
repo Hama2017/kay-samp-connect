@@ -547,24 +547,15 @@ export default function SpaceAdmin() {
               <div className="grid gap-2 sm:gap-3">
                 {subscribers.map((subscriber) => (
                   <div key={subscriber.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
-                      <AvatarImage src={subscriber.profile_picture_url} />
-                      <AvatarFallback className="text-xs sm:text-sm">
-                        {subscriber.username?.charAt(0)?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <Link to={`/profile/${subscriber.username}`} className="hover:underline">
-                        <p className="font-medium text-sm sm:text-base truncate">@{subscriber.username}</p>
-                      </Link>
-                      <p className="text-xs text-muted-foreground">
-                        Abonné depuis {new Date(subscriber.subscribed_at).toLocaleDateString('fr-FR', { 
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
-                      </p>
-                    </div>
+                    <Link to={`/profile/${subscriber.username}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
+                        <AvatarImage src={subscriber.profile_picture_url} />
+                        <AvatarFallback className="text-xs sm:text-sm bg-green-500 text-white font-semibold">
+                          {subscriber.username?.slice(0, 2).toUpperCase() || "US"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="font-medium text-sm sm:text-base truncate hover:underline">@{subscriber.username}</p>
+                    </Link>
                     {subscriber.id !== space.creator_id && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
