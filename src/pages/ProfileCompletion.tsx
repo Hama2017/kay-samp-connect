@@ -228,23 +228,11 @@ export default function ProfileCompletion() {
                 setError(null);
               }} className="pl-10 h-14 text-lg" disabled={isLoading} autoFocus maxLength={20} />
                   {isChecking && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />}
-                  {!isChecking && isAvailable === true && <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />}
-                  {!isChecking && isAvailable === false && <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />}
                 </div>
                 
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">
-                    3-20 caractères • Lettres, chiffres et underscore uniquement
-                  </p>
-                  {isAvailable === true && <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      Disponible !
-                    </p>}
-                  {isAvailable === false && <p className="text-xs text-destructive flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      Déjà pris
-                    </p>}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  3-20 caractères • Lettres, chiffres et underscore uniquement
+                </p>
               </div>
 
               <div className="space-y-3">
