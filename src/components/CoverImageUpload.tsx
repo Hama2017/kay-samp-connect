@@ -216,18 +216,6 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
               </>
             )}
           </Button>
-          
-          {currentCoverUrl && (
-            <Button
-              variant="destructive"
-              size="sm"
-              className="shadow-lg"
-              onClick={removeCoverImage}
-              disabled={isUploading}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
         {/* Indicateur de chargement */}
