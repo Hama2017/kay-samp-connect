@@ -174,30 +174,6 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Avatar */}
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                  <AvatarImage src={user?.profile?.profile_picture_url} />
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                    {user?.profile?.username?.substring(0, 2).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">@{user?.profile?.username || "Utilisateur"}</h3>
-                      {user?.profile?.is_verified && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">
-                          ✓ Certifié
-                        </Badge>
-                      )}
-                    </div>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Camera className="h-4 w-4" />
-                      Changer la photo
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Form */}
                 <div className="grid gap-4">
                   <div className="space-y-2">
