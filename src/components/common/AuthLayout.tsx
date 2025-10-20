@@ -10,8 +10,8 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, title, subtitle, showLogo = true }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="w-full max-w-md space-y-8 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5 overflow-y-auto">
+      <div className="w-full max-w-md space-y-4 md:space-y-8 animate-fade-in my-auto">
         {showLogo && (
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">

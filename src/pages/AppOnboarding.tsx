@@ -82,7 +82,7 @@ export default function AppOnboarding() {
   return (
     <AuthLayout showLogo={false}>
       <Card className="w-full shadow-lg">
-        <CardHeader className="space-y-6">
+        <CardHeader className="space-y-3 md:space-y-6 py-4 md:py-6">
           {/* Indicateurs de progression */}
           <div className="flex items-center justify-center gap-2 pt-2">
             {onboardingSteps.map((_, index) => (
@@ -100,101 +100,101 @@ export default function AppOnboarding() {
           </div>
 
           {/* Icône et titre */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-2 md:space-y-4">
             {currentStep === 0 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={welcomeImage} 
                   alt="Bienvenue" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : currentStep === 1 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={postsImage} 
                   alt="Publiez des posts" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : currentStep === 2 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={sampzoneImage} 
                   alt="SAMP Zone" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : currentStep === 3 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={newsImage} 
                   alt="Ne rate plus rien" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : currentStep === 4 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={trendingImage} 
                   alt="Découvre ce qui buzz" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : currentStep === 5 ? (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-1">
                 <img 
                   src={finalImage} 
                   alt="Rangg mou gaw" 
-                  className="w-64 h-64 object-contain"
+                  className="w-40 h-40 md:w-64 md:h-64 object-contain"
                 />
               </div>
             ) : (
               <div className="flex justify-center">
                 <div className="relative">
-                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Icon className="w-10 h-10 text-primary" />
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Icon className="w-8 h-8 md:w-10 md:h-10 text-primary" />
                   </div>
                   {currentStep === onboardingSteps.length - 1 && (
-                    <div className="absolute -top-1 -right-1 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                      <Check className="w-4 h-4 text-white" />
+                    <div className="absolute -top-1 -right-1 w-6 h-6 md:w-7 md:h-7 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                      <Check className="w-3 h-3 md:w-4 md:h-4 text-white" />
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold">
+            <div className="space-y-1 md:space-y-2">
+              <CardTitle className="text-xl md:text-2xl font-bold">
                 {step.title}
               </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground px-4">
+              <CardDescription className="text-xs md:text-sm text-muted-foreground px-2 md:px-4">
                 {step.description}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-3 md:space-y-6 py-4 md:py-6">
           {/* Boutons */}
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             {currentStep > 0 && (
               <Button 
                 onClick={handleBack}
                 variant="outline"
-                className="w-full h-14 text-base font-semibold"
+                className="w-full h-11 md:h-14 text-sm md:text-base font-semibold"
               >
-                <ArrowLeft className="mr-2 h-5 w-5" />
+                <ArrowLeft className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                 Retour
               </Button>
             )}
             
             <Button 
               onClick={handleNext}
-              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              className="w-full h-11 md:h-14 text-sm md:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
             >
               {currentStep === onboardingSteps.length - 1 ? 'Commencer' : 'Suivant'}
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
             </Button>
 
             {currentStep < onboardingSteps.length - 1 && (
