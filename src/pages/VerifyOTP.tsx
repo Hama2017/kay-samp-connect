@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/common/AuthLayout";
@@ -181,6 +181,11 @@ export default function VerifyOTP() {
     <AuthLayout showLogo={false}>
       <div className="flex flex-col items-center space-y-6">
         <div className="text-center space-y-2">
+          <div className="flex justify-center mb-2">
+            <div className="p-3 rounded-full bg-primary/10">
+              <MessageSquare className="h-8 w-8 text-primary" />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Vérification
           </h1>
