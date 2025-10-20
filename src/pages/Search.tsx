@@ -255,33 +255,26 @@ export default function Search() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold text-foreground">Utilisateurs suggérés</h3>
                       {searchResults.users.slice(0, 3).map((user) => (
-                        <Card key={user.id} className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-                          <CardContent className="p-4" onClick={() => handleUserClick(user.username)}>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <Avatar className="h-12 w-12 ring-2 ring-primary/10">
-                                <AvatarImage src={user.profilePicture} />
-                                <AvatarFallback className="bg-gradient-primary text-white">
+                      <Card key={user.id} className="cursor-pointer hover:shadow-sm transition-all duration-200">
+                          <CardContent className="p-3 sm:p-4" onClick={() => handleUserClick(user.username)}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                                  <AvatarImage src={user.profilePicture} />
+                                  <AvatarFallback className="bg-gradient-primary text-white">
                                     {user.username[0]?.toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center space-x-2 mb-1">
-                                    <h3 className="font-semibold text-sm truncate">@{user.username}</h3>
-                                    {user.isVerified && <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">✓</Badge>}
-                                  </div>
-                                  {user.bio && <p className="text-xs text-muted-foreground line-clamp-1">{user.bio}</p>}
-                                  <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
-                                    <span>{user.followersCount} SAMPNA</span>
-                                    <span>•</span>
-                                    <span>{user.followingCount} abonnements</span>
-                                  </div>
+                                  {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
+                                  <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} DamaySAMP</p>
                                 </div>
                               </div>
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="ml-4 text-xs"
+                                className="flex-shrink-0 text-xs h-8"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   // Handle follow toggle
@@ -352,27 +345,31 @@ export default function Search() {
                     />
                   ) : (
                     searchResults.users.map((user) => (
-                      <Card key={user.id} className="cursor-pointer hover:shadow-md transition-all duration-200">
-                        <CardContent className="p-4" onClick={() => handleUserClick(user.username)}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="h-12 w-12">
-                                <AvatarImage src="" />
-                                <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
+                      <Card key={user.id} className="cursor-pointer hover:shadow-sm transition-all duration-200">
+                        <CardContent className="p-3 sm:p-4" onClick={() => handleUserClick(user.username)}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                                <AvatarImage src={user.profilePicture} />
+                                <AvatarFallback className="bg-gradient-primary text-white">
+                                  {user.username[0]?.toUpperCase()}
+                                </AvatarFallback>
                               </Avatar>
-                              <div>
-                                <div className="flex items-center space-x-2">
-                                  <h3 className="font-semibold">@{user.username}</h3>
-                                  {user.isVerified && <Badge variant="secondary" className="text-xs">✓</Badge>}
-                                </div>
-                                {user.bio && <p className="text-sm text-muted-foreground">{user.bio}</p>}
-                                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                  <span>{user.followersCount} SAMPNA</span>
-                                  <span>{user.followingCount} abonnements</span>
-                                </div>
+                              <div className="min-w-0 flex-1">
+                                {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
+                                <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} DamaySAMP</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="flex-shrink-0 text-xs h-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle follow toggle
+                              }}
+                            >
                               Suivre
                             </Button>
                           </div>
