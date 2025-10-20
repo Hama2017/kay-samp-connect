@@ -112,6 +112,12 @@ export default function Profile() {
                 )}
               </div>
               
+              {user.profile?.full_name && (
+                <p className="text-lg text-foreground mb-2">
+                  {user.profile?.full_name}
+                </p>
+              )}
+              
               {user.profile?.bio && (
                 <p className="text-muted-foreground mb-3">{user.profile.bio}</p>
               )}

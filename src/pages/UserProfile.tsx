@@ -41,7 +41,7 @@ useEffect(() => {
     try {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username, bio, profile_picture_url, cover_image_url, is_verified, followers_count, following_count, created_at, updated_at, profile_visible')
+        .select('id, username, full_name, bio, profile_picture_url, cover_image_url, is_verified, followers_count, following_count, created_at, updated_at, profile_visible')
         .eq('username', username)
         .single();
         
@@ -247,6 +247,12 @@ useEffect(() => {
                   </Badge>
                 )}
               </div>
+              
+              {userProfile.full_name && (
+                <p className="text-lg text-foreground mb-2">
+                  {userProfile.full_name}
+                </p>
+              )}
               
               {userProfile.bio && (
                 <p className="text-muted-foreground mb-3">{userProfile.bio}</p>
