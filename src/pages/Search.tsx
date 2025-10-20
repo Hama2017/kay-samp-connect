@@ -257,31 +257,18 @@ export default function Search() {
                       {searchResults.users.slice(0, 3).map((user) => (
                       <Card key={user.id} className="cursor-pointer hover:shadow-sm transition-all duration-200">
                           <CardContent className="p-3 sm:p-4" onClick={() => handleUserClick(user.username)}>
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
-                                  <AvatarImage src={user.profilePicture} />
-                                  <AvatarFallback className="bg-gradient-primary text-white">
-                                    {user.username[0]?.toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0 flex-1">
-                                  {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
-                                  <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
-                                </div>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                                <AvatarImage src={user.profilePicture} />
+                                <AvatarFallback className="bg-gradient-primary text-white">
+                                  {user.username[0]?.toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
+                                <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
                               </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="flex-shrink-0 text-xs h-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Handle follow toggle
-                                }}
-                              >
-                                DamaySAMP
-                              </Button>
                             </div>
                           </CardContent>
                         </Card>
@@ -347,31 +334,18 @@ export default function Search() {
                     searchResults.users.map((user) => (
                       <Card key={user.id} className="cursor-pointer hover:shadow-sm transition-all duration-200">
                         <CardContent className="p-3 sm:p-4" onClick={() => handleUserClick(user.username)}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
-                                <AvatarImage src={user.profilePicture} />
-                                <AvatarFallback className="bg-gradient-primary text-white">
-                                  {user.username[0]?.toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0 flex-1">
-                                {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
-                                <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
-                              </div>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                              <AvatarImage src={user.profilePicture} />
+                              <AvatarFallback className="bg-gradient-primary text-white">
+                                {user.username[0]?.toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="flex-shrink-0 text-xs h-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Handle follow toggle
-                              }}
-                            >
-                              DamaySAMP
-                            </Button>
                           </div>
                         </CardContent>
                       </Card>
