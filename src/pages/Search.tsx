@@ -268,7 +268,7 @@ export default function Search() {
                                 <div className="min-w-0 flex-1">
                                   {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
                                   <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} DamaySAMP</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
                                 </div>
                               </div>
                               <Button 
@@ -358,7 +358,7 @@ export default function Search() {
                               <div className="min-w-0 flex-1">
                                 {user.bio && <p className="text-sm font-medium truncate mb-0.5">{user.bio}</p>}
                                 <p className="text-xs sm:text-sm text-muted-foreground truncate">@{user.username}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} DamaySAMP</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{user.followersCount} SAMPKAT</p>
                               </div>
                             </div>
                             <Button 
