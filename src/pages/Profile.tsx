@@ -258,12 +258,22 @@ export default function Profile() {
                 />
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun post favori</h3>
-                <p className="text-muted-foreground">
-                  Les posts que vous mettez en favoris apparaîtront ici
+              <div className="text-center py-16">
+                <div className="mb-6">
+                  <Bookmark className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Aucun SAMP Post favori</h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-4">
+                  Vous n'avez pas encore ajouté de posts en favoris.
+                  Cliquez sur le bouton "DamaySAMP" sur un post pour l'ajouter ici.
                 </p>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/')}
+                  className="gap-2"
+                >
+                  Découvrir des posts
+                </Button>
               </div>
             )}
           </TabsContent>
