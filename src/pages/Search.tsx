@@ -280,7 +280,7 @@ export default function Search() {
                                   // Handle follow toggle
                                 }}
                               >
-                                Suivre
+                                DamaySAMP
                               </Button>
                             </div>
                           </CardContent>
@@ -370,7 +370,7 @@ export default function Search() {
                                 // Handle follow toggle
                               }}
                             >
-                              Suivre
+                              DamaySAMP
                             </Button>
                           </div>
                         </CardContent>
