@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpacesPaginated } from "@/hooks/useSpacesPaginated";
-import { useBookmarkedPosts } from "@/hooks/useBookmarkedPosts";
+import { useBookmarksPaginated } from "@/hooks/useBookmarksPaginated";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { InfiniteScrollLoader } from "@/components/InfiniteScrollLoader";
 import { InfinitePostsList } from "@/components/InfinitePostsList";
@@ -26,12 +26,13 @@ export default function Profile() {
   const [coverImageUrl, setCoverImageUrl] = useState<string>("");
   const { posts, isLoading: postsLoading, hasMore: postsHasMore, fetchPosts, loadMorePosts, votePost } = usePosts();
   const { spaces, isLoading: spacesLoading, hasMore: spacesHasMore, fetchSpaces, loadMoreSpaces } = useSpacesPaginated();
-  const { posts: bookmarkedPosts, isLoading: bookmarksLoading } = useBookmarkedPosts();
+  const { bookmarks, isLoading: bookmarksLoading, hasMore: bookmarksHasMore, fetchBookmarks, loadMoreBookmarks } = useBookmarksPaginated();
 
   useEffect(() => {
     if (user?.id) {
       fetchPosts({ author_id: user.id });
       fetchSpaces({ user_spaces: true });
+      fetchBookmarks({ item_type: 'post' });
       
       // Charger la photo de couverture
       const loadCoverImage = async () => {
@@ -62,7 +63,7 @@ export default function Profile() {
   const userSpaces = spaces.filter(space => space.creator_id === user.id);
 
   const initialLoading = (postsLoading || spacesLoading || bookmarksLoading) && 
-    (posts.length === 0 && spaces.length === 0 && bookmarkedPosts.length === 0);
+    (posts.length === 0 && spaces.length === 0 && bookmarks.length === 0);
 
   if (initialLoading) {
     return <LoadingSpinner size="lg" text="Chargement du profil..." />;
@@ -236,21 +237,26 @@ export default function Profile() {
           
           {/* Bookmarks Tab */}
           <TabsContent value="bookmarks" className="space-y-4 mt-6">
-            {bookmarksLoading ? (
+            {bookmarksLoading && bookmarks.length === 0 ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Chargement des SAMP Posts...</p>
+                <p className="text-muted-foreground">Chargement des favoris...</p>
               </div>
-            ) : bookmarkedPosts.length > 0 ? (
-              <InfinitePostsList
-                posts={bookmarkedPosts}
-                onLoadMore={async () => {}}
-                onVote={votePost}
-                onIncrementViews={(postId) => {}}
-                onPostClick={(post) => navigate(`/post/${post.id}`)}
-                hasMore={false}
-                isLoading={false}
-              />
+            ) : bookmarks.length > 0 ? (
+              <div className="space-y-3 sm:space-y-4">
+                <InfinitePostsList
+                  posts={bookmarks
+                    .filter(bookmark => bookmark.item_type === 'post')
+                    .map(bookmark => posts.find(p => p.id === bookmark.item_id))
+                    .filter(Boolean) as any[]}
+                  onLoadMore={async () => loadMoreBookmarks({ item_type: 'post' })}
+                  onVote={votePost}
+                  onIncrementViews={(postId) => {}}
+                  onPostClick={(post) => navigate(`/post/${post.id}`)}
+                  hasMore={bookmarksHasMore}
+                  isLoading={bookmarksLoading}
+                />
+              </div>
             ) : (
               <div className="text-center py-16">
                 <div className="mb-6">
