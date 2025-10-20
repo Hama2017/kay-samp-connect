@@ -26,6 +26,7 @@ export default function Settings() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const [profileData, setProfileData] = useState({
+    full_name: user?.profile?.full_name || "",
     bio: user?.profile?.bio || ""
   });
 
@@ -176,6 +177,16 @@ export default function Settings() {
               <CardContent className="space-y-6">
                 {/* Form */}
                 <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="full_name">Nom complet</Label>
+                    <Input
+                      id="full_name"
+                      placeholder="Votre nom complet"
+                      value={profileData.full_name}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="bio">Biographie</Label>
                     <Textarea
