@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Flag, AlertTriangle } from "lucide-react";
 
 interface ReportModalProps {
@@ -53,15 +53,10 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
   const [selectedReason, setSelectedReason] = useState('');
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const handleSubmit = async () => {
     if (!selectedReason) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner une raison",
-        variant: "destructive"
-      });
+      toast.error("Veuillez sélectionner une raison");
       return;
     }
 
@@ -70,10 +65,7 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    toast({
-      title: "Signalement envoyé",
-      description: "Merci pour votre signalement. Notre équipe l'examinera sous peu."
-    });
+    toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
     
     setIsSubmitting(false);
     setOpen(false);

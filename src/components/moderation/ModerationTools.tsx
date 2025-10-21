@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { 
   Shield, 
   AlertTriangle, 
@@ -80,7 +80,6 @@ export function ModerationTools() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [actionReason, setActionReason] = useState("");
   const [actionType, setActionType] = useState("");
-  const { toast } = useToast();
 
   const handleReportAction = (reportId: string, action: 'resolve' | 'dismiss', reason?: string) => {
     setReports(prev => prev.map(report => 
@@ -89,10 +88,7 @@ export function ModerationTools() {
         : report
     ));
     
-    toast({
-      title: action === 'resolve' ? "Signalement résolu" : "Signalement rejeté",
-      description: `Le signalement a été ${action === 'resolve' ? 'résolu' : 'rejeté'} avec succès.`
-    });
+    toast.success(`Signalement ${action === 'resolve' ? 'résolu' : 'rejeté'} avec succès`);
     
     setSelectedReport(null);
     setActionReason("");

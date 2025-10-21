@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useCategories } from "@/hooks/useCategories";
 import { useSpaceInvitations } from "@/hooks/useSpaceInvitations";
@@ -15,7 +15,6 @@ import { UserSearchCombobox } from "@/components/UserSearchCombobox";
 
 export default function CreateSpace() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { createSpace } = useSpaces();
   const { categories, isLoading: categoriesLoading } = useCategories();
   const { sendInvitation } = useSpaceInvitations();
@@ -32,11 +31,7 @@ export default function CreateSpace() {
     e.preventDefault();
     
     if (!formData.name || formData.categories.length === 0) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires et choisir au moins une catégorie",
-        variant: "destructive",
-      });
+      toast.error("Veuillez remplir tous les champs obligatoires et choisir au moins une catégorie");
       return;
     }
 
@@ -67,10 +62,7 @@ export default function CreateSpace() {
         }
         
         if (successCount > 0) {
-      toast({
-        title: "Invitations envoyées",
-        description: `${successCount} invitation(s) envoyée(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`,
-      });
+          toast.success(`${successCount} invitation(s) envoyée(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`);
         }
       }
       
@@ -82,17 +74,9 @@ export default function CreateSpace() {
                              error.message?.toLowerCase().includes('idx_spaces_name_category_unique');
       
       if (isDuplicateName) {
-        toast({
-          title: "Nom déjà utilisé",
-          description: `Une SAMP Zone "${formData.name}" existe déjà. Veuillez choisir un autre nom.`,
-          variant: "destructive",
-        });
+        toast.error(`Une SAMP Zone "${formData.name}" existe déjà. Veuillez choisir un autre nom.`);
       } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible de créer la SAMP Zone. Réessayez plus tard.",
-          variant: "destructive",
-        });
+        toast.error("Impossible de créer la SAMP Zone. Réessayez plus tard.");
       }
     } finally {
       setIsLoading(false);

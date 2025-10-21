@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +15,6 @@ export default function CreatePost() {
   const navigate = useNavigate();
   const { spaceId } = useParams();
   const location = useLocation();
-  const { toast } = useToast();
   const { user } = useAuth();
   const { createPost, isLoading } = usePosts();
   const { getSpaceById } = useSpaces();
@@ -110,11 +109,7 @@ export default function CreatePost() {
     
     const videoId = extractYouTubeId(youtubeUrl);
     if (!videoId) {
-      toast({
-        title: "Erreur",
-        description: "Lien YouTube invalide",
-        variant: "destructive",
-      });
+      toast.error("Lien YouTube invalide");
       return;
     }
 
@@ -141,20 +136,12 @@ export default function CreatePost() {
     if (e) e.preventDefault();
     
     if (!formData.content.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez écrire quelque chose",
-        variant: "destructive",
-      });
+      toast.error("Veuillez écrire quelque chose");
       return;
     }
 
     if (!user) {
-      toast({
-        title: "Erreur",
-        description: "Vous devez être connecté pour publier",
-        variant: "destructive",
-      });
+      toast.error("Vous devez être connecté pour publier");
       return;
     }
 
@@ -172,10 +159,7 @@ export default function CreatePost() {
 
       // Rediriger selon le contexte
       if (newPost?.id) {
-        toast({
-          title: "Succès",
-          description: "Publication créée avec succès",
-        });
+        toast.success("Publication créée avec succès");
         
         if (spaceId) {
           // Rediriger vers la SAMP Zone

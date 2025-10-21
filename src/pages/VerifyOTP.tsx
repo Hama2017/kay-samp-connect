@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/common/AuthLayout";
 import { LoadingButton } from "@/components/common/LoadingButton";
@@ -16,7 +16,6 @@ export default function VerifyOTP() {
   const [canResend, setCanResend] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -162,10 +161,7 @@ export default function VerifyOTP() {
 
       if (error) throw error;
 
-      toast({
-        title: "Code renvoyé ✅",
-        description: "Vérifiez vos SMS",
-      });
+      toast.success("Code renvoyé - Vérifiez vos SMS");
     } catch (error: any) {
       setError("Impossible de renvoyer le code.");
       setCanResend(true);

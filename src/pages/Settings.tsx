@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ModerationTools } from "@/components/moderation/ModerationTools";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -20,7 +20,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Settings() {
   const { user, updateProfile, signOut } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -50,16 +49,9 @@ export default function Settings() {
   const handleProfileUpdate = async () => {
     try {
       await updateProfile(profileData);
-      toast({
-        title: "Profil mis à jour",
-        description: "Vos informations ont été sauvegardées"
-      });
+      toast.success("Profil mis à jour avec succès");
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le profil",
-        variant: "destructive"
-      });
+      toast.error("Impossible de mettre à jour le profil");
     }
   };
 
@@ -80,27 +72,17 @@ export default function Settings() {
       
       await updateProfile(privacyData);
       
-      toast({
-        title: "Paramètres mis à jour",
-        description: "Vos préférences de confidentialité ont été sauvegardées"
-      });
+      toast.success("Paramètres de confidentialité sauvegardés");
     } catch (error) {
       // Revert local state on error
       setPrivacy(privacy);
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour les paramètres",
-        variant: "destructive"
-      });
+      toast.error("Impossible de mettre à jour les paramètres");
     }
   };
 
   const handleLogout = () => {
     signOut();
-    toast({
-      title: "Déconnexion",
-      description: "À bientôt sur KaaySamp !"
-    });
+    toast.success("À bientôt sur KaaySamp !");
     navigate("/login");
   };
 
@@ -110,21 +92,14 @@ export default function Settings() {
       
       if (error) throw error;
 
-      toast({
-        title: "Compte supprimé",
-        description: "Votre compte a été supprimé définitivement"
-      });
+      toast.success("Compte supprimé définitivement");
       
       // Sign out and redirect
       await signOut();
       navigate("/");
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer votre compte. Veuillez réessayer.",
-        variant: "destructive"
-      });
+      toast.error("Impossible de supprimer votre compte. Veuillez réessayer.");
     } finally {
       setDeleteDialogOpen(false);
     }

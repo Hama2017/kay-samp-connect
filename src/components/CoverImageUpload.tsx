@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Camera, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -16,7 +16,6 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
   const { user } = useAuth();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,20 +24,12 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
 
     // Validation du fichier
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner une image",
-        variant: "destructive"
-      });
+      toast.error("Veuillez sélectionner une image");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB max
-      toast({
-        title: "Erreur", 
-        description: "L'image doit faire moins de 5MB",
-        variant: "destructive"
-      });
+      toast.error("L'image doit faire moins de 5MB");
       return;
     }
 
@@ -96,20 +87,13 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
         }
       }
 
-      toast({
-        title: "Photo de couverture mise à jour",
-        description: "Votre photo de couverture a été changée avec succès"
-      });
+      toast.success("Photo de couverture mise à jour avec succès");
 
       onUploadComplete?.(publicUrl);
       
     } catch (error: any) {
       console.error('Error uploading cover image:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible d'uploader l'image",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Impossible d'uploader l'image");
     } finally {
       setIsUploading(false);
       setPreviewUrl(null);
@@ -140,20 +124,13 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
         }
       }
 
-      toast({
-        title: "Photo supprimée",
-        description: "La photo de couverture a été supprimée"
-      });
+      toast.success("Photo de couverture supprimée");
 
       onUploadComplete?.('');
 
     } catch (error: any) {
       console.error('Error removing cover image:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de supprimer l'image",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Impossible de supprimer l'image");
     } finally {
       setIsUploading(false);
     }

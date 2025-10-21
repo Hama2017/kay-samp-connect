@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { InfinitePostsList } from "@/components/InfinitePostsList";
@@ -19,7 +19,6 @@ import defaultCover from "@/assets/default-cover.png";
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user: currentUser } = useAuth();
   
   const [userProfile, setUserProfile] = useState<any>(null);

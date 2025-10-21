@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PhoneInput } from 'react-international-phone';
 import { AuthLayout } from "@/components/common/AuthLayout";
@@ -13,9 +13,6 @@ export default function UnifiedAuth() {
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const {
-    toast
-  } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,11 +58,7 @@ export default function UnifiedAuth() {
         errorMessage = "Numéro de téléphone invalide.";
       }
       setError(errorMessage);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
