@@ -47,8 +47,16 @@ export default function Settings() {
   }, [user?.profile]);
 
   const handleProfileUpdate = async () => {
+    // Validation côté client
+    const trimmedName = profileData.full_name?.trim();
+    
+    if (!trimmedName) {
+      toast.error("Le nom complet ne peut pas être vide");
+      return;
+    }
+
     try {
-      await updateProfile(profileData);
+      await updateProfile({ ...profileData, full_name: trimmedName });
       toast.success("Profil mis à jour avec succès");
     } catch (error) {
       toast.error("Impossible de mettre à jour le profil");
