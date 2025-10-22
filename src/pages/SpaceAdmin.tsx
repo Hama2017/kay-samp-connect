@@ -125,10 +125,17 @@ export default function SpaceAdmin() {
   const handleUpdate = async () => {
     if (!spaceId) return;
 
+    // Validation du nom
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
+      toast.error("Le nom de la SAMP Zone ne peut pas être vide");
+      return;
+    }
+
     setIsUpdating(true);
     try {
       await updateSpace(spaceId, {
-        name: formData.name,
+        name: trimmedName,
         description: formData.description,
         categories: formData.categories,
         background_image_url: formData.background_image_url,
