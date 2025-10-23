@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNSFWDetection } from '@/hooks/useNSFWDetection';
+import { processImage } from '@/utils/imageCompression';
 
 interface BackgroundImageUploadProps {
   currentImageUrl?: string;
@@ -26,31 +27,26 @@ export function BackgroundImageUpload({
     setIsUploading(true);
     
     try {
-      // Validation du fichier
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Le fichier doit être une image');
-      }
-      
-      if (file.size > 5 * 1024 * 1024) { // 5MB
-        throw new Error('L\'image ne doit pas dépasser 5MB');
-      }
+      // Valider, compresser et convertir en WebP
+      const processedFile = await processImage(file, false);
 
       // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(file);
+      const nsfwResult = await analyzeImage(processedFile);
       
       if (nsfwResult.isNSFW) {
         throw new Error(nsfwResult.message);
       }
 
       // Générer un nom de fichier unique
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.webp`;
       const filePath = `space-backgrounds/${fileName}`;
 
       // Upload vers Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('post-media')
-        .upload(filePath, file);
+        .upload(filePath, processedFile, {
+          contentType: 'image/webp'
+        });
 
       if (uploadError) throw uploadError;
 

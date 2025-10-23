@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useNSFWDetection } from "@/hooks/useNSFWDetection";
+import { processImage } from "@/utils/imageCompression";
 
 interface CoverImageUploadProps {
   currentCoverUrl?: string;
@@ -23,17 +24,6 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Validation du fichier
-    if (!file.type.startsWith('image/')) {
-      toast.error("Veuillez sélectionner une image");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB max
-      toast.error("L'image doit faire moins de 5MB");
-      return;
-    }
 
     // Aperçu
     const reader = new FileReader();
@@ -52,23 +42,27 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
     setIsUploading(true);
     
     try {
+      // Valider, compresser et convertir en WebP
+      const processedFile = await processImage(file, false);
+
       // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(file);
+      const nsfwResult = await analyzeImage(processedFile);
       
       if (nsfwResult.isNSFW) {
         toast.error(nsfwResult.message);
         return;
       }
-      const fileExt = file.name.split('.').pop();
-      const fileName = `cover_${user.id}_${Date.now()}.${fileExt}`;
+
+      const fileName = `cover_${user.id}_${Date.now()}.webp`;
       const filePath = `${user.id}/${fileName}`;
 
       // Upload vers Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: 'image/webp'
         });
 
       if (uploadError) throw uploadError;

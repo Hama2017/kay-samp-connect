@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { extractVideoThumbnail } from '@/utils/videoThumbnail';
+import { processImage, validateVideo } from '@/utils/imageCompression';
 
 export interface Post {
   id: string;
@@ -200,19 +201,37 @@ export function usePosts() {
           // Vérifier si c'est un GIF depuis une URL (Giphy)
           else if (file.isGifUrl) {
             mediaUrl = file.url;
-            mediaType = 'image'; // Les GIFs sont traités comme des images
+            mediaType = 'image';
             console.log('GIF depuis URL:', { mediaUrl, mediaType });
           } else {
-            // Upload normal du fichier
-            const fileExtension = file.name.split('.').pop();
+            // Valider et compresser le fichier selon son type
+            let processedFile: File;
+            
+            if (file.type && file.type.startsWith('video/')) {
+              // Valider la vidéo (limite de 50MB)
+              validateVideo(file);
+              processedFile = file; // Les vidéos ne sont pas compressées côté client
+              mediaType = 'video';
+            } else if (file.type && file.type.startsWith('image/')) {
+              // Compresser et convertir l'image en WebP
+              processedFile = await processImage(file, false);
+              mediaType = 'image';
+            } else {
+              console.error('Type de fichier non supporté:', file.type);
+              continue;
+            }
+            
+            const fileExtension = mediaType === 'video' ? file.name.split('.').pop() : 'webp';
             const fileName = `${user.id}/${data.id}_${i}_${Date.now()}.${fileExtension}`;
             
-            console.log('Upload fichier vers storage:', { fileName, fileType: file.type });
+            console.log('Upload fichier vers storage:', { fileName, fileType: processedFile.type });
             
             // Upload file to Supabase Storage
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('post-media')
-              .upload(fileName, file);
+              .upload(fileName, processedFile, {
+                contentType: processedFile.type
+              });
 
             if (uploadError) {
               console.error('Erreur upload storage:', uploadError);
@@ -225,12 +244,9 @@ export function usePosts() {
               .getPublicUrl(fileName);
             
             mediaUrl = urlData.publicUrl;
-
-            // Determine media type
-            if (file.type && file.type.startsWith('video/')) {
-              mediaType = 'video';
-              
-              // Extraire et uploader le thumbnail de la vidéo
+            
+            // Extraire thumbnail pour les vidéos
+            if (mediaType === 'video') {
               try {
                 console.log('Extraction du thumbnail de la vidéo...');
                 const thumbnailBlob = await extractVideoThumbnail(file);
@@ -256,12 +272,7 @@ export function usePosts() {
                 }
               } catch (thumbnailError) {
                 console.error('Erreur extraction thumbnail:', thumbnailError);
-                // Continue sans thumbnail si l'extraction échoue
               }
-            } else if (file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif')) {
-              mediaType = 'image'; // Les GIFs sont traités comme des images
-            } else if (file.type && file.type.startsWith('image/')) {
-              mediaType = 'image';
             }
           }
           

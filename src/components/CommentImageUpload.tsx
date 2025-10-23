@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNSFWDetection } from '@/hooks/useNSFWDetection';
+import { processImage } from '@/utils/imageCompression';
 
 interface CommentImageUploadProps {
   onImageUploaded: (imageUrl: string) => void;
@@ -46,8 +47,11 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
     setIsUploading(true);
 
     try {
+      // Valider, compresser et convertir en WebP
+      const processedFile = await processImage(file, false);
+
       // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(file);
+      const nsfwResult = await analyzeImage(processedFile);
       
       if (nsfwResult.isNSFW) {
         toast({
@@ -57,17 +61,18 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
         });
         return;
       }
+      
       // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `comment_${Date.now()}.${fileExt}`;
+      const fileName = `comment_${Date.now()}.webp`;
       const filePath = `${user.id}/${fileName}`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('post-media')
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: 'image/webp'
         });
 
       if (uploadError) throw uploadError;

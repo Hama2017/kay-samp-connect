@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNSFWDetection } from '@/hooks/useNSFWDetection';
+import { processImage } from '@/utils/imageCompression';
 
 export function useAvatarUpload() {
   const { user, updateUserProfile } = useAuth();
@@ -43,8 +44,11 @@ export function useAvatarUpload() {
     setIsUploading(true);
 
     try {
+      // Valider, compresser et convertir en WebP
+      const processedFile = await processImage(file, true);
+
       // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(file);
+      const nsfwResult = await analyzeImage(processedFile);
       
       if (nsfwResult.isNSFW) {
         toast({
@@ -54,9 +58,9 @@ export function useAvatarUpload() {
         });
         return false;
       }
-      // Créer un nom de fichier unique
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
+      
+      // Créer un nom de fichier unique (toujours .webp maintenant)
+      const fileName = `${user.id}/avatar-${Date.now()}.webp`;
 
       // Supprimer l'ancien avatar s'il existe
       if (user.profile?.profile_picture_url) {
@@ -72,12 +76,13 @@ export function useAvatarUpload() {
         }
       }
 
-      // Upload du nouveau fichier
+      // Upload du fichier compressé
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, {
+        .upload(fileName, processedFile, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
+          contentType: 'image/webp'
         });
 
       if (uploadError) throw uploadError;
@@ -107,9 +112,16 @@ export function useAvatarUpload() {
 
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
+      
+      // Messages d'erreur personnalisés
+      let errorMessage = error.message || "Erreur lors de l'upload de la photo";
+      if (error.message?.includes('trop volumineux')) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de l'upload de la photo",
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
