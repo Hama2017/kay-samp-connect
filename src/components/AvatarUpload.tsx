@@ -64,13 +64,19 @@ export function AvatarUpload({
             </Avatar>
             
             {/* Overlay avec icône camera */}
-            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-              {isUploading ? (
-                <LoadingSpinner size="sm" className="text-white" />
-              ) : (
+            {!isUploading && (
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
                 <Camera className="h-6 w-6 text-white" />
-              )}
-            </div>
+              </div>
+            )}
+            
+            {/* Overlay de chargement */}
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center opacity-100">
+                <LoadingSpinner size="sm" className="text-white" />
+                <span className="text-white text-xs mt-2 font-medium">Analyse...</span>
+              </div>
+            )}
             
             {/* Badge de modification */}
             <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg group-hover:scale-110 transition-transform duration-200">
