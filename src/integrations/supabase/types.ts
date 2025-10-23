@@ -20,7 +20,7 @@ export type Database = {
           event_data: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           page_url: string | null
           session_id: string
           user_agent: string | null
@@ -31,7 +31,7 @@ export type Database = {
           event_data?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           page_url?: string | null
           session_id: string
           user_agent?: string | null
@@ -42,7 +42,7 @@ export type Database = {
           event_data?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           page_url?: string | null
           session_id?: string
           user_agent?: string | null
@@ -450,6 +450,36 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       post_media: {
         Row: {
           created_at: string
@@ -644,6 +674,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          banned: boolean | null
+          banned_at: string | null
+          banned_reason: string | null
           bio: string | null
           cover_image_url: string | null
           created_at: string | null
@@ -662,6 +695,9 @@ export type Database = {
           username: string
         }
         Insert: {
+          banned?: boolean | null
+          banned_at?: string | null
+          banned_reason?: string | null
           bio?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -680,6 +716,9 @@ export type Database = {
           username: string
         }
         Update: {
+          banned?: boolean | null
+          banned_at?: string | null
+          banned_reason?: string | null
           bio?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -696,6 +735,51 @@ export type Database = {
           show_followers?: boolean | null
           updated_at?: string | null
           username?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          reported_item_id: string
+          reported_item_type: string
+          reporter_id: string
+          resolution_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          reported_item_id: string
+          reported_item_type: string
+          reporter_id: string
+          resolution_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          reported_item_id?: string
+          reported_item_type?: string
+          reporter_id?: string
+          resolution_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -877,7 +961,7 @@ export type Database = {
       spaces: {
         Row: {
           background_image_url: string | null
-          badge: Database["public"]["Enums"]["space_badge"] | null
+          badges: string[] | null
           categories: string[] | null
           cover_image_url: string | null
           created_at: string
@@ -895,7 +979,7 @@ export type Database = {
         }
         Insert: {
           background_image_url?: string | null
-          badge?: Database["public"]["Enums"]["space_badge"] | null
+          badges?: string[] | null
           categories?: string[] | null
           cover_image_url?: string | null
           created_at?: string
@@ -913,7 +997,7 @@ export type Database = {
         }
         Update: {
           background_image_url?: string | null
-          badge?: Database["public"]["Enums"]["space_badge"] | null
+          badges?: string[] | null
           categories?: string[] | null
           cover_image_url?: string | null
           created_at?: string
@@ -995,6 +1079,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
       user_stats: {
         Row: {
@@ -1114,13 +1222,33 @@ export type Database = {
       }
     }
     Functions: {
-      check_email_exists: {
-        Args: { email_input: string }
+      check_email_exists: { Args: { email_input: string }; Returns: boolean }
+      cleanup_expired_otp: { Args: never; Returns: number }
+      delete_post_cascade: { Args: { post_id_param: string }; Returns: boolean }
+      delete_space_cascade: {
+        Args: { space_id_param: string }
         Returns: boolean
       }
-      cleanup_expired_otp: {
-        Args: Record<PropertyKey, never>
-        Returns: number
+      delete_user_cascade: { Args: { user_id_param: string }; Returns: boolean }
+      get_activity_data: {
+        Args: { end_date: string; granularity?: string; start_date: string }
+        Returns: Json
+      }
+      get_activity_stats: { Args: never; Returns: Json }
+      get_admin_stats: { Args: never; Returns: Json }
+      get_category_stats: { Args: never; Returns: Json }
+      get_content_stats: { Args: never; Returns: Json }
+      get_engagement_stats: { Args: never; Returns: Json }
+      get_most_reported_by_type: { Args: never; Returns: Json }
+      get_most_reported_items: {
+        Args: never
+        Returns: {
+          item_id: string
+          item_name: string
+          item_title: string
+          item_type: string
+          report_count: number
+        }[]
       }
       get_public_profile: {
         Args: { profile_id: string }
@@ -1138,6 +1266,8 @@ export type Database = {
           username: string
         }[]
       }
+      get_recent_activity: { Args: never; Returns: Json }
+      get_report_stats: { Args: never; Returns: Json }
       get_safe_public_profile: {
         Args: { profile_user_id: string }
         Returns: {
@@ -1154,16 +1284,21 @@ export type Database = {
           username: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_post_view_if_new: {
         Args: { p_post_id: string; p_user_id: string }
         Returns: boolean
       }
-      increment_post_views: {
-        Args: { post_id: string }
-        Returns: undefined
-      }
+      increment_post_views: { Args: { post_id: string }; Returns: undefined }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       space_badge: "kaaysamp" | "factcheck" | "evenement"
     }
     CompositeTypes: {
@@ -1292,6 +1427,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       space_badge: ["kaaysamp", "factcheck", "evenement"],
     },
   },
