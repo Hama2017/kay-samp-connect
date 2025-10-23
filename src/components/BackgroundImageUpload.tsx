@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNSFWDetection } from '@/hooks/useNSFWDetection';
 import { processImage } from '@/utils/imageCompression';
 
 interface BackgroundImageUploadProps {
@@ -21,7 +20,6 @@ export function BackgroundImageUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
-  const { analyzeImage, isAnalyzing } = useNSFWDetection();
 
   const uploadImage = useCallback(async (file: File) => {
     setIsUploading(true);
@@ -29,13 +27,6 @@ export function BackgroundImageUpload({
     try {
       // Valider, compresser et convertir en WebP
       const processedFile = await processImage(file, false);
-
-      // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(processedFile);
-      
-      if (nsfwResult.isNSFW) {
-        throw new Error(nsfwResult.message);
-      }
 
       // Générer un nom de fichier unique
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.webp`;
@@ -72,7 +63,7 @@ export function BackgroundImageUpload({
     } finally {
       setIsUploading(false);
     }
-  }, [onImageUploaded, toast, analyzeImage]);
+  }, [onImageUploaded, toast]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -126,7 +117,7 @@ export function BackgroundImageUpload({
                     size="sm"
                     variant="secondary"
                     onClick={() => document.getElementById('background-upload')?.click()}
-                    disabled={isUploading || isAnalyzing}
+                    disabled={isUploading}
                   >
                     <Upload className="h-4 w-4 mr-1" />
                     Changer
@@ -164,7 +155,7 @@ export function BackgroundImageUpload({
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {(isUploading || isAnalyzing) ? (isAnalyzing ? 'Analyse en cours...' : 'Téléchargement en cours...') : 'Ajouter une image de fond'}
+                  {isUploading ? 'Téléchargement en cours...' : 'Ajouter une image de fond'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Glissez-déposez ou cliquez pour sélectionner

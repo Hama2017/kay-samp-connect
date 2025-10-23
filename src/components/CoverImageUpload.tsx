@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { useNSFWDetection } from "@/hooks/useNSFWDetection";
 import { processImage } from "@/utils/imageCompression";
 
 interface CoverImageUploadProps {
@@ -19,7 +18,6 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const { analyzeImage, isAnalyzing } = useNSFWDetection();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,14 +42,6 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
     try {
       // Valider, compresser et convertir en WebP
       const processedFile = await processImage(file, false);
-
-      // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(processedFile);
-      
-      if (nsfwResult.isNSFW) {
-        toast.error(nsfwResult.message);
-        return;
-      }
 
       const fileName = `cover_${user.id}_${Date.now()}.webp`;
       const filePath = `${user.id}/${fileName}`;
@@ -154,9 +144,9 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
             size="sm"
             className="gap-2"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || isAnalyzing}
+            disabled={isUploading}
           >
-            {(isUploading || isAnalyzing) ? (
+            {isUploading ? (
               <LoadingSpinner size="sm" />
             ) : (
               <>
@@ -185,9 +175,9 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
             size="sm"
             className="gap-2 shadow-lg"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || isAnalyzing}
+            disabled={isUploading}
           >
-            {(isUploading || isAnalyzing) ? (
+            {isUploading ? (
               <LoadingSpinner size="sm" />
             ) : (
               <>

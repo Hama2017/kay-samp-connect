@@ -4,7 +4,6 @@ import { ImageIcon, X, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useNSFWDetection } from '@/hooks/useNSFWDetection';
 import { processImage } from '@/utils/imageCompression';
 
 interface CommentImageUploadProps {
@@ -16,7 +15,6 @@ interface CommentImageUploadProps {
 export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveImage }: CommentImageUploadProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { analyzeImage, isAnalyzing } = useNSFWDetection();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,18 +47,6 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
     try {
       // Valider, compresser et convertir en WebP
       const processedFile = await processImage(file, false);
-
-      // Analyser l'image avec NSFW detection
-      const nsfwResult = await analyzeImage(processedFile);
-      
-      if (nsfwResult.isNSFW) {
-        toast({
-          title: "Contenu inapproprié",
-          description: nsfwResult.message,
-          variant: "destructive",
-        });
-        return;
-      }
       
       // Generate unique filename
       const fileName = `comment_${Date.now()}.webp`;
@@ -144,10 +130,10 @@ export function CommentImageUpload({ onImageUploaded, selectedImage, onRemoveIma
         variant="ghost"
         size="sm"
         onClick={handleButtonClick}
-        disabled={isUploading || isAnalyzing}
+        disabled={isUploading}
         className="flex items-center gap-1 h-8 px-2"
       >
-        {(isUploading || isAnalyzing) ? (
+        {isUploading ? (
           <Upload className="h-4 w-4 animate-spin" />
         ) : (
           <ImageIcon className="h-4 w-4" />
