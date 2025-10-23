@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, Hash, Users, Plus } from "lucide-react";
+import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, Hash, Users, Plus, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReportModal } from "@/components/ReportModal";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -221,6 +222,11 @@ useEffect(() => {
                       )}
                     </Button>
                   )}
+                  <ReportModal contentType="user" contentId={userProfile.id} targetName={userProfile.username}>
+                    <Button variant="ghost" size="icon">
+                      <Flag className="h-4 w-4" />
+                    </Button>
+                  </ReportModal>
                 </div>
               ) : (
                 <Button 
