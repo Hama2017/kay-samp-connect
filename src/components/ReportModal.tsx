@@ -118,14 +118,6 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
         </DialogHeader>
         
         <div className="space-y-6">
-          {targetName && (
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                Signalement concernant : <span className="font-medium text-foreground">{targetName}</span>
-              </p>
-            </div>
-          )}
-
           <div className="space-y-4">
             <Label>Raison du signalement *</Label>
             <RadioGroup value={selectedReason} onValueChange={setSelectedReason}>
