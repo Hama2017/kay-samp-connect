@@ -77,6 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
+      // Vérifier si l'utilisateur est banni
+      // @ts-ignore - banned field exists in DB but not in types yet
+      if (data?.banned) {
+        console.log('❌ Utilisateur banni détecté');
+        await supabase.auth.signOut();
+        return null;
+      }
+
       return data;
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -171,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -179,6 +187,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         setIsLoading(false);
         return { error: error.message };
+      }
+
+      // Vérifier si l'utilisateur est banni
+      if (data.user) {
+        // @ts-ignore - banned fields exist in DB but not in types yet
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('banned, banned_reason')
+          .eq('id', data.user.id)
+          .single();
+
+        // @ts-ignore - banned fields exist in DB
+        if (!profileError && profile?.banned) {
+          // Déconnecter immédiatement l'utilisateur banni
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return { 
+            // @ts-ignore - banned_reason field exists in DB
+            error: `Vous êtes banni de la plateforme. ${profile.banned_reason ? `Raison: ${profile.banned_reason}. ` : ''}Contactez un admin au contact@kaaysamp.com` 
+          };
+        }
       }
 
       setIsLoading(false);

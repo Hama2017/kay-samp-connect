@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, MessageCircle, BarChart, Bookmark, BookmarkCheck, Share2, ExternalLink } from "lucide-react";
+import { ChevronUp, ChevronDown, MessageCircle, BarChart, Bookmark, BookmarkCheck, Share2, ExternalLink, Flag } from "lucide-react";
 import { useRealBookmarks } from "@/hooks/useRealBookmarks";
 import { useNativeShare } from "@/hooks/useNativeShare";
+import { ReportModal } from "@/components/ReportModal";
 
 interface PostActionsProps {
   post: {
@@ -134,6 +135,22 @@ const handleShare = async (e: React.MouseEvent) => {
         >
           <Share2 className="h-4 w-4" />
         </Button> */}
+
+        {/* Report button */}
+        <ReportModal 
+          contentType="post" 
+          contentId={post.id}
+          targetName={post.title || post.content.slice(0, 50)}
+        >
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 px-2 text-muted-foreground hover:text-destructive"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Flag className="h-4 w-4" />
+          </Button>
+        </ReportModal>
       </div>
       
       {/* Views count */}

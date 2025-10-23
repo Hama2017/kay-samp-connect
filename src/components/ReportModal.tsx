@@ -62,15 +62,42 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Vous devez être connecté pour signaler");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // @ts-ignore - Types will be updated after migration
+      const { error } = await (supabase as any)
+        .from('reports')
+        .insert({
+          reporter_id: user.id,
+          reported_item_type: contentType,
+          reported_item_id: contentId,
+          reason: selectedReason,
+          description: details || null
+        });
+
+      if (error) {
+        console.error('Error submitting report:', error);
+        toast.error("Erreur lors de l'envoi du signalement");
+      } else {
+        toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
+        setOpen(false);
+        setSelectedReason('');
+        setDetails('');
+      }
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      toast.error("Erreur lors de l'envoi du signalement");
+    }
     
     setIsSubmitting(false);
-    setOpen(false);
-    setSelectedReason('');
-    setDetails('');
   };
 
   const reasons = reportReasons[contentType];
