@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { useReports } from "@/hooks/useReports";
+import { useAdminActions } from "@/hooks/useAdminActions";
 import { 
   Shield, 
   AlertTriangle, 
@@ -21,8 +22,7 @@ import {
   Flag,
   Clock,
   CheckCircle,
-  XCircle,
-  MoreHorizontal
+  XCircle
 } from "lucide-react";
 
 interface Report {
@@ -76,46 +76,77 @@ const mockReports: Report[] = [
 ];
 
 export function ModerationTools() {
-  const [reports, setReports] = useState<Report[]>(mockReports);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const { reports, fetchReports, updateReportStatus, isLoading } = useReports();
+  const { banUser, deletePost, isLoading: actionLoading } = useAdminActions();
+  const [selectedReport, setSelectedReport] = useState<any | null>(null);
   const [actionReason, setActionReason] = useState("");
   const [actionType, setActionType] = useState("");
 
-  const handleReportAction = (reportId: string, action: 'resolve' | 'dismiss', reason?: string) => {
-    setReports(prev => prev.map(report => 
-      report.id === reportId 
-        ? { ...report, status: action === 'resolve' ? 'resolved' : 'dismissed' }
-        : report
-    ));
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  const handleReportAction = async (reportId: string, action: string, reason?: string) => {
+    const success = await updateReportStatus(reportId, action, reason);
     
-    toast.success(`Signalement ${action === 'resolve' ? 'résolu' : 'rejeté'} avec succès`);
-    
-    setSelectedReport(null);
-    setActionReason("");
-    setActionType("");
+    if (success) {
+      setSelectedReport(null);
+      setActionReason("");
+      setActionType("");
+    }
   };
 
-  const pendingReports = reports.filter(r => r.status === 'pending');
-  const resolvedReports = reports.filter(r => r.status === 'resolved');
-  const dismissedReports = reports.filter(r => r.status === 'dismissed');
+  const handleModAction = async () => {
+    if (!selectedReport || !actionType) return;
 
-  const getStatusBadge = (status: Report['status']) => {
+    switch (actionType) {
+      case 'resolve':
+      case 'dismiss':
+        await handleReportAction(selectedReport.id, actionType, actionReason);
+        break;
+      case 'ban':
+        if (selectedReport.reported_item_type === 'user') {
+          const success = await banUser(selectedReport.reported_item_id, actionReason || 'Banni suite à signalement');
+          if (success) {
+            await handleReportAction(selectedReport.id, 'resolved', 'Utilisateur banni');
+          }
+        }
+        break;
+      case 'delete':
+        if (selectedReport.reported_item_type === 'post') {
+          const success = await deletePost(selectedReport.reported_item_id);
+          if (success) {
+            await handleReportAction(selectedReport.id, 'resolved', 'Contenu supprimé');
+          }
+        }
+        break;
+    }
+  };
+
+  const pendingReports = reports.filter((r: any) => r.status === 'pending');
+  const resolvedReports = reports.filter((r: any) => r.status === 'resolved');
+  const dismissedReports = reports.filter((r: any) => r.status === 'dismissed');
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
         return <Badge variant="destructive" className="gap-1"><Clock className="h-3 w-3" /> En attente</Badge>;
       case 'resolved':
-        return <Badge variant="default" className="gap-1 bg-green-100 text-green-800"><CheckCircle className="h-3 w-3" /> Résolu</Badge>;
+        return <Badge variant="default" className="gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"><CheckCircle className="h-3 w-3" /> Résolu</Badge>;
       case 'dismissed':
         return <Badge variant="secondary" className="gap-1"><XCircle className="h-3 w-3" /> Rejeté</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const getTypeIcon = (type: Report['type']) => {
+  const getTypeIcon = (type: string) => {
     switch (type) {
       case 'post': return <FileText className="h-4 w-4" />;
       case 'comment': return <MessageCircle className="h-4 w-4" />;
       case 'user': return <Users className="h-4 w-4" />;
       case 'space': return <Shield className="h-4 w-4" />;
+      default: return <Flag className="h-4 w-4" />;
     }
   };
 
@@ -277,15 +308,15 @@ export function ModerationTools() {
             <TabsContent value="resolved">
               <ScrollArea className="h-[400px]">
                 <div className="space-y-4">
-                  {resolvedReports.map((report) => (
+                  {resolvedReports.map((report: any) => (
                     <div key={report.id} className="p-4 border rounded-lg opacity-75">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          {getTypeIcon(report.type)}
+                          {getTypeIcon(report.reported_item_type)}
                           <div>
-                            <h4 className="font-medium">{report.targetName}</h4>
+                            <h4 className="font-medium">{report.reason}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {report.reason} • Résolu
+                              Résolu
                             </p>
                           </div>
                         </div>
@@ -300,15 +331,15 @@ export function ModerationTools() {
             <TabsContent value="dismissed">
               <ScrollArea className="h-[400px]">
                 <div className="space-y-4">
-                  {dismissedReports.map((report) => (
+                  {dismissedReports.map((report: any) => (
                     <div key={report.id} className="p-4 border rounded-lg opacity-75">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          {getTypeIcon(report.type)}
+                          {getTypeIcon(report.reported_item_type)}
                           <div>
-                            <h4 className="font-medium">{report.targetName}</h4>
+                            <h4 className="font-medium">{report.reason}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {report.reason} • Rejeté
+                              Rejeté
                             </p>
                           </div>
                         </div>
@@ -335,42 +366,33 @@ export function ModerationTools() {
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Type</Label>
-                  <p className="font-medium capitalize">{selectedReport.type}</p>
-                </div>
-                <div>
-                  <Label>Statut</Label>
-                  {getStatusBadge(selectedReport.status)}
-                </div>
-              </div>
-
-              <div>
-                <Label>Cible</Label>
-                <p className="font-medium">{selectedReport.targetName}</p>
-              </div>
-
-              <div>
-                <Label>Raison du signalement</Label>
-                <p className="font-medium text-destructive">{selectedReport.reason}</p>
-              </div>
-
-              {selectedReport.details && (
-                <div>
-                  <Label>Détails</Label>
-                  <p className="text-muted-foreground">{selectedReport.details}</p>
-                </div>
-              )}
-
-              {selectedReport.content && (
-                <div>
-                  <Label>Contenu signalé</Label>
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="italic">"{selectedReport.content}"</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Type</Label>
+                    <p className="font-medium capitalize">{selectedReport.reported_item_type}</p>
+                  </div>
+                  <div>
+                    <Label>Statut</Label>
+                    {getStatusBadge(selectedReport.status)}
                   </div>
                 </div>
-              )}
+
+                <div>
+                  <Label>ID du contenu</Label>
+                  <p className="font-medium text-xs">{selectedReport.reported_item_id}</p>
+                </div>
+
+                <div>
+                  <Label>Raison du signalement</Label>
+                  <p className="font-medium text-destructive">{selectedReport.reason}</p>
+                </div>
+
+                {selectedReport.description && (
+                  <div>
+                    <Label>Détails</Label>
+                    <p className="text-muted-foreground">{selectedReport.description}</p>
+                  </div>
+                )}
 
               <Separator />
 
@@ -404,17 +426,11 @@ export function ModerationTools() {
                     Annuler
                   </Button>
                   <Button 
-                    onClick={() => {
-                      if (actionType === 'resolve') {
-                        handleReportAction(selectedReport.id, 'resolve', actionReason);
-                      } else if (actionType === 'dismiss') {
-                        handleReportAction(selectedReport.id, 'dismiss', actionReason);
-                      }
-                    }}
-                    disabled={!actionType}
+                    onClick={handleModAction}
+                    disabled={!actionType || isLoading || actionLoading}
                     className="flex-1"
                   >
-                    Appliquer l'action
+                    {isLoading || actionLoading ? 'Traitement...' : 'Appliquer l\'action'}
                   </Button>
                 </div>
               </div>

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "sonner";
 import { Flag, AlertTriangle } from "lucide-react";
+import { useReports } from "@/hooks/useReports";
 
 interface ReportModalProps {
   children: React.ReactNode;
@@ -49,6 +49,7 @@ const reportReasons = {
 };
 
 export function ReportModal({ children, contentType, contentId, targetName }: ReportModalProps) {
+  const { createReport } = useReports();
   const [open, setOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [details, setDetails] = useState('');
@@ -56,21 +57,21 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
 
   const handleSubmit = async () => {
     if (!selectedReason) {
-      toast.error("Veuillez sélectionner une raison");
       return;
     }
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const reasonLabel = reasons.find(r => r.id === selectedReason)?.label || selectedReason;
+    const success = await createReport(contentType, contentId, reasonLabel, details);
     
-    toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
+    if (success) {
+      setOpen(false);
+      setSelectedReason('');
+      setDetails('');
+    }
     
     setIsSubmitting(false);
-    setOpen(false);
-    setSelectedReason('');
-    setDetails('');
   };
 
   const reasons = reportReasons[contentType];
