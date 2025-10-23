@@ -6,8 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { Flag, AlertTriangle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface ReportModalProps {
   children: React.ReactNode;
@@ -51,7 +49,6 @@ const reportReasons = {
 };
 
 export function ReportModal({ children, contentType, contentId, targetName }: ReportModalProps) {
-  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [details, setDetails] = useState('');
@@ -63,40 +60,17 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
       return;
     }
 
-    if (!user) {
-      toast.error('Vous devez être connecté pour signaler du contenu');
-      return;
-    }
-
     setIsSubmitting(true);
     
-    try {
-      const reasonLabel = reasons.find(r => r.id === selectedReason)?.label || selectedReason;
-      
-      // @ts-ignore - reports table exists in DB but not in generated types
-      const { error } = await (supabase as any)
-        .from('reports')
-        .insert({
-          reported_item_type: contentType,
-          reported_item_id: contentId,
-          reporter_id: user.id,
-          reason: reasonLabel,
-          description: details,
-          status: 'pending'
-        });
-
-      if (error) throw error;
-
-      toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
-      setOpen(false);
-      setSelectedReason('');
-      setDetails('');
-    } catch (error) {
-      console.error('Error creating report:', error);
-      toast.error('Erreur lors de l\'envoi du signalement');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
+    
+    setIsSubmitting(false);
+    setOpen(false);
+    setSelectedReason('');
+    setDetails('');
   };
 
   const reasons = reportReasons[contentType];

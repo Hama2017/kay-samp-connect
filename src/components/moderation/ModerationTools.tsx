@@ -104,7 +104,7 @@ export function ModerationTools() {
       case 'pending':
         return <Badge variant="destructive" className="gap-1"><Clock className="h-3 w-3" /> En attente</Badge>;
       case 'resolved':
-        return <Badge variant="default" className="gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"><CheckCircle className="h-3 w-3" /> Résolu</Badge>;
+        return <Badge variant="default" className="gap-1 bg-green-100 text-green-800"><CheckCircle className="h-3 w-3" /> Résolu</Badge>;
       case 'dismissed':
         return <Badge variant="secondary" className="gap-1"><XCircle className="h-3 w-3" /> Rejeté</Badge>;
     }
@@ -335,42 +335,42 @@ export function ModerationTools() {
             </DialogHeader>
             
             <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Type</Label>
-                    <p className="font-medium capitalize">{selectedReport.type}</p>
-                  </div>
-                  <div>
-                    <Label>Statut</Label>
-                    {getStatusBadge(selectedReport.status)}
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Cible</Label>
-                  <p className="font-medium">{selectedReport.targetName}</p>
+                  <Label>Type</Label>
+                  <p className="font-medium capitalize">{selectedReport.type}</p>
                 </div>
-
                 <div>
-                  <Label>Raison du signalement</Label>
-                  <p className="font-medium text-destructive">{selectedReport.reason}</p>
+                  <Label>Statut</Label>
+                  {getStatusBadge(selectedReport.status)}
                 </div>
+              </div>
 
-                {selectedReport.details && (
-                  <div>
-                    <Label>Détails</Label>
-                    <p className="text-muted-foreground">{selectedReport.details}</p>
-                  </div>
-                )}
+              <div>
+                <Label>Cible</Label>
+                <p className="font-medium">{selectedReport.targetName}</p>
+              </div>
 
-                {selectedReport.content && (
-                  <div>
-                    <Label>Contenu signalé</Label>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="italic">"{selectedReport.content}"</p>
-                    </div>
+              <div>
+                <Label>Raison du signalement</Label>
+                <p className="font-medium text-destructive">{selectedReport.reason}</p>
+              </div>
+
+              {selectedReport.details && (
+                <div>
+                  <Label>Détails</Label>
+                  <p className="text-muted-foreground">{selectedReport.details}</p>
+                </div>
+              )}
+
+              {selectedReport.content && (
+                <div>
+                  <Label>Contenu signalé</Label>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="italic">"{selectedReport.content}"</p>
                   </div>
-                )}
+                </div>
+              )}
 
               <Separator />
 
