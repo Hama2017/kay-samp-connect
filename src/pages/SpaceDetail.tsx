@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Hash, Plus, MessageCircle, TrendingUp, Clock, Flame, Settings } from "lucide-react";
+import { ArrowLeft, Users, Hash, Plus, MessageCircle, TrendingUp, Clock, Flame, Settings, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReportModal } from "@/components/ReportModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSpaces } from "@/hooks/useSpaces";
@@ -323,6 +324,13 @@ export default function SpaceDetail() {
               <Plus className="h-4 w-4" />
               Créer un post
             </Button>
+          )}
+          {user && space.creator_id !== user.id && (
+            <ReportModal contentType="space" contentId={space.id} targetName={space.name}>
+              <Button variant="ghost" size="icon">
+                <Flag className="h-4 w-4" />
+              </Button>
+            </ReportModal>
           )}
         </div>
       );
