@@ -102,9 +102,12 @@ export default function Settings() {
 
       toast.success("Compte supprimé définitivement");
       
-      // Sign out and redirect
-      await signOut();
-      navigate("/");
+      // Clear local session (user is already deleted from auth.users by the edge function)
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Redirect to home
+      window.location.href = "/";
     } catch (error) {
       console.error('Error deleting account:', error);
       toast.error("Impossible de supprimer votre compte. Veuillez réessayer.");
