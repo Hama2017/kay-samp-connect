@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useNSFWDetection } from "@/hooks/useNSFWDetection";
 
 interface CoverImageUploadProps {
   currentCoverUrl?: string;
@@ -17,6 +18,7 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const { analyzeImage, isAnalyzing } = useNSFWDetection();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -50,6 +52,13 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
     setIsUploading(true);
     
     try {
+      // Analyser l'image avec NSFW detection
+      const nsfwResult = await analyzeImage(file);
+      
+      if (nsfwResult.isNSFW) {
+        toast.error(nsfwResult.message);
+        return;
+      }
       const fileExt = file.name.split('.').pop();
       const fileName = `cover_${user.id}_${Date.now()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
@@ -151,9 +160,9 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
             size="sm"
             className="gap-2"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+            disabled={isUploading || isAnalyzing}
           >
-            {isUploading ? (
+            {(isUploading || isAnalyzing) ? (
               <LoadingSpinner size="sm" />
             ) : (
               <>
@@ -182,9 +191,9 @@ export function CoverImageUpload({ currentCoverUrl, onUploadComplete }: CoverIma
             size="sm"
             className="gap-2 shadow-lg"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+            disabled={isUploading || isAnalyzing}
           >
-            {isUploading ? (
+            {(isUploading || isAnalyzing) ? (
               <LoadingSpinner size="sm" />
             ) : (
               <>

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNSFWDetection } from '@/hooks/useNSFWDetection';
 
 export function useAvatarUpload() {
   const { user, updateUserProfile } = useAuth();
   const { toast } = useToast();
+  const { analyzeImage, isAnalyzing } = useNSFWDetection();
   const [isUploading, setIsUploading] = useState(false);
 
   const uploadAvatar = async (file: File): Promise<boolean> => {
@@ -41,6 +43,17 @@ export function useAvatarUpload() {
     setIsUploading(true);
 
     try {
+      // Analyser l'image avec NSFW detection
+      const nsfwResult = await analyzeImage(file);
+      
+      if (nsfwResult.isNSFW) {
+        toast({
+          title: "Contenu inapproprié",
+          description: nsfwResult.message,
+          variant: "destructive",
+        });
+        return false;
+      }
       // Créer un nom de fichier unique
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
@@ -155,6 +168,6 @@ export function useAvatarUpload() {
   return {
     uploadAvatar,
     removeAvatar,
-    isUploading
+    isUploading: isUploading || isAnalyzing
   };
 }
