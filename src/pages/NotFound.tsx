@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { Home, SearchX } from "lucide-react";
+import { Home, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
@@ -16,7 +16,7 @@ const NotFound = () => {
       <div className="text-center space-y-8 animate-fade-in-up max-w-md">
         {/* Icon */}
         <div className="mx-auto w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center">
-          <SearchX className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
+          <Eye className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
         </div>
 
         {/* Content */}
@@ -27,6 +27,9 @@ const NotFound = () => {
           <h2 className="text-2xl font-semibold text-foreground">
             Page introuvable
           </h2>
+          <p className="text-lg font-medium text-primary/80 italic">
+            "Yaw Khana Do Khool"
+          </p>
           <p className="text-muted-foreground">
             Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
           </p>
