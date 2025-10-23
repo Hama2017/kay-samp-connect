@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
 import { Flag, AlertTriangle } from "lucide-react";
-import { useReports } from "@/hooks/useReports";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ReportModalProps {
   children: React.ReactNode;
@@ -49,7 +51,7 @@ const reportReasons = {
 };
 
 export function ReportModal({ children, contentType, contentId, targetName }: ReportModalProps) {
-  const { createReport } = useReports();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [details, setDetails] = useState('');
@@ -57,21 +59,44 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
 
   const handleSubmit = async () => {
     if (!selectedReason) {
+      toast.error("Veuillez sélectionner une raison");
+      return;
+    }
+
+    if (!user) {
+      toast.error('Vous devez être connecté pour signaler du contenu');
       return;
     }
 
     setIsSubmitting(true);
     
-    const reasonLabel = reasons.find(r => r.id === selectedReason)?.label || selectedReason;
-    const success = await createReport(contentType, contentId, reasonLabel, details);
-    
-    if (success) {
+    try {
+      const reasonLabel = reasons.find(r => r.id === selectedReason)?.label || selectedReason;
+      
+      // @ts-ignore - reports table exists in DB but not in generated types
+      const { error } = await (supabase as any)
+        .from('reports')
+        .insert({
+          reported_item_type: contentType,
+          reported_item_id: contentId,
+          reporter_id: user.id,
+          reason: reasonLabel,
+          description: details,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast.success("Signalement envoyé. Notre équipe l'examinera sous peu.");
       setOpen(false);
       setSelectedReason('');
       setDetails('');
+    } catch (error) {
+      console.error('Error creating report:', error);
+      toast.error('Erreur lors de l\'envoi du signalement');
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const reasons = reportReasons[contentType];
