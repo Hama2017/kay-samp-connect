@@ -10,7 +10,6 @@ import { usePosts } from "@/hooks/usePosts";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useAuth } from "@/contexts/AuthContext";
 import GifSelector from "@/components/GifSelector";
-import { useNSFWDetection } from "@/hooks/useNSFWDetection";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -19,7 +18,6 @@ export default function CreatePost() {
   const { user } = useAuth();
   const { createPost, isLoading } = usePosts();
   const { getSpaceById } = useSpaces();
-  const { analyzeFile, isAnalyzing } = useNSFWDetection();
   
   // Déterminer si on est dans un espace spécifique
   const isInSpace = Boolean(spaceId);
@@ -61,23 +59,7 @@ export default function CreatePost() {
     
     const filesArray = Array.from(files);
     
-    // Analyser chaque fichier avec NSFW detection
-    for (const file of filesArray) {
-      try {
-        const nsfwResult = await analyzeFile(file);
-        
-        if (nsfwResult.isNSFW) {
-          toast.error(`${file.name}: ${nsfwResult.message}`);
-          return;
-        }
-      } catch (error) {
-        console.error('Erreur lors de l\'analyse NSFW:', error);
-        toast.error(`Impossible d'analyser ${file.name}`);
-        return;
-      }
-    }
-    
-    // Si tous les fichiers sont validés
+    // Accepter tous les fichiers
     setFormData(prev => ({ ...prev, selectedFiles: filesArray }));
     
     // Create preview URLs
@@ -219,11 +201,10 @@ export default function CreatePost() {
             disabled={
               !formData.content.trim() || 
               isLoading ||
-              isAnalyzing ||
               (isInSpace && currentSpace && currentSpace.categories && currentSpace.categories.length > 1 && formData.categories.length === 0)
             }
           >
-            {isAnalyzing ? "Analyse..." : isLoading ? "Publication..." : "Publier"}
+            {isLoading ? "Publication..." : "Publier"}
           </Button>
         </div>
       </div>
