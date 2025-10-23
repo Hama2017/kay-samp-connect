@@ -238,13 +238,15 @@ export default function SpaceDetail() {
         )}
         
       <CardContent className="p-6">
-        <div className="mb-3"> 
+        <div className="mb-3 flex flex-wrap gap-1"> 
              {space.is_verified && (
           <Badge variant="secondary" className="bg-primary/10 text-primary">
             ✓ Officiel
           </Badge>
         )}
-        {space.badge && <SpaceBadge badge={space.badge} />}
+        {space.badges && space.badges.map((badge) => (
+          <SpaceBadge key={badge} badge={badge} />
+        ))}
         </div>
   <div className="flex items-start gap-4 mb-6">
     <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">

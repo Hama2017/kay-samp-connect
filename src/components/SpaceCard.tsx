@@ -13,7 +13,7 @@ interface Space {
   subscribers_count: number;
   is_verified: boolean;
   is_subscribed?: boolean;
-  badge?: 'evenement' | 'factcheck' | 'kaaysamp' | 'official' | null;
+  badges?: ('evenement' | 'factcheck' | 'kaaysamp' | 'official')[];
 }
 
 interface SpaceCardProps {
@@ -37,15 +37,15 @@ export function SpaceCard({ space, onSubscriptionToggle }: SpaceCardProps) {
       onClick={() => navigate(`/space/${space.id}`)}
     >
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
-        <div className="mb-2">     
+        <div className="mb-2 flex flex-wrap gap-1">     
           {space.is_verified && (
             <Badge variant="secondary" className="text-xs bg-primary/10 text-primary flex-shrink-0">
               Officiel ✓
             </Badge>
           )}
-          {space.badge && (
-            <SpaceBadge badge={space.badge} className="text-xs flex-shrink-0" />
-          )}
+          {space.badges && space.badges.map((badge) => (
+            <SpaceBadge key={badge} badge={badge} className="text-xs flex-shrink-0" />
+          ))}
         </div>
         <div className="flex items-start justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
