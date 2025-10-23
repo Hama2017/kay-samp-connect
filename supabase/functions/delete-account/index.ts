@@ -205,19 +205,23 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id);
     if (analyticsError) console.error('Error deleting analytics:', analyticsError);
 
-    // 17. Delete profile
+    // 17. Delete profile (CRITICAL - must succeed)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .delete()
       .eq('id', user.id);
-    if (profileError) console.error('Error deleting profile:', profileError);
+    
+    if (profileError) {
+      console.error('CRITICAL ERROR deleting profile:', profileError);
+      throw new Error(`Failed to delete profile: ${profileError.message}`);
+    }
 
-    // 18. Finally, delete the auth user
+    // 18. Finally, delete the auth user (CRITICAL - must succeed)
     const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
     
     if (deleteUserError) {
-      console.error('Error deleting auth user:', deleteUserError);
-      throw deleteUserError;
+      console.error('CRITICAL ERROR deleting auth user:', deleteUserError);
+      throw new Error(`Failed to delete auth user: ${deleteUserError.message}`);
     }
 
     console.log('Account deletion completed successfully for user:', user.id);
