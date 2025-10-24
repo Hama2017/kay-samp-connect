@@ -233,7 +233,8 @@ export function InfinitePostsList({
             
             <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
               <div 
-                className="text-foreground mb-3 leading-relaxed break-all max-w-full overflow-wrap-anywhere"
+                className="text-foreground mb-3 leading-relaxed max-w-full"
+                style={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}
                 dangerouslySetInnerHTML={{
                   __html: sanitizeContent(getDisplayContent(post))
                 }}
