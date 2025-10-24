@@ -30,6 +30,7 @@ interface Post {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
+    full_name?: string;
   } | null;
   spaces?: {
     id: string;
@@ -206,6 +207,11 @@ export function InfinitePostsList({
                         </>
                       )}
                     </div>
+                    {post.profiles?.full_name && (
+                      <p className="text-xs font-medium text-foreground/80 truncate mt-0.5">
+                        {post.profiles.full_name}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground truncate">
                       {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
                     </p>
