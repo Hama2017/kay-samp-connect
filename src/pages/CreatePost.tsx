@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { X, Image, Video, Play, FileImage, Youtube } from "lucide-react";
+import { X, Image, Video, Play, FileImage, Youtube, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,8 @@ export default function CreatePost() {
   
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [tiktokUrl, setTiktokUrl] = useState("");
+  const [showTiktokInput, setShowTiktokInput] = useState(false);
   
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [currentSpace, setCurrentSpace] = useState<any>(null);
@@ -145,6 +147,44 @@ export default function CreatePost() {
     setPreviewUrls(prev => [...prev, `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`]);
     setYoutubeUrl("");
     setShowYoutubeInput(false);
+  };
+
+  const extractTikTokId = (url: string) => {
+    // Formats possibles:
+    // https://www.tiktok.com/@username/video/1234567890
+    // https://vm.tiktok.com/ZSxxxxx/
+    const match = url.match(/\/video\/(\d+)/);
+    return match ? match[1] : url;
+  };
+
+  const handleTikTokAdd = () => {
+    if (!tiktokUrl.trim()) return;
+    
+    if (!tiktokUrl.includes('tiktok.com')) {
+      toast.error("Lien TikTok invalide");
+      return;
+    }
+
+    const videoId = extractTikTokId(tiktokUrl);
+
+    const tiktokFile = {
+      name: `tiktok-${Date.now()}`,
+      type: 'tiktok',
+      size: 0,
+      url: tiktokUrl,
+      videoId: videoId,
+      isTikTokUrl: true
+    };
+
+    setFormData(prev => ({ 
+      ...prev, 
+      selectedFiles: [...prev.selectedFiles, tiktokFile as any] 
+    }));
+    
+    // Utiliser une icône TikTok comme preview
+    setPreviewUrls(prev => [...prev, 'https://sf16-website-login.neutral.ttwstatic.com/obj/tiktok_web_login_static/tiktok/webapp/main/webapp-desktop/8152caf0c8e8bc67ae0d.png']);
+    setTiktokUrl("");
+    setShowTiktokInput(false);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -282,6 +322,13 @@ export default function CreatePost() {
                             />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                               <Youtube className="h-8 w-8 text-red-500" />
+                            </div>
+                          </div>
+                        ) : file.type === 'tiktok' ? (
+                          <div className="relative w-full h-full bg-black">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                              <Music className="h-10 w-10 text-white" />
+                              <span className="text-xs text-white/80">Vidéo TikTok</span>
                             </div>
                           </div>
                         ) : file.type.startsWith('video/') ? (
@@ -435,6 +482,17 @@ export default function CreatePost() {
               <Youtube className="h-5 w-5" />
               YouTube
             </Button>
+            
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={() => setShowTiktokInput(true)}
+              className="gap-3 hover:bg-black/5 hover:text-foreground border-2 border-dashed border-muted-foreground/30 hover:border-muted-foreground/60 px-6 py-3"
+            >
+              <Music className="h-5 w-5" />
+              TikTok
+            </Button>
           </div>
 
           {/* YouTube URL Input */}
@@ -460,6 +518,37 @@ export default function CreatePost() {
                   onClick={() => {
                     setShowYoutubeInput(false);
                     setYoutubeUrl("");
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* TikTok URL Input */}
+          {showTiktokInput && (
+            <div className="mt-4 p-4 bg-muted/50 rounded-lg border">
+              <div className="flex items-center gap-2 mb-3">
+                <Music className="h-5 w-5" />
+                <span className="font-medium">Ajouter une vidéo TikTok</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://www.tiktok.com/@username/video/..."
+                  value={tiktokUrl}
+                  onChange={(e) => setTiktokUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-input rounded-md bg-background"
+                />
+                <Button onClick={handleTikTokAdd} disabled={!tiktokUrl.trim()}>
+                  Ajouter
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setShowTiktokInput(false);
+                    setTiktokUrl("");
                   }}
                 >
                   <X className="h-4 w-4" />
