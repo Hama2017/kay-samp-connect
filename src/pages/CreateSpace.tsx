@@ -35,6 +35,17 @@ export default function CreateSpace() {
       return;
     }
 
+    // Validation des longueurs
+    if (formData.name.length > 100) {
+      toast.error("Le nom ne peut pas dépasser 100 caractères");
+      return;
+    }
+
+    if (formData.description.length > 2000) {
+      toast.error("La description ne peut pas dépasser 2 000 caractères");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const spaceData = await createSpace({
@@ -109,8 +120,12 @@ export default function CreateSpace() {
                 placeholder="Ex: Tech Dakar, Cuisine Sénégalaise..."
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                maxLength={100}
                 className="border-primary/20 focus:border-primary/40"
               />
+              <div className={`text-xs text-right ${formData.name.length > 90 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                {formData.name.length} / 100 caractères
+              </div>
             </div>
 
             {/* Description */}
@@ -123,8 +138,12 @@ export default function CreateSpace() {
                 placeholder="Décris le thème et l'objectif de ta SAMP Zone..."
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                maxLength={2000}
                 className="min-h-[100px] border-primary/20 focus:border-primary/40"
               />
+              <div className={`text-xs text-right ${formData.description.length > 1900 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                {formData.description.length} / 2 000 caractères
+              </div>
             </div>
             {/* Categories */}
             <div className="space-y-3">

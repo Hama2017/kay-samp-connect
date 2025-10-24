@@ -55,6 +55,17 @@ export default function Settings() {
       return;
     }
 
+    // Validations de longueur
+    if (trimmedName.length > 100) {
+      toast.error("Le nom complet ne peut pas dépasser 100 caractères");
+      return;
+    }
+
+    if (profileData.bio && profileData.bio.length > 1000) {
+      toast.error("La biographie ne peut pas dépasser 1 000 caractères");
+      return;
+    }
+
     try {
       await updateProfile({ ...profileData, full_name: trimmedName });
       toast.success("Profil mis à jour avec succès");
@@ -170,7 +181,11 @@ export default function Settings() {
                       placeholder="Votre nom complet"
                       value={profileData.full_name}
                       onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
+                      maxLength={100}
                     />
+                    <div className={`text-xs text-right ${profileData.full_name.length > 90 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                      {profileData.full_name.length} / 100 caractères
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -180,8 +195,12 @@ export default function Settings() {
                       placeholder="Parlez-nous de vous..."
                       value={profileData.bio}
                       onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                      maxLength={1000}
                       rows={3}
                     />
+                    <div className={`text-xs text-right ${profileData.bio.length > 950 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                      {profileData.bio.length} / 1 000 caractères
+                    </div>
                   </div>
 
                   <Button onClick={handleProfileUpdate} className="w-fit">

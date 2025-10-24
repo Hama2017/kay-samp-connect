@@ -88,7 +88,7 @@ export default function ProfileCompletion() {
       return;
     }
     if (fullName.length > 50) {
-      setError("Nom trop long (max 50 caractères)");
+      setError("Nom trop long (max 100 caractères)");
       return;
     }
     setStep('username');
@@ -204,7 +204,7 @@ export default function ProfileCompletion() {
                 <Input type="text" placeholder="ex: NanditeBii😎" value={fullName} onChange={e => {
               setFullName(e.target.value);
               setError(null);
-            }} className="h-14 text-base" autoFocus maxLength={50} />
+            }} className="h-14 text-base" autoFocus maxLength={100} />
                 <p className="text-xs text-muted-foreground text-center">
                   Utilisez votre nom, un surnom ou même des emojis
                 </p>

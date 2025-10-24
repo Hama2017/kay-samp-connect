@@ -60,6 +60,12 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
       return;
     }
 
+    // Validation de longueur
+    if (details.length > 2000) {
+      toast.error("Les détails ne peuvent pas dépasser 2 000 caractères");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -142,8 +148,14 @@ export function ReportModal({ children, contentType, contentId, targetName }: Re
               placeholder="Ajoutez des détails qui pourraient nous aider à examiner ce signalement..."
               value={details}
               onChange={(e) => setDetails(e.target.value)}
+              maxLength={2000}
               rows={3}
             />
+            {details.length > 0 && (
+              <div className={`text-xs text-right ${details.length > 1900 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                {details.length} / 2 000 caractères
+              </div>
+            )}
           </div>
 
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950 dark:border-amber-800">

@@ -55,6 +55,11 @@ export default function CreatePost() {
   }, [formData.content]);
 
   const handleInputChange = (field: string, value: string) => {
+    // Limiter le contenu à 15000 caractères
+    if (field === 'content' && value.length > 15000) {
+      toast.error("Le contenu ne peut pas dépasser 15 000 caractères");
+      return;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -243,6 +248,10 @@ export default function CreatePost() {
                     height: 'auto'
                   }}
                 />
+                {/* Compteur de caractères */}
+                <div className={`text-xs text-right px-3 mt-1 ${formData.content.length > 14000 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                  {formData.content.length.toLocaleString()} / 15 000 caractères
+                </div>
                 {/* Visual indicator for hashtags */}
                 {formData.content.includes('#') && (
                   <div className="text-xs text-muted-foreground mt-2 px-3">

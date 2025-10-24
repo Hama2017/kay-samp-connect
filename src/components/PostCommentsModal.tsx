@@ -236,6 +236,13 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
   const handleSubmitComment = useCallback(async () => {
     if ((!commentContent.trim() && !selectedGif && !selectedImage) || !post?.id || isSubmitting) return;
 
+    // Validation de longueur
+    if (commentContent.length > 5000) {
+      const { toast } = await import('sonner');
+      toast.error("Le commentaire ne peut pas dépasser 5 000 caractères");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const mediaUrl = selectedImage || selectedGif || undefined;
@@ -620,15 +627,24 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
             </Avatar>
             
             <div className="flex-1 space-y-3">
-              <Textarea
-                placeholder={getPlaceholder()}
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="min-h-[44px] resize-none border-border focus:border-primary focus:ring-primary text-base bg-muted"
-                rows={1}
-                disabled={isSubmitting}
-              />
+              <div className="relative">
+                <Textarea
+                  placeholder={getPlaceholder()}
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  maxLength={5000}
+                  className="min-h-[44px] resize-none border-border focus:border-primary focus:ring-primary text-base bg-muted"
+                  rows={1}
+                  disabled={isSubmitting}
+                />
+                {/* Compteur de caractères */}
+                {commentContent.length > 0 && (
+                  <div className={`text-xs text-right mt-1 ${commentContent.length > 4800 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                    {commentContent.length} / 5 000
+                  </div>
+                )}
+              </div>
               
               {/* Actions en bas - Seulement GIF et Image */}
               <div className="flex items-center justify-between">
