@@ -73,8 +73,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-sm">
-                        <SampZonesIcon size={20} className="text-primary-foreground" />
+                      <div className="w-10 h-10 bg-gradient-primary rounded-lg shadow-sm">
                       </div>
                     </div>
                     
