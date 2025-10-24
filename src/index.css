@@ -117,6 +117,10 @@ All colors MUST be HSL. */
 @layer base {
    * {
     @apply border-border;
+    /* Éviter de couper les mots au milieu des lignes */
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   
   /* Masquer les scrollbars sur tous les navigateurs */
