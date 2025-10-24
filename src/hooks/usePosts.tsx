@@ -26,6 +26,7 @@ export interface Post {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
+    full_name?: string;
   } | null;
   spaces?: {
     id: string;
@@ -84,7 +85,8 @@ export function usePosts() {
             id,
             username,
             profile_picture_url,
-            is_verified
+            is_verified,
+            full_name
           ),
           spaces (
             id,

@@ -19,6 +19,7 @@ export interface PostDetail {
     profile_picture_url?: string;
     is_verified: boolean;
     bio?: string;
+    full_name?: string;
   } | null;
   spaces?: {
     id: string;

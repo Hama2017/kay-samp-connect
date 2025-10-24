@@ -43,7 +43,8 @@ serve(async (req) => {
           username,
           profile_picture_url,
           is_verified,
-          bio
+          bio,
+          full_name
         ),
         spaces(
           id,
