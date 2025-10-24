@@ -250,10 +250,6 @@ export default function SpaceDetail() {
         ))}
         </div>
   <div className="flex items-start gap-4 mb-6">
-    <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-      <SampZonesIcon size={32} className="text-primary-foreground" />
-    </div>
-
     <div className="flex-1">
       <div className="flex items-center gap-2 mb-1">
         <h2 className="text-2xl font-bold">{space.name}</h2>
