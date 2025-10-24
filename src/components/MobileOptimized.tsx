@@ -118,13 +118,14 @@ interface PullToRefreshProps {
 export function PullToRefresh({ 
   onRefresh, 
   children, 
-  threshold = 80,
+  threshold = 120,
   disabled = false 
 }: PullToRefreshProps) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [startY, setStartY] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const MIN_PULL_DISTANCE = 40; // Distance minimale avant d'afficher l'indicateur
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (disabled || isRefreshing) return;
@@ -140,7 +141,10 @@ export function PullToRefresh({
     // Only allow pull-to-refresh if scrolled to top
     if (containerRef.current.scrollTop === 0 && diff > 0) {
       e.preventDefault();
-      setPullDistance(Math.min(diff, threshold * 1.5));
+      // Ajouter une résistance progressive pour un effet plus smooth
+      const resistance = diff < MIN_PULL_DISTANCE ? 0.3 : 0.5;
+      const adjustedDiff = diff * resistance;
+      setPullDistance(Math.min(adjustedDiff, threshold * 1.5));
     }
   };
 
@@ -161,6 +165,7 @@ export function PullToRefresh({
 
   const pullProgress = Math.min(pullDistance / threshold, 1);
   const shouldTrigger = pullDistance >= threshold;
+  const showIndicator = pullDistance > MIN_PULL_DISTANCE;
 
   return (
     <div 
@@ -171,7 +176,7 @@ export function PullToRefresh({
       onTouchEnd={handleTouchEnd}
     >
       {/* Pull indicator */}
-      {pullDistance > 0 && (
+      {showIndicator && (
         <div 
           className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 z-10"
           style={{ 
