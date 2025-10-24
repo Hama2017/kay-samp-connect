@@ -66,7 +66,11 @@ export function BottomNavigation() {
         >
           {({ isActive }) => (
             <>
-              <Icon className={cn("h-5 w-5", isActive && "animate-gentle-bounce")} />
+              {Icon === SampZonesIcon ? (
+                <Icon className={cn("h-5 w-5", isActive && "animate-gentle-bounce")} isActive={isActive} />
+              ) : (
+                <Icon className={cn("h-5 w-5", isActive && "animate-gentle-bounce")} />
+              )}
               <span className="text-xs font-medium leading-tight">{item.label}</span>
             </>
           )}

@@ -3,9 +3,10 @@ import sampZonesIcon from "@/assets/samp-zones-icon.svg";
 interface SampZonesIconProps {
   className?: string;
   size?: number;
+  isActive?: boolean;
 }
 
-export function SampZonesIcon({ className = "", size = 24 }: SampZonesIconProps) {
+export function SampZonesIcon({ className = "", size = 24, isActive = false }: SampZonesIconProps) {
   return (
     <img 
       src={sampZonesIcon} 
@@ -14,8 +15,11 @@ export function SampZonesIcon({ className = "", size = 24 }: SampZonesIconProps)
       style={{ 
         width: size, 
         height: size,
-        filter: 'brightness(0) saturate(100%) invert(0.5)',
-        opacity: 0.7
+        filter: isActive 
+          ? 'brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(130deg) brightness(98%) contrast(101%)'
+          : 'brightness(0) saturate(100%) invert(0.5)',
+        opacity: isActive ? 1 : 0.7,
+        transition: 'all 0.2s ease'
       }}
     />
   );
