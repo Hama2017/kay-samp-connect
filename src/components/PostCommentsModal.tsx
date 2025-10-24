@@ -34,6 +34,7 @@ interface Post {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
+    full_name?: string;
   } | null;
   spaces?: {
     id: string;
@@ -394,6 +395,13 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
                               {formatDate(comment.created_at)}
                             </span>
                           </div>
+                          
+                          {/* Full name sous le username */}
+                          {comment.profiles?.full_name && (
+                            <p className="text-xs font-medium text-foreground/80 mb-1">
+                              {comment.profiles.full_name}
+                            </p>
+                          )}
                           
                           {/* Contenu du commentaire */}
                           {comment.content && (

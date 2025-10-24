@@ -20,6 +20,7 @@ export interface Comment {
     username: string;
     profile_picture_url?: string;
     is_verified?: boolean;
+    full_name?: string;
   };
   comment_media?: Array<{
     id: string;
@@ -57,7 +58,8 @@ export function useComments() {
             id,
             username,
             profile_picture_url,
-            is_verified
+            is_verified,
+            full_name
           ),
           comment_media (
             id,

@@ -108,7 +108,8 @@ serve(async (req) => {
         profiles(
           username,
           profile_picture_url,
-          is_verified
+          is_verified,
+          full_name
         ),
         comment_media(
           id,
