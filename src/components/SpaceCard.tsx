@@ -50,10 +50,6 @@ export function SpaceCard({ space, onSubscriptionToggle }: SpaceCardProps) {
         </div>
         <div className="flex items-start justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-              <SampZonesIcon size={24} className="sm:w-6 sm:h-6 text-white" />
-            </div>
-            
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 sm:gap-2 mb-1">
                 <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
