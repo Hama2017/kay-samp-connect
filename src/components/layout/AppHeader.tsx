@@ -41,17 +41,6 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
-          <div className="flex items-center gap-2">
-            <img 
-              src={kaaysampLogo} 
-              alt="KaaySamp" 
-              className="h-8 w-12 rounded-md"
-            />
-            <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent  sm:block">
-              KaaySamp
-            </span>
-          </div>
         </div>
 
         {/* Right side - Mobile Actions */}
