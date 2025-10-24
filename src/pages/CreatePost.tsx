@@ -235,7 +235,7 @@ export default function CreatePost() {
                   value={formData.content}
                   onChange={(e) => handleInputChange("content", e.target.value)}
                   placeholder="Quoi de neuf ?"
-                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-3 bg-transparent relative z-10 overflow-hidden"
+                  className="min-h-[150px] max-h-[400px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-3 bg-transparent relative z-10 overflow-y-auto"
                   style={{
                     lineHeight: "1.5",
                     height: 'auto'
