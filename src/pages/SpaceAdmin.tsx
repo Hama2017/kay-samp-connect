@@ -56,7 +56,7 @@ export default function SpaceAdmin() {
       try {
         setIsLoadingSpace(true);
         const spaceData = await getSpaceById(spaceId);
-        setSpace(spaceData);
+        setSpace(spaceData as any);
         setFormData({
           name: spaceData.name,
           description: spaceData.description || "",

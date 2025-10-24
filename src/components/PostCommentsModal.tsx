@@ -64,9 +64,42 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [optimisticVotes, setOptimisticVotes] = useState<Record<string, { up: number; down: number; userVote: 'up' | 'down' | null }>>({});
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   
   const { user } = useAuth();
   const { comments, isLoading, hasMore, fetchComments, loadMoreComments, createComment, voteComment } = useComments();
+
+  // Gérer les changements de hauteur du viewport (clavier mobile)
+  useEffect(() => {
+    const handleResize = () => {
+      // Utiliser visualViewport si disponible (meilleur pour mobile)
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      } else {
+        setViewportHeight(window.innerHeight);
+      }
+    };
+
+    // Écouter les changements de visualViewport
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    }
+    
+    // Fallback avec window.resize
+    window.addEventListener('resize', handleResize);
+    
+    // Initialiser
+    handleResize();
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      }
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Chargement initial des commentaires
   useEffect(() => {
@@ -297,7 +330,13 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="h-[600px] max-h-[80dvh] flex flex-col bg-background">
+      <DrawerContent 
+        className="flex flex-col bg-background"
+        style={{ 
+          height: `${Math.min(600, viewportHeight * 0.85)}px`,
+          maxHeight: `${viewportHeight * 0.85}px`
+        }}
+      >
         {/* Header - Style TikTok */}
         <DrawerHeader className="flex-shrink-0 border-b border-border py-4 bg-background">
           <div className="flex items-center justify-center relative">

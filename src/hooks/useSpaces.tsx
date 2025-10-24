@@ -123,11 +123,11 @@ export function useSpaces() {
         const spacesWithSubscription = data.map(space => ({
           ...space,
           is_subscribed: subscribedSpaceIds.has(space.id)
-        }));
+        })) as any;
 
         setSpaces(spacesWithSubscription);
       } else {
-        setSpaces(data || []);
+        setSpaces((data as any) || []);
       }
     } catch (err: any) {
       setError(err.message);
@@ -331,7 +331,7 @@ export function useSpaces() {
       // Update local state
       setSpaces(prevSpaces => 
         prevSpaces.map(space => 
-          space.id === spaceId ? { ...space, ...data } : space
+          space.id === spaceId ? { ...space, ...data } as any : space
         )
       );
 
