@@ -185,7 +185,7 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-y-auto">
       {/* Header épuré */}
       <div className="sticky top-0 z-50 bg-background border-b safe-area-top">
         <div className="flex items-center justify-between px-4 py-3">
