@@ -72,11 +72,6 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-primary rounded-lg shadow-sm">
-                      </div>
-                    </div>
-                    
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
