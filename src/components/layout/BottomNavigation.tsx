@@ -1,4 +1,4 @@
-import { Home, Hash, Plus, TrendingUp, User, FileText, Users } from "lucide-react";
+import { Home, Plus, TrendingUp, User, FileText, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -42,7 +42,7 @@ export function BottomNavigation() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <NavLink to="/create-space" className="flex items-center gap-2 w-full">
-                  <Hash className="h-4 w-4" />
+                  <SampZonesIcon size={16} />
                   Créer une SAMP Zone
                 </NavLink>
               </DropdownMenuItem>

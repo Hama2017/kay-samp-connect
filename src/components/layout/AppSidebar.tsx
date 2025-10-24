@@ -1,4 +1,5 @@
-import { X, Users, Hash } from "lucide-react";
+import { X, Users } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -73,7 +74,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-sm">
-                        <Hash className="h-5 w-5 text-primary-foreground" />
+                        <SampZonesIcon size={20} className="text-primary-foreground" />
                       </div>
                     </div>
                     
@@ -107,7 +108,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
             ) : (
               <div className="text-center text-muted-foreground py-8 px-4">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Hash className="h-8 w-8 text-primary/50" />
+                  <SampZonesIcon size={32} className="text-primary/50" />
                 </div>
                 <p className="font-medium mb-2">Aucune SAMP Zone SAMPNA</p>
                 <p className="text-sm leading-relaxed">

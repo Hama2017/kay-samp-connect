@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, Filter, Users, MessageSquare, Hash, X, Plus } from "lucide-react";
+import { Search as SearchIcon, Filter, Users, MessageSquare, X, Plus } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -203,7 +204,7 @@ export default function Search() {
                     Posts ({searchResults.posts.length})
                   </TabsTrigger>
                   <TabsTrigger value="spaces" className="text-xs sm:text-sm">
-                    <Hash className="h-4 w-4 mr-1 hidden sm:inline" />
+                    <SampZonesIcon size={16} className="mr-1 hidden sm:inline" />
                     Espaces ({searchResults.spaces.length})
                   </TabsTrigger>
                   <TabsTrigger value="users" className="text-xs sm:text-sm">
@@ -300,11 +301,11 @@ export default function Search() {
 
                 <TabsContent value="spaces" className="space-y-4">
                   {searchResults.spaces.length === 0 ? (
-                    <EmptyState
-                      icon={Hash}
-                      title="Aucun espace trouvé"
-                      description={`Aucun espace ne correspond à "${query}"`}
-                    />
+                    <div className="text-center py-8">
+                      <SampZonesIcon size={48} className="text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Aucun espace trouvé</h3>
+                      <p className="text-muted-foreground">Aucun espace ne correspond à "{query}"</p>
+                    </div>
                   ) : (
                     searchResults.spaces.map((space) => (
                       <SpaceCard

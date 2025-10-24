@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Hash, Users, BadgeCheck } from "lucide-react";
+import { TrendingUp, MessageCircle, ArrowUp, Eye, Crown, Trophy, Users, BadgeCheck } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -216,7 +217,7 @@ export default function Trending() {
             <span className="text-xs sm:text-sm truncate">Posts</span>
           </TabsTrigger>
           <TabsTrigger value="spaces" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
-            <Hash className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <SampZonesIcon size={16} className="flex-shrink-0 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm truncate">SAMP Zones</span>
           </TabsTrigger>
           <TabsTrigger value="contributors" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
@@ -349,11 +350,11 @@ export default function Trending() {
 
         <TabsContent value="spaces" className="space-y-4">
           {topSpaces.length === 0 ? (
-            <EmptyState
-              icon={Hash}
-              title="Aucune SAMP Zone tendance"
-              description="Créez ou rejoignez une SAMP Zone pour la voir apparaître ici !"
-            />
+            <div className="text-center py-8">
+              <SampZonesIcon size={48} className="text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucune SAMP Zone tendance</h3>
+              <p className="text-muted-foreground">Créez ou rejoignez une SAMP Zone pour la voir apparaître ici !</p>
+            </div>
           ) : (
             topSpaces.map((space, index) => (
               <div key={space.id} className="relative">

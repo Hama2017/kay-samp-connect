@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Users, Hash, Plus, Filter } from "lucide-react";
+import { Search, Users, Plus, Filter } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +131,7 @@ export default function Discover() {
           </div>
         ) : spaces.length === 0 ? (
           <div className="text-center py-12">
-            <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <SampZonesIcon size={48} className="text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold text-foreground mb-2">Aucune SAMP Zone trouvée</h3>
             <p className="text-muted-foreground">
               Essayez avec d'autres mots-clés ou explorez d'autres catégories

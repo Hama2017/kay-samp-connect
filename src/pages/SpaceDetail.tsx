@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Hash, Plus, MessageCircle, TrendingUp, Clock, Flame, Settings, Flag } from "lucide-react";
+import { ArrowLeft, Users, Plus, MessageCircle, TrendingUp, Clock, Flame, Settings, Flag } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { Button } from "@/components/ui/button";
 import { ReportModal } from "@/components/ReportModal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -250,7 +251,7 @@ export default function SpaceDetail() {
         </div>
   <div className="flex items-start gap-4 mb-6">
     <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-      <Hash className="h-8 w-8 text-primary-foreground" />
+      <SampZonesIcon size={32} className="text-primary-foreground" />
     </div>
 
     <div className="flex-1">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, Hash, Users, Plus, Flag } from "lucide-react";
+import { ArrowLeft, UserPlus, UserCheck, Settings, Calendar, MessageCircle, Users, Plus, Flag } from "lucide-react";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 import { Button } from "@/components/ui/button";
 import { ReportModal } from "@/components/ReportModal";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -355,7 +356,7 @@ useEffect(() => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <SampZonesIcon size={48} className="text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Aucune SAMP Zone créée</h3>
                 <p className="text-muted-foreground">
                   @{userProfile.username} n'a pas encore créé de SAMP Zones
