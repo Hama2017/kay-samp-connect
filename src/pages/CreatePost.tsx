@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { X, Image, Video, Play, FileImage, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,14 @@ export default function CreatePost() {
       }).catch(console.error);
     }
   });
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [formData.content]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -227,9 +235,10 @@ export default function CreatePost() {
                   value={formData.content}
                   onChange={(e) => handleInputChange("content", e.target.value)}
                   placeholder="Quoi de neuf ?"
-                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-3 bg-transparent relative z-10"
+                  className="min-h-[150px] text-lg border-none shadow-none resize-none focus-visible:ring-0 p-3 bg-transparent relative z-10 overflow-hidden"
                   style={{
-                    lineHeight: "1.5"
+                    lineHeight: "1.5",
+                    height: 'auto'
                   }}
                 />
                 {/* Visual indicator for hashtags */}
