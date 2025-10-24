@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ interface GifData {
 }
 
 export default function GifSelector({ isOpen, onClose, onSelectGif }: GifSelectorProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("Senegal");
   const [gifs, setGifs] = useState<GifData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -65,16 +65,12 @@ export default function GifSelector({ isOpen, onClose, onSelectGif }: GifSelecto
     }
   };
 
-  const handleOpen = () => {
+  // Charger les GIFs "Senegal" par défaut à l'ouverture
+  useEffect(() => {
     if (isOpen && gifs.length === 0) {
-      loadTrendingGifs();
+      searchGifs("Senegal");
     }
-  };
-
-  // Charger les GIFs tendance à l'ouverture
-  useState(() => {
-    handleOpen();
-  });
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
