@@ -247,9 +247,8 @@ export default function Profile() {
               <div className="space-y-3 sm:space-y-4">
                 <InfinitePostsList
                   posts={bookmarks
-                    .filter(bookmark => bookmark.item_type === 'post')
-                    .map(bookmark => posts.find(p => p.id === bookmark.item_id))
-                    .filter(Boolean) as any[]}
+                    .filter(bookmark => bookmark.item_type === 'post' && bookmark.post)
+                    .map(bookmark => bookmark.post)}
                   onLoadMore={async () => loadMoreBookmarks({ item_type: 'post' })}
                   onVote={votePost}
                   onIncrementViews={(postId) => {}}

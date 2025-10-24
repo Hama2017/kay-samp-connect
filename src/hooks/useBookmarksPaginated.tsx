@@ -12,6 +12,8 @@ export interface Bookmark {
   user_id: string;
   metadata?: any;
   created_at: string;
+  // Post complet si item_type = 'post'
+  post?: any;
 }
 
 export function useBookmarksPaginated() {
@@ -51,7 +53,48 @@ export function useBookmarksPaginated() {
 
       if (error) throw error;
 
-      const newBookmarks = (data as Bookmark[]) || [];
+      let newBookmarks = (data as Bookmark[]) || [];
+      
+      // Si c'est un bookmark de type 'post', récupérer les posts complets
+      if (filters?.item_type === 'post' && newBookmarks.length > 0) {
+        const postIds = newBookmarks.map(b => b.item_id);
+        
+        const { data: postsData, error: postsError } = await supabase
+          .from('posts')
+          .select(`
+            *,
+            profiles!posts_author_id_fkey(
+              id,
+              username,
+              full_name,
+              profile_picture_url,
+              is_verified
+            ),
+            post_media(
+              id,
+              media_url,
+              media_type,
+              media_order,
+              thumbnail_url,
+              youtube_video_id
+            ),
+            spaces(
+              id,
+              name,
+              is_verified
+            )
+          `)
+          .in('id', postIds);
+          
+        if (!postsError && postsData) {
+          // Mapper les posts aux bookmarks
+          newBookmarks = newBookmarks.map(bookmark => ({
+            ...bookmark,
+            post: postsData.find(p => p.id === bookmark.item_id)
+          }));
+        }
+      }
+      
       const hasMoreBookmarks = newBookmarks.length === limit;
 
       if (append && page > 1) {
