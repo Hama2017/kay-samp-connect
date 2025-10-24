@@ -85,7 +85,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground truncate flex-1">
+                        <span className="text-xs text-muted-foreground truncate flex-1 border border-border/50 rounded px-2 py-0.5">
                           {space.categories && space.categories.join(" • ")}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
