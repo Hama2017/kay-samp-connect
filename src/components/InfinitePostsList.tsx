@@ -41,6 +41,9 @@ interface Post {
     id: string;
     media_url: string;
     media_type: string;
+    youtube_video_id?: string;
+    tiktok_video_id?: string;
+    thumbnail_url?: string;
   }>;
 }
 
