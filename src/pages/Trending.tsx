@@ -16,6 +16,7 @@ import { SpaceCard } from "@/components/SpaceCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/EmptyState";
 import { sanitizeContent } from "@/utils/contentSanitizer";
+import { PostCommentsModal } from "@/components/PostCommentsModal";
 
 // Mock data for trending
 const mockTrendingData = {
@@ -130,6 +131,8 @@ const timePeriods = [
 
 export default function Trending() {
   const [selectedPeriod, setSelectedPeriod] = useState("day");
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { posts, fetchPosts, isLoading: postsLoading, votePost } = usePosts();
@@ -149,6 +152,16 @@ export default function Trending() {
   // Get top posts, spaces
   const topPosts = posts.slice(0, 5);
   const topSpaces = spaces.slice(0, 5);
+
+  const handleOpenComments = (post: any) => {
+    setSelectedPost(post);
+    setIsCommentsModalOpen(true);
+  };
+
+  const handleCloseComments = () => {
+    setSelectedPost(null);
+    setIsCommentsModalOpen(false);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -326,7 +339,7 @@ export default function Trending() {
                   <PostActions 
                     post={post}
                     onVote={votePost}
-                    onOpenComments={() => navigate(`/post/${post.id}`)}
+                    onOpenComments={() => handleOpenComments(post)}
                   />
                 </CardContent>
               </Card>
@@ -448,6 +461,14 @@ export default function Trending() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Modal de commentaires */}
+      <PostCommentsModal
+        post={selectedPost}
+        isOpen={isCommentsModalOpen}
+        onClose={handleCloseComments}
+        onVote={votePost}
+      />
     </div>
   );
 }
