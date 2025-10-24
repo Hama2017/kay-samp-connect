@@ -3,10 +3,11 @@ import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { SampZonesIcon } from "@/components/ui/SampZonesIcon";
 
 const navigationItems = [
   { icon: Home, label: "Accueil", path: "/" },
-  { icon: Hash, label: "SAMP Zones", path: "/discover" },
+  { icon: SampZonesIcon, label: "SAMP Zones", path: "/discover" },
   { icon: Plus, label: "Créer", path: "/create", isSpecial: true },
   { icon: TrendingUp, label: "Tendances", path: "/trending" },
   { icon: User, label: "Profil", path: "/profile" },
