@@ -3,12 +3,19 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BookmarksList } from "@/components/bookmarks/BookmarksList";
 import { usePageTracking } from "@/hooks/usePageTracking";
+import { PullToRefresh } from "@/components/MobileOptimized";
+import { useState } from "react";
 
 export default function Bookmarks() {
   const navigate = useNavigate();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Track page view
   usePageTracking();
+
+  const handleRefresh = async () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,9 +41,11 @@ export default function Bookmarks() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <BookmarksList />
-      </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <BookmarksList key={refreshKey} />
+        </div>
+      </PullToRefresh>
     </div>
   );
 }

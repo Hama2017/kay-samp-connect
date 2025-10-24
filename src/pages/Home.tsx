@@ -11,6 +11,7 @@ import { InfinitePostsList } from "@/components/InfinitePostsList";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
 import { SpaceInvitationNotifications } from "@/components/SpaceInvitationNotifications";
+import { PullToRefresh } from "@/components/MobileOptimized";
 
 const sortFilters = [
   { id: "recent", label: "Plus récents", icon: Clock, short: "Récents" },
@@ -50,6 +51,10 @@ export default function Home() {
     setSelectedPost(post);
   };
 
+  const handleRefresh = async () => {
+    await fetchPosts({ sort_by: selectedFilter as any });
+  };
+
   const filteredAndSortedPosts = useMemo(() => {
     let filteredPosts = selectedCategory === "Tous" 
       ? posts 
@@ -63,8 +68,9 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-full">
-      {/* 🎯 CONTENEUR MOBILE OPTIMISÉ */}
-      <div className="px-3 py-4 sm:px-6 sm:py-6 max-w-screen-sm mx-auto">
+      <PullToRefresh onRefresh={handleRefresh}>
+        {/* 🎯 CONTENEUR MOBILE OPTIMISÉ */}
+        <div className="px-3 py-4 sm:px-6 sm:py-6 max-w-screen-sm mx-auto">
         
         {/* 👋 SECTION BIENVENUE - MOBILE COMPACT */}
         <div className="text-center mb-4 animate-fade-in-up">
@@ -150,7 +156,8 @@ export default function Home() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </PullToRefresh>
 
       {/* 💬 MODAL COMMENTAIRES - MOBILE FRIENDLY */}
       <PostCommentsModal

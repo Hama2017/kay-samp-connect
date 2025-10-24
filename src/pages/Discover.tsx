@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSpaces } from "@/hooks/useSpaces";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { useCategories } from "@/hooks/useCategories";
+import { PullToRefresh } from "@/components/MobileOptimized";
 
 
 const sortOptions = [
@@ -51,9 +52,19 @@ export default function Discover() {
     }
   };
 
+  const handleRefresh = async () => {
+    await fetchSpaces({
+      category: selectedCategory,
+      search: searchQuery,
+      sort_by: sortBy as any,
+      verified_only: showVerifiedOnly === "verifies"
+    });
+  };
+
   return (
-    <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-full overflow-hidden">
-      {/* Header */}
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="w-full mx-auto px-4 py-4 sm:py-6 max-w-full overflow-hidden">
+        {/* Header */}
       <div className="text-center mb-4 sm:mb-6 animate-fade-in-up">
         <h1 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
           SAMP Zones
@@ -147,6 +158,7 @@ export default function Discover() {
           ))
         )}
       </div>
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }

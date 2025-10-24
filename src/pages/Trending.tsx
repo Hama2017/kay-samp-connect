@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/EmptyState";
 import { sanitizeContent } from "@/utils/contentSanitizer";
 import { PostCommentsModal } from "@/components/PostCommentsModal";
+import { PullToRefresh } from "@/components/MobileOptimized";
 
 // Mock data for trending
 const mockTrendingData = {
@@ -164,6 +165,14 @@ export default function Trending() {
     setIsCommentsModalOpen(false);
   };
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      fetchPosts({ sort_by: "popular" }),
+      fetchSpaces({ sort_by: "popular" }),
+      fetchTopContributors(selectedPeriod as any)
+    ]);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -179,8 +188,10 @@ export default function Trending() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      {/* Header */}
+    <>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        {/* Header */}
       <div className="text-center mb-6 animate-fade-in-up">
         <div className="flex items-center justify-center gap-2 mb-2">
           <TrendingUp className="h-6 w-6 text-primary" />
@@ -462,14 +473,16 @@ export default function Trending() {
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Modal de commentaires */}
-      <PostCommentsModal
-        post={selectedPost}
-        isOpen={isCommentsModalOpen}
-        onClose={handleCloseComments}
-        onVote={votePost}
-      />
     </div>
+    </PullToRefresh>
+
+    {/* Modal de commentaires */}
+    <PostCommentsModal
+      post={selectedPost}
+      isOpen={isCommentsModalOpen}
+      onClose={handleCloseComments}
+      onVote={votePost}
+    />
+    </>
   );
 }
