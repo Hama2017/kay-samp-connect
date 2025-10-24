@@ -65,7 +65,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
               subscribedSpaces.map((space) => (
                 <div
                   key={space.id}
-                  className="card-mobile p-3 hover:bg-primary/5 cursor-pointer transition-all duration-200 group active:scale-95"
+                  className="card-mobile p-3 hover:bg-primary/5 cursor-pointer transition-all duration-200 group active:scale-95 border border-border rounded-lg"
                   onClick={() => {
                     navigate(`/space/${space.id}`);
                     onOpenChange(false);
@@ -85,7 +85,7 @@ export function AppSidebar({ open, onOpenChange }: AppSidebarProps) {
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground truncate flex-1 border border-border/50 rounded px-2 py-0.5">
+                        <span className="text-xs text-muted-foreground truncate flex-1">
                           {space.categories && space.categories.join(" • ")}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
