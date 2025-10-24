@@ -35,14 +35,12 @@ export function BottomNavigation() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="top" className="mb-2">
               <DropdownMenuItem asChild>
-                <NavLink to="/create-post" className="flex items-center gap-2 w-full">
-                  <FileText className="h-4 w-4" />
+                <NavLink to="/create-post" className="w-full">
                   Créer un post
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/create-space" className="flex items-center gap-2 w-full">
-                  <SampZonesIcon size={16} className="text-[hsl(var(--senegal-green))]" />
+                <NavLink to="/create-space" className="w-full">
                   Créer une SAMP Zone
                 </NavLink>
               </DropdownMenuItem>
