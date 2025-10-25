@@ -309,26 +309,28 @@ export default function PostMediaDisplay({
         );
 
       case "tiktok":
+        const tiktokVideoId = mediaItem.tiktok_video_id;
+        if (!tiktokVideoId) return <div>Vidéo TikTok invalide</div>;
         return (
-          <div className="relative w-full aspect-[9/16] max-w-[400px] mx-auto">
-            <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#00f2ea] via-[#ff0050] to-[#000000] p-[2px]">
-              <div className="bg-black rounded-lg h-full flex flex-col items-center justify-center gap-4 p-8">
-                <Music className="h-16 w-16 text-white" />
-                <div className="text-center space-y-2">
-                  <p className="text-white font-medium">Vidéo TikTok</p>
-                  <p className="text-white/60 text-sm">Cliquez pour voir sur TikTok</p>
-                </div>
+          <div className="relative w-full aspect-[9/16] max-w-[325px] mx-auto">
+            <blockquote 
+              className="tiktok-embed" 
+              cite={media_url}
+              data-video-id={tiktokVideoId}
+              style={{ maxWidth: '325px', minWidth: '325px' }}
+            >
+              <section>
                 <a 
-                  href={media_url}
-                  target="_blank"
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-white/90 text-black rounded-full font-medium transition-colors"
+                  href={media_url}
+                  className="flex items-center justify-center h-full"
                 >
                   Voir sur TikTok
-                  <ExternalLink className="h-4 w-4" />
                 </a>
-              </div>
-            </div>
+              </section>
+            </blockquote>
+            <script async src="https://www.tiktok.com/embed.js"></script>
           </div>
         );
 
