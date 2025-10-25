@@ -17,7 +17,7 @@ declare global {
 // 🔹 Fonction pour mettre à jour la StatusBar selon le thème
 const updateStatusBar = async (isDark: boolean) => {
   try {
-    const backgroundColor = isDark ? "#0a1628" : "#ffffff";
+    const backgroundColor = isDark ? "#0e131b" : "#ffffff";
     const style = isDark ? Style.Dark : Style.Light;
     
     await StatusBar.setBackgroundColor({ color: backgroundColor });
