@@ -447,6 +447,7 @@ export type Database = {
           media_url: string
           post_id: string
           thumbnail_url: string | null
+          tiktok_video_id: string | null
           youtube_video_id: string | null
         }
         Insert: {
@@ -457,6 +458,7 @@ export type Database = {
           media_url: string
           post_id: string
           thumbnail_url?: string | null
+          tiktok_video_id?: string | null
           youtube_video_id?: string | null
         }
         Update: {
@@ -467,6 +469,7 @@ export type Database = {
           media_url?: string
           post_id?: string
           thumbnail_url?: string | null
+          tiktok_video_id?: string | null
           youtube_video_id?: string | null
         }
         Relationships: [
