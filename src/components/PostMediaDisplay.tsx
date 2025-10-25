@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Youtube, RotateCcw, RotateCw, Maximize, Minimize, Music, ExternalLink } from "lucide-react";
+import { TikTokEmbed } from 'react-social-media-embed';
 
 interface PostMedia {
   id: string;
@@ -309,28 +310,9 @@ export default function PostMediaDisplay({
         );
 
       case "tiktok":
-        const tiktokVideoId = mediaItem.tiktok_video_id;
-        if (!tiktokVideoId) return <div>Vidéo TikTok invalide</div>;
         return (
-          <div className="relative w-full aspect-[9/16] max-w-[325px] mx-auto">
-            <blockquote 
-              className="tiktok-embed" 
-              cite={media_url}
-              data-video-id={tiktokVideoId}
-              style={{ maxWidth: '325px', minWidth: '325px' }}
-            >
-              <section>
-                <a 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  href={media_url}
-                  className="flex items-center justify-center h-full"
-                >
-                  Voir sur TikTok
-                </a>
-              </section>
-            </blockquote>
-            <script async src="https://www.tiktok.com/embed.js"></script>
+          <div className="flex justify-center w-full">
+            <TikTokEmbed url={media_url} width={325} />
           </div>
         );
 
