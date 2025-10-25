@@ -40,6 +40,7 @@ export interface Post {
     media_order: number;
     thumbnail_url?: string;
     youtube_video_id?: string;
+    tiktok_video_id?: string;
   }>;
 }
 
@@ -99,7 +100,8 @@ export function usePosts() {
             media_type,
             media_order,
             thumbnail_url,
-            youtube_video_id
+            youtube_video_id,
+            tiktok_video_id
           )
         `)
         .range((page - 1) * limit, page * limit - 1);
@@ -188,6 +190,7 @@ export function usePosts() {
           let mediaUrl = '';
           let mediaType = 'image';
           let youtubeVideoId = '';
+          let tiktokVideoId = '';
           
           console.log('Traitement fichier:', file);
           
@@ -199,6 +202,13 @@ export function usePosts() {
             mediaType = 'youtube';
             youtubeVideoId = file.videoId;
             console.log('YouTube video:', { mediaUrl, mediaType, youtubeVideoId });
+          }
+          // Vérifier si c'est une vidéo TikTok
+          else if (file.isTikTokUrl) {
+            mediaUrl = file.url;
+            mediaType = 'tiktok';
+            tiktokVideoId = file.videoId;
+            console.log('TikTok video:', { mediaUrl, mediaType, tiktokVideoId });
           }
           // Vérifier si c'est un GIF depuis une URL (Giphy)
           else if (file.isGifUrl) {
@@ -291,6 +301,11 @@ export function usePosts() {
           // Add YouTube video ID if it's a YouTube video
           if (mediaType === 'youtube' && youtubeVideoId) {
             mediaRecord.youtube_video_id = youtubeVideoId;
+          }
+
+          // Add TikTok video ID if it's a TikTok video
+          if (mediaType === 'tiktok' && tiktokVideoId) {
+            mediaRecord.tiktok_video_id = tiktokVideoId;
           }
 
           // Add thumbnail URL if available
