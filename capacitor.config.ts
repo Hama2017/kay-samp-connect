@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'KaaySamp',
   webDir: 'dist',
   server: {
-    url: 'http://169.254.86.155:8080',
+    url: 'http://169.254.112.75:8080',
     cleartext: true
   },
   ios: {

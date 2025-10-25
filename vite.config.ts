@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['@tensorflow/tfjs', 'nsfwjs'],
     esbuildOptions: {
       target: 'es2020',
     },
