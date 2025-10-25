@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Youtube, RotateCcw, RotateCw, Maximize, Minimize, Music, ExternalLink } from "lucide-react";
-import { TikTokEmbed } from 'react-social-media-embed';
+import TikTokEmbedWrapper from "./TikTokEmbedWrapper";
 
 interface PostMedia {
   id: string;
@@ -310,11 +310,7 @@ export default function PostMediaDisplay({
         );
 
       case "tiktok":
-        return (
-          <div className="flex justify-center w-full">
-            <TikTokEmbed url={media_url} width={325} />
-          </div>
-        );
+        return <TikTokEmbedWrapper url={media_url} width={325} />;
 
       case "video":
         const showBig = showBigControls[id] !== false;
