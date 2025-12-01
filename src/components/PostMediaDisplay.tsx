@@ -293,21 +293,27 @@ export default function PostMediaDisplay({
           />
         );
 
-      case "youtube":
-        const videoId = youtube_video_id || extractYouTubeId(media_url);
-        if (!videoId) return <div>Vidéo YouTube invalide</div>;
-        return (
-          <div className="relative w-full aspect-video">
-            <iframe
-              className={cn("rounded-lg w-full h-full", className)}
-              src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        );
+   case "youtube":
+  const videoId = youtube_video_id || extractYouTubeId(media_url);
+  if (!videoId) return <div>Vidéo YouTube invalide</div>;
+
+  // URL via proxy
+  const proxyUrl = `https://www.test.hamadouba.com/youtube.html?v=${videoId}&autoplay=0&loop=0&mute=0`;
+
+  return (
+    <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+      <iframe
+        src={proxyUrl}
+        className="w-full h-full"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+        title="YouTube Video"
+      />
+    </div>
+  );
+
 
       case "tiktok":
         return <TikTokEmbedWrapper url={media_url} width={325} />;
