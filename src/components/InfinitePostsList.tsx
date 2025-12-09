@@ -76,12 +76,21 @@ export function InfinitePostsList({
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
-  // Virtualizer for optimized rendering
+  // Virtualizer for optimized rendering - only renders visible items
   const virtualizer = useVirtualizer({
-    count: posts.length,
+    count: posts.length + (hasMore ? 1 : 0), // +1 for loader
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 450,
-    overscan: 3,
+    estimateSize: useCallback((index: number) => {
+      // Estimate different sizes based on content
+      if (index >= posts.length) return 80; // Loader height
+      const post = posts[index];
+      const hasMedia = post.post_media && post.post_media.length > 0;
+      const hasLongContent = post.content.length > 200;
+      if (hasMedia) return 550;
+      if (hasLongContent) return 350;
+      return 280;
+    }, [posts]),
+    overscan: 2, // Render 2 extra items above/below viewport
   });
 
   // Load more when near bottom
@@ -89,7 +98,7 @@ export function InfinitePostsList({
     const items = virtualizer.getVirtualItems();
     const lastItem = items[items.length - 1];
     
-    if (lastItem && lastItem.index >= posts.length - 3 && hasMore && !isLoading) {
+    if (lastItem && lastItem.index >= posts.length - 2 && hasMore && !isLoading) {
       onLoadMore();
     }
   }, [virtualizer.getVirtualItems(), posts.length, hasMore, isLoading, onLoadMore]);
@@ -103,14 +112,12 @@ export function InfinitePostsList({
     onIncrementViews(post.id);
   };
 
-  // Fonction pour ouvrir le modal de commentaires
   const handleOpenComments = (post: Post) => {
     setSelectedPost(post);
     setIsCommentsModalOpen(true);
     onIncrementViews(post.id);
   };
 
-  // Fonction pour fermer le modal
   const handleCloseComments = () => {
     setIsCommentsModalOpen(false);
     setSelectedPost(null);
@@ -157,7 +164,7 @@ export function InfinitePostsList({
       title: post.title || post.content.slice(0, 100),
       description: post.content,
       metadata: {
-        author: post.profiles.username,
+        author: post.profiles?.username || "Utilisateur",
         likes: post.votes_up,
         comments: post.comments_count,
         category: "post",
@@ -165,140 +172,186 @@ export function InfinitePostsList({
     });
   };
 
+  const virtualItems = virtualizer.getVirtualItems();
+
   return (
     <>
-      <div className="space-y-3 sm:space-y-4">
-        {posts.map((post) => {
-          const bookmarked = isBookmarked(post.id, "post");
+      {/* Scrollable container for virtualization */}
+      <div
+        ref={parentRef}
+        className="h-[calc(100vh-180px)] overflow-auto"
+        style={{ contain: 'strict' }}
+      >
+        {/* Total height container */}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {/* Virtualized items */}
+          {virtualItems.map((virtualRow) => {
+            const index = virtualRow.index;
+            
+            // Loader item
+            if (index >= posts.length) {
+              return (
+                <div
+                  key="loader"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {isLoading && (
+                    <div className="flex justify-center py-6">
+                      <LoadingSpinner size="sm" text="Chargement..." />
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
-          return (
-          <Card 
-            key={post.id} 
-            className="hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden"
-          >
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  <Avatar 
-                    className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (post.profiles && user?.profile?.username === post.profiles.username) {
-                        navigate('/profile');
-                      } else if (post.profiles) {
-                        navigate(`/user/${post.profiles.username}`);
-                      }
-                    }}
-                  >
-                    <AvatarImage src={post.profiles?.profile_picture_url || undefined} />
-                    <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
-                      {post.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <span 
-                        className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
+            const post = posts[index];
+            const bookmarked = isBookmarked(post.id, "post");
+
+            return (
+              <div
+                key={post.id}
+                data-index={index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                className="pb-3 sm:pb-4"
+              >
+                <Card className="hover:shadow-lg transition-all duration-300 animate-fade-in-up max-w-full overflow-hidden">
+                  <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <Avatar 
+                          className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ring-2 ring-[#1f9463]/10 hover:ring-[#1f9463]/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (post.profiles && user?.profile?.username === post.profiles.username) {
+                              navigate('/profile');
+                            } else if (post.profiles) {
+                              navigate(`/user/${post.profiles.username}`);
+                            }
+                          }}
+                        >
+                          <AvatarImage src={post.profiles?.profile_picture_url || undefined} />
+                          <AvatarFallback className="bg-gradient-to-r from-[#1f9463] to-[#43ca92] text-white font-semibold text-xs sm:text-sm">
+                            {post.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <span 
+                              className="font-semibold text-xs sm:text-sm cursor-pointer hover:text-[#1f9463] transition-colors truncate"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (post.profiles && user?.profile?.username === post.profiles.username) {
+                                  navigate('/profile');
+                                } else if (post.profiles) {
+                                  navigate(`/user/${post.profiles.username}`);
+                                }
+                              }}
+                            >
+                              @{post.profiles?.username || "Utilisateur"} 
+                            </span>
+                            {post.profiles?.is_verified && (
+                              <BadgeCheck size={20} color="#329056ff" />
+                            )}
+                          </div>
+                          {post.profiles?.full_name && (
+                            <p className="text-xs font-medium text-foreground/80 truncate mt-0.5">
+                              {post.profiles.full_name}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground truncate">
+                            {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant={bookmarked ? "default" : "outline"}
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (post.profiles && user?.profile?.username === post.profiles.username) {
-                            navigate('/profile');
-                          } else if (post.profiles) {
-                            navigate(`/user/${post.profiles.username}`);
-                          }
+                          handleBookmarkToggle(post);
                         }}
+                        className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full transition-colors ${
+                          bookmarked
+                            ? "bg-[#1f9463] hover:bg-[#43ca92] text-white border-[#1f9463]"
+                            : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border-muted hover:border-[#1f9463]/30"
+                        }`}
                       >
-                        @{post.profiles?.username || "Utilisateur"} 
-                      </span>
-                      {post.profiles?.is_verified && (
-                        <>
-                          <BadgeCheck size={20} color="#329056ff" />
-                        </>
-                      )}
+                        {bookmarked ? "Sampna" : "DamaySAMP"}
+                      </Button>
                     </div>
-                    {post.profiles?.full_name && (
-                      <p className="text-xs font-medium text-foreground/80 truncate mt-0.5">
-                        {post.profiles.full_name}
-                      </p>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
+                    <div 
+                      className="text-foreground mb-3 leading-relaxed max-w-full"
+                      style={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeContent(getDisplayContent(post))
+                      }}
+                    />
+                    
+                    {shouldShowReadMore(post.content) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpanded(post.id);
+                        }}
+                        className="text-[#1f9463] text-sm font-medium mb-3 hover:text-[#43ca92] hover:underline transition-colors"
+                      >
+                        {isPostExpanded(post.id) ? "Lire moins" : "Lire la suite"}
+                      </button>
                     )}
-                    <p className="text-xs text-muted-foreground truncate">
-                      {post.spaces?.name ? `dans ${post.spaces.name}` : "dans Général"} • {formatDate(post.created_at)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bouton favoris avec vos couleurs */}
-                <Button
-                  variant={bookmarked ? "default" : "outline"}
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBookmarkToggle(post);
-                  }}
-                  className={`text-xs px-3 py-1.5 h-8 font-medium rounded-full transition-colors ${
-                    bookmarked
-                      ? "bg-[#1f9463] hover:bg-[#43ca92] text-white border-[#1f9463]"
-                      : "hover:bg-[#1f9463]/10 hover:text-[#1f9463] border-muted hover:border-[#1f9463]/30"
-                  }`}
-                >
-                  {bookmarked ? "Sampna" : "DamaySAMP"}
-                </Button>
+                    
+                    <PostMediaDisplay 
+                      media={post.post_media || []} 
+                      maxHeight="max-h-[70vh]"
+                    />
+                    
+                    {post.hashtags && post.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {post.hashtags.map((tag, tagIndex) => (
+                          <span key={tagIndex} className="text-xs text-[#1f9463] hover:text-[#43ca92] cursor-pointer transition-colors">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <PostActions 
+                      post={post}
+                      onVote={onVote}
+                      onOpenComments={() => handleOpenComments(post)}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-            </CardHeader>
-            
-            <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
-              <div 
-                className="text-foreground mb-3 leading-relaxed max-w-full"
-                style={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeContent(getDisplayContent(post))
-                }}
-              />
-              
-              {shouldShowReadMore(post.content) && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleExpanded(post.id);
-                  }}
-                  className="text-[#1f9463] text-sm font-medium mb-3 hover:text-[#43ca92] hover:underline transition-colors"
-                >
-                  {isPostExpanded(post.id) ? "Lire moins" : "Lire la suite"}
-                </button>
-              )}
-              
-              <PostMediaDisplay 
-                media={post.post_media || []} 
-               maxHeight="max-h-[70vh]"
-              />
-              
-              {post.hashtags && post.hashtags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {post.hashtags.map((tag, index) => (
-                    <span key={index} className="text-xs text-[#1f9463] hover:text-[#43ca92] cursor-pointer transition-colors">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              {/* Utilisation du modal au lieu de la navigation */}
-              <PostActions 
-                post={post}
-                onVote={onVote}
-                onOpenComments={() => handleOpenComments(post)}
-              />
-            </CardContent>
-          </Card>
-        )})}
-        
-        {isLoading && (
-          <div className="flex justify-center py-6">
-            <LoadingSpinner size="sm" text="Chargement..." />
-          </div>
-        )}
-        
+            );
+          })}
+        </div>
+
+        {/* End of list message */}
         {!hasMore && posts.length > 0 && (
           <div className="text-center py-6 text-muted-foreground">
             <p>Vous avez vu tous les posts disponibles</p>
