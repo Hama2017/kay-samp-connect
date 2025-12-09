@@ -1071,6 +1071,14 @@ export type Database = {
       get_activity_stats: { Args: never; Returns: Json }
       get_admin_stats: { Args: never; Returns: Json }
       get_category_stats: { Args: never; Returns: Json }
+      get_comment_vote_counts: {
+        Args: { p_comment_id: string }
+        Returns: {
+          downvotes: number
+          upvotes: number
+          user_vote: string
+        }[]
+      }
       get_content_stats: { Args: never; Returns: Json }
       get_engagement_stats: { Args: never; Returns: Json }
       get_most_reported_by_type: { Args: never; Returns: Json }
@@ -1116,6 +1124,14 @@ export type Database = {
           profile_visible: boolean
           updated_at: string
           username: string
+        }[]
+      }
+      get_vote_counts: {
+        Args: { p_post_id: string }
+        Returns: {
+          downvotes: number
+          upvotes: number
+          user_vote: string
         }[]
       }
       has_role: {
