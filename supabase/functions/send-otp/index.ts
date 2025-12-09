@@ -118,8 +118,8 @@ Deno.serve(async (req) => {
     });
 
     if (!twilioResponse.ok) {
-      const error = await twilioResponse.text();
-      console.error('Twilio error:', error);
+      const errorText = await twilioResponse.text();
+      console.error('Twilio error:', errorText);
       throw new Error('Échec de l\'envoi du SMS');
     }
 
@@ -138,12 +138,13 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Send-OTP Error:', error);
     
+    const err = error as Error;
     // Don't expose internal errors to client
-    const statusCode = error.message.includes('Trop de tentatives') ? 429 :
-                      error.message.includes('Invalid phone') ? 400 : 500;
+    const statusCode = err.message.includes('Trop de tentatives') ? 429 :
+                      err.message.includes('Invalid phone') ? 400 : 500;
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: err.message }),
       { 
         status: statusCode,
         headers: { 

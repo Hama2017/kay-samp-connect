@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
@@ -14,7 +13,50 @@ interface SearchRequest {
   limit?: number;
 }
 
-serve(async (req) => {
+interface PostResult {
+  id: string;
+  content: string;
+  created_at: string;
+  hashtags: string[] | null;
+  votes_up: number;
+  votes_down: number;
+  comments_count: number;
+  views_count: number;
+  profiles: unknown;
+  spaces: unknown;
+  post_media: unknown[];
+}
+
+interface SpaceResult {
+  id: string;
+  name: string;
+  description: string | null;
+  categories: string[] | null;
+  subscribers_count: number;
+  is_verified: boolean;
+  updated_at: string;
+  is_subscribed: boolean;
+  space_subscriptions: { user_id: string }[];
+}
+
+interface UserResult {
+  id: string;
+  username: string;
+  bio: string | null;
+  profile_picture_url: string | null;
+  is_verified: boolean;
+  followers_count: number;
+  following_count: number;
+}
+
+interface SearchResults {
+  posts: PostResult[];
+  spaces: SpaceResult[];
+  users: UserResult[];
+  totalResults: number;
+}
+
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -48,7 +90,7 @@ serve(async (req) => {
     }
 
     const searchTerm = `%${query.toLowerCase()}%`;
-    let results = {
+    const results: SearchResults = {
       posts: [],
       spaces: [],
       users: [],
@@ -99,7 +141,7 @@ serve(async (req) => {
       if (postsError) {
         console.error('Error searching posts:', postsError);
       } else {
-        results.posts = postsData || [];
+        results.posts = (postsData || []) as PostResult[];
       }
     }
 
@@ -147,10 +189,19 @@ serve(async (req) => {
         // Get current user ID to check if subscribed
         const { data: { user } } = await supabaseClient.auth.getUser();
         
-        results.spaces = (spacesData || []).map(space => ({
+        results.spaces = (spacesData || []).map((space: { 
+          id: string; 
+          name: string; 
+          description: string | null;
+          categories: string[] | null;
+          subscribers_count: number;
+          is_verified: boolean;
+          updated_at: string;
+          space_subscriptions: { user_id: string }[];
+        }) => ({
           ...space,
-          is_subscribed: user ? space.space_subscriptions.some((sub: any) => sub.user_id === user.id) : false
-        }));
+          is_subscribed: user ? space.space_subscriptions.some((sub: { user_id: string }) => sub.user_id === user.id) : false
+        })) as SpaceResult[];
       }
     }
 
@@ -187,7 +238,15 @@ serve(async (req) => {
       if (usersError) {
         console.error('Error searching users:', usersError);
       } else {
-        results.users = (usersData || []).map(user => ({
+        results.users = (usersData || []).map((user: {
+          id: string;
+          username: string;
+          bio: string | null;
+          profile_picture_url: string | null;
+          is_verified: boolean;
+          followers_count: number | null;
+          following_count: number | null;
+        }) => ({
           id: user.id,
           username: user.username,
           bio: user.bio,
@@ -195,7 +254,7 @@ serve(async (req) => {
           is_verified: user.is_verified,
           followers_count: user.followers_count || 0,
           following_count: user.following_count || 0
-        }));
+        })) as UserResult[];
       }
     }
 
@@ -212,7 +271,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Search error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

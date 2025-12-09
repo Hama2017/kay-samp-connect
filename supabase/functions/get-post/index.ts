@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
@@ -6,7 +5,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+interface Vote {
+  vote_type: string;
+  user_id: string;
+}
+
+interface PostMedia {
+  id: string;
+  media_type: string;
+  media_url: string;
+  thumbnail_url?: string;
+  youtube_video_id?: string;
+  media_order: number;
+}
+
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -133,17 +146,19 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser();
 
     // Calculer les votes du post
-    const upVotes = post.post_votes?.filter(vote => vote.vote_type === 'up').length || 0;
-    const downVotes = post.post_votes?.filter(vote => vote.vote_type === 'down').length || 0;
-    const currentUserVote = user ? post.post_votes?.find(vote => vote.user_id === user.id)?.vote_type : null;
+    const postVotes = (post.post_votes || []) as Vote[];
+    const upVotes = postVotes.filter((vote: Vote) => vote.vote_type === 'up').length;
+    const downVotes = postVotes.filter((vote: Vote) => vote.vote_type === 'down').length;
+    const currentUserVote = user ? postVotes.find((vote: Vote) => vote.user_id === user.id)?.vote_type : null;
 
     // Calculer les votes des commentaires et filtrer ceux sans profil
     const commentsWithVotes = (comments || [])
-      .filter(comment => comment.profiles !== null)
-      .map(comment => {
-        const commentUpVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'up').length || 0;
-        const commentDownVotes = comment.comment_votes?.filter(vote => vote.vote_type === 'down').length || 0;
-        const currentUserCommentVote = user ? comment.comment_votes?.find(vote => vote.user_id === user.id)?.vote_type : null;
+      .filter((comment: { profiles: unknown }) => comment.profiles !== null)
+      .map((comment: { comment_votes?: Vote[]; comment_media?: unknown[]; [key: string]: unknown }) => {
+        const commentVotes = (comment.comment_votes || []) as Vote[];
+        const commentUpVotes = commentVotes.filter((vote: Vote) => vote.vote_type === 'up').length;
+        const commentDownVotes = commentVotes.filter((vote: Vote) => vote.vote_type === 'down').length;
+        const currentUserCommentVote = user ? commentVotes.find((vote: Vote) => vote.user_id === user.id)?.vote_type : null;
 
         return {
           ...comment,
@@ -154,12 +169,13 @@ serve(async (req) => {
         };
       });
 
+    const postMedia = (post.post_media || []) as PostMedia[];
     const result = {
       ...post,
       votes_up: upVotes,
       votes_down: downVotes,
       current_user_vote: currentUserVote,
-      post_media: post.post_media?.sort((a, b) => a.media_order - b.media_order) || [],
+      post_media: postMedia.sort((a: PostMedia, b: PostMedia) => a.media_order - b.media_order),
       comments: commentsWithVotes
     };
 
@@ -174,7 +190,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Get post error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

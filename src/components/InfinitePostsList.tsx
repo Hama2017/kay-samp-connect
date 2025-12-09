@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { MessageCircle, ArrowUp, Eye, CircleCheck, BadgeCheck } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { BadgeCheck } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import PostMediaDisplay from "@/components/PostMediaDisplay";
@@ -70,22 +70,29 @@ export function InfinitePostsList({
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useRealBookmarks();
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  const parentRef = useRef<HTMLDivElement>(null);
   
   // États pour le modal de commentaires
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
-  const handleScroll = useCallback(() => {
-    if (window.innerHeight + document.documentElement.scrollTop 
-        >= document.documentElement.offsetHeight - 1000 && hasMore && !isLoading) {
+  // Virtualizer for optimized rendering
+  const virtualizer = useVirtualizer({
+    count: posts.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 450,
+    overscan: 3,
+  });
+
+  // Load more when near bottom
+  useEffect(() => {
+    const items = virtualizer.getVirtualItems();
+    const lastItem = items[items.length - 1];
+    
+    if (lastItem && lastItem.index >= posts.length - 3 && hasMore && !isLoading) {
       onLoadMore();
     }
-  }, [hasMore, isLoading, onLoadMore]);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+  }, [virtualizer.getVirtualItems(), posts.length, hasMore, isLoading, onLoadMore]);
 
   const handlePostClick = (post: Post) => {
     if (onPostClick) {
