@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, ChevronDown, Send, X, Image, ChevronUp, ThumbsDown } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { X, Image } from "lucide-react";
 import { 
   Drawer, 
   DrawerContent, 
@@ -10,11 +10,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useComments } from "@/hooks/useComments";
+import { useComments, type Comment } from "@/hooks/useComments";
 import GifSelector from "@/components/GifSelector";
 import { CommentImageUpload } from "@/components/CommentImageUpload";
 import { useAuth } from "@/contexts/AuthContext";
+import { VirtualizedCommentsList } from "@/components/VirtualizedCommentsList";
 
 interface Post {
   id: string;
@@ -363,217 +363,22 @@ export function PostCommentsModal({ post, isOpen, onClose, onVote }: PostComment
           </div>
         </DrawerHeader>
 
-        {/* Zone de commentaires */}
-        <div className="flex-1 min-h-0 relative overflow-auto bg-background">
-          <ScrollArea className="h-full">
-            <div className="px-0 py-0">
-              {isLoading && comments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mb-3"></div>
-                  <p className="text-muted-foreground text-sm">Chargement des commentaires...</p>
-                </div>
-              ) : comments.length > 0 ? (
-                <div className="divide-y divide-border">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="py-4 px-4">
-                      {/* Commentaire principal - Style TikTok */}
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-10 w-10 flex-shrink-0">
-                          <AvatarImage src={comment.profiles?.profile_picture_url || ""} />
-                          <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                            {comment.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1 min-w-0">
-                          {/* Username et temps */}
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-base text-foreground">
-                              {comment.profiles?.username || "Unknown"}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {formatDate(comment.created_at)}
-                            </span>
-                          </div>
-                          
-                          {/* Full name sous le username */}
-                          {comment.profiles?.full_name && (
-                            <p className="text-xs font-medium text-foreground/80 mb-1">
-                              {comment.profiles.full_name}
-                            </p>
-                          )}
-                          
-                          {/* Contenu du commentaire */}
-                          {comment.content && (
-                            <p className="text-base text-foreground mb-2 leading-normal break-all">
-                              {comment.content}
-                            </p>
-                          )}
-                          
-                          {/* Médias du commentaire */}
-                          {comment.comment_media && comment.comment_media.length > 0 && (
-                            <div className="mb-3">
-                              {comment.comment_media.map((media: any) => (
-                                <img
-                                  key={media.id}
-                                  src={media.media_url}
-                                  alt="Comment media"
-                                  className="max-w-full h-auto rounded-lg max-h-40 border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                                  loading="lazy"
-                                  onClick={() => setFullscreenImage(media.media_url)}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Actions - Flèches au lieu du coeur */}
-                          <div className="flex items-center gap-6 mt-2">
-                            <button 
-                              onClick={() => handleVoteComment(comment.id, 'up')}
-                              className="flex items-center gap-2 text-muted-foreground hover:text-green-500 transition-colors"
-                              disabled={isSubmitting}
-                            >
-                              <ChevronUp className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
-                              <span className="text-sm font-medium">{getCommentVotes(comment).votes_up}</span>
-                            </button>
-                            
-                            <button 
-                              onClick={() => handleVoteComment(comment.id, 'down')}
-                              className="flex items-center gap-2 text-muted-foreground hover:text-red-500 transition-colors"
-                              disabled={isSubmitting}
-                            >
-                              <ChevronDown className={`h-4 w-4 ${getCommentVotes(comment).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
-                              <span className="text-sm font-medium">{getCommentVotes(comment).votes_down}</span>
-                            </button>
-                            
-                            <button 
-                              onClick={() => handleReplyClick(comment.id, comment.profiles?.username || "Unknown")}
-                              className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-                              disabled={isSubmitting}
-                            >
-                              Répondre
-                            </button>
-                          </div>
-                          
-                          {/* Bouton pour afficher/masquer les réponses - Style TikTok */}
-                          {comment.replies && comment.replies.length > 0 && (
-                            <button
-                              onClick={() => toggleReplies(comment.id)}
-                              className="flex items-center gap-2 mt-3 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <span className="text-sm font-medium">
-                                {expandedReplies.has(comment.id) ? (
-                                  `Masquer les ${comment.replies.length} réponses`
-                                ) : (
-                                  `Afficher les ${comment.replies.length} réponses`
-                                )}
-                              </span>
-                              <ChevronDown className={`h-4 w-4 transition-transform ${
-                                expandedReplies.has(comment.id) ? 'rotate-180' : ''
-                              }`} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Réponses - Style TikTok avec indentation */}
-                      {comment.replies && comment.replies.length > 0 && expandedReplies.has(comment.id) && (
-                        <div className="mt-4 space-y-4">
-                          {comment.replies.map((reply: any) => (
-                            <div key={reply.id} className="flex items-start gap-3 ml-8 border-l-2 border-border pl-4">
-                              <Avatar className="h-8 w-8 flex-shrink-0">
-                                <AvatarImage src={reply.profiles?.profile_picture_url || ""} />
-                                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                                  {reply.profiles?.username?.substring(0, 2).toUpperCase() || "??"}
-                                </AvatarFallback>
-                              </Avatar>
-                              
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-semibold text-sm text-foreground">
-                                    {reply.profiles?.username || "Unknown"}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatDate(reply.created_at)}
-                                  </span>
-                                </div>
-                                
-                                <p className="text-base text-foreground mb-2 leading-normal break-all">
-                                  {reply.content}
-                                </p>
-
-                                {/* Médias des réponses */}
-                                {reply.comment_media && reply.comment_media.length > 0 && (
-                                  <div className="mb-3">
-                                    {reply.comment_media.map((media: any) => (
-                                      <img
-                                        key={media.id}
-                                        src={media.media_url}
-                                        alt="Comment media"
-                                        className="max-w-full h-auto rounded-lg max-h-40 border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                                        loading="lazy"
-                                        onClick={() => setFullscreenImage(media.media_url)}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-
-                                <div className="flex items-center gap-4 mt-2">
-                                  <button 
-                                    onClick={() => handleVoteComment(reply.id, 'up')}
-                                    className="flex items-center gap-1.5 text-muted-foreground hover:text-green-500 transition-colors"
-                                    disabled={isSubmitting}
-                                  >
-                                    <ChevronUp className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'up' ? 'text-green-500' : ''}`} />
-                                    <span className="text-xs">{getCommentVotes(reply).votes_up}</span>
-                                  </button>
-                                  
-                                  <button 
-                                    onClick={() => handleVoteComment(reply.id, 'down')}
-                                    className="flex items-center gap-1.5 text-muted-foreground hover:text-red-500 transition-colors"
-                                    disabled={isSubmitting}
-                                  >
-                                    <ChevronDown className={`h-3 w-3 ${getCommentVotes(reply).current_user_vote === 'down' ? 'text-red-500' : ''}`} />
-                                    <span className="text-xs">{getCommentVotes(reply).votes_down}</span>
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* Bouton charger plus */}
-                  {hasMore && (
-                    <div className="text-center py-4">
-                      <Button
-                        variant="ghost"
-                        onClick={() => loadMoreComments(post.id)}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <>
-                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mr-2"></div>
-                            Chargement...
-                          </>
-                        ) : (
-                          "Charger plus de commentaires"
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground font-medium mb-1">Aucun commentaire</p>
-                  <p className="text-sm text-muted-foreground">Soyez le premier à commenter !</p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+        {/* Zone de commentaires virtualisée */}
+        <div className="flex-1 min-h-0 relative overflow-hidden bg-background">
+          <VirtualizedCommentsList
+            comments={comments}
+            hasMore={hasMore}
+            isLoading={isLoading}
+            onLoadMore={() => loadMoreComments(post.id)}
+            onVoteComment={handleVoteComment}
+            onReplyClick={handleReplyClick}
+            getCommentVotes={getCommentVotes}
+            formatDate={formatDate}
+            expandedReplies={expandedReplies}
+            toggleReplies={toggleReplies}
+            onImageClick={(url) => setFullscreenImage(url)}
+            isSubmitting={isSubmitting}
+          />
         </div>
 
         {/* Zone de saisie - Style TikTok - Toujours visible */}
